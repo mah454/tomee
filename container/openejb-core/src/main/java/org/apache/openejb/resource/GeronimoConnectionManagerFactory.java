@@ -49,18 +49,18 @@ import org.apache.openejb.util.reflection.Reflections;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.resource.ResourceException;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ValidatingManagedConnectionFactory;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.InvalidTransactionException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ManagedConnection;
+import jakarta.resource.spi.ManagedConnectionFactory;
+import jakarta.resource.spi.ValidatingManagedConnectionFactory;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.InvalidTransactionException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +70,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.logging.Level;
 
 public class GeronimoConnectionManagerFactory {
     private final Logger logger = Logger.getInstance(LogCategory.OPENEJB_STARTUP, GeronimoConnectionManagerFactory.class);
@@ -483,7 +484,7 @@ public class GeronimoConnectionManagerFactory {
             if (current instanceof AbstractSinglePoolConnectionInterceptor) {
                 foundPool = Reflections.get(current, "pool");
             } else if (current instanceof MultiPoolConnectionInterceptor) {
-                log.warn("validation on stack " + stack + " not supported");
+                log.log(Level.WARNING, "validation on stack " + stack + " not supported");
             }
             this.pool = foundPool;
 
@@ -562,11 +563,11 @@ public class GeronimoConnectionManagerFactory {
                                         stack.returnConnection(new ConnectionInfo(mci), ConnectionReturnAction.DESTROY);
                                         continue;
                                     }
-                                    log.error("Can't find " + invalid + " in " + pool);
+                                    log.log(Level.SEVERE, "Can't find " + invalid + " in " + pool);
                                 }
                             }
                         } catch (final ResourceException e) {
-                            log.error(e.getMessage(), e);
+                            log.log(Level.SEVERE, e.getMessage(), e);
                         }
                     } finally {
                         if (lock != null) {

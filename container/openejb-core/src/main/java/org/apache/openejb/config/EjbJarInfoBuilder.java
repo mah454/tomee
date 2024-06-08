@@ -449,6 +449,7 @@ public class EjbJarInfoBuilder {
 
             copyCallbacks(s.getAroundInvoke(), info.aroundInvoke);
 
+            copyCallbacks(s.getAroundConstruct(), info.aroundConstruct);
             copyCallbacks(s.getPostConstruct(), info.postConstruct);
             copyCallbacks(s.getPreDestroy(), info.preDestroy);
 
@@ -854,7 +855,7 @@ public class EjbJarInfoBuilder {
         if (mdb.getMessagingType() != null) {
             bean.mdbInterface = mdb.getMessagingType();
         } else {
-            bean.mdbInterface = "javax.jms.MessageListener";
+            bean.mdbInterface = "jakarta.jms.MessageListener";
         }
 
         final ResourceLink resourceLink = d.getResourceLink("openejb/destination");

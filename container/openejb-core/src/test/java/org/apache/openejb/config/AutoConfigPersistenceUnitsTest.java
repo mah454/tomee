@@ -83,14 +83,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", jta managed
      * Existing data source "OrangeUnmanaged", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>OrangeUnamanged</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This is the happy path.
      *
      * @throws Exception
@@ -116,9 +116,9 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
      * Existing data source "OrangeUnmanaged", not jta managed
      * Existing data source "Lime", jta managed
      * Existing data source "LimeUnmanaged", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>OrangeUnmanaged</non-jta-data-source>
@@ -127,7 +127,7 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
      * <jta-data-source>Lime</jta-data-source>
      * <non-jta-data-source>LimeUnmanaged</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This is the happy path.
      *
      * @throws Exception
@@ -178,11 +178,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit", not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-unit data source and the non-jta-datasource should be null
      *
      * @throws Exception
@@ -201,11 +201,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit", jta-managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-unit data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -229,11 +229,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit", jta-managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-unit data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -266,11 +266,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit", non-jta-managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-unit data source and create a new JtaManaged datasource
      *
      * @throws Exception
@@ -294,13 +294,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-id", not controlled by us
-     * <p/>
+     *
      * Application contains a web module with id "orange-id"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-id data source and the non-jta-datasource should be null
      *
      * @throws Exception
@@ -331,13 +331,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-web", jta managed
-     * <p/>
+     *
      * Application contains a web module with id "orange-id"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-id data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -361,8 +361,8 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
         assembler.createApplication(appInfo);
 
         // Check results
-        final ResourceInfo generated = resources.get(1);
-        assertEquals(supplied.id + "NonJta", generated.id);
+        final ResourceInfo generated = findResource(supplied.id + "NonJta");
+        assertNotNull(generated);
         assertEquals(supplied.service, generated.service);
         assertEquals(supplied.className, generated.className);
         assertEquals(supplied.properties.get("JdbcDriver"), generated.properties.get("JdbcDriver"));
@@ -370,15 +370,25 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
         assertEquals("false", generated.properties.get("JtaManaged"));
     }
 
+    private ResourceInfo findResource(final String search) {
+        for (final ResourceInfo resource : resources) {
+            if (resource.id.equals(search)) {
+                return resource;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Existing data source "orange-id", non-jta managed
-     * <p/>
+     *
      * Application contains a web module with id "orange-id"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-id data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -402,8 +412,8 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
         assembler.createApplication(appInfo);
 
         // Check results
-        final ResourceInfo generated = resources.get(1);
-        assertEquals(supplied.id + "Jta", generated.id);
+        final ResourceInfo generated = findResource(supplied.id + "Jta");
+        assertNotNull(generated);
         assertEquals(supplied.service, generated.service);
         assertEquals(supplied.className, generated.className);
         assertEquals(supplied.properties.get("JdbcDriver"), generated.properties.get("JdbcDriver"));
@@ -413,13 +423,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-web", not controlled by us
-     * <p/>
+     *
      * Application contains a web module with root context path as "orange-web"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-web data source and the non-jta-datasource should be null
      *
      * @throws Exception
@@ -450,13 +460,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-web", jta managed
-     * <p/>
+     *
      * Application contains a web module with root context path as "orange-web"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-web data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -480,8 +490,8 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
         assembler.createApplication(appInfo);
 
         // Check results
-        final ResourceInfo generated = resources.get(1);
-        assertEquals(supplied.id + "NonJta", generated.id);
+        final ResourceInfo generated = findResource(supplied.id + "NonJta");
+        assertNotNull(generated);
         assertEquals(supplied.service, generated.service);
         assertEquals(supplied.className, generated.className);
         assertEquals(supplied.properties.get("JdbcDriver"), generated.properties.get("JdbcDriver"));
@@ -491,13 +501,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-web", non-jta managed
-     * <p/>
+     *
      * Application contains a web module with root context path as "orange-web"
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The orange-unit app should automatically use orange-web data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -521,8 +531,8 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
         assembler.createApplication(appInfo);
 
         // Check results
-        final ResourceInfo generated = resources.get(1);
-        assertEquals(supplied.id + "Jta", generated.id);
+        final ResourceInfo generated = findResource(supplied.id + "Jta");
+        assertNotNull(generated);
         assertEquals(supplied.service, generated.service);
         assertEquals(supplied.className, generated.className);
         assertEquals(supplied.properties.get("JdbcDriver"), generated.properties.get("JdbcDriver"));
@@ -533,11 +543,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit-app", not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The app module id is orange-unit-app. The jta data source should be orange-unit-app and the non-jta-data-source should be null
      *
      * @throws Exception
@@ -556,11 +566,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit-app", jta-managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The app module id is orange-unit-app. Use orange-unit-app data source and create a new non-JtaManaged datasource
      *
      * @throws Exception
@@ -584,11 +594,11 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "orange-unit-app", non-jta-managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit" />
-     * <p/>
+     *
      * The app module id is orange-unit-app. Use orange-unit-app data source and create a new JtaManaged datasource
      *
      * @throws Exception
@@ -613,9 +623,9 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", not controlled by us
      * Existing data source "OrangeUnmanaged", also not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>OrangeUnamanged</non-jta-data-source>
@@ -642,13 +652,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * Here we should just let them try and get by with
      * just the one data source.
      *
@@ -670,13 +680,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * Here we should just let them try and get by with
      * just the one data source.
      *
@@ -698,14 +708,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not controlled by us
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * Here we should just let them try and get by with
      * both jta and non-jta references pointed at the same
      * data source.
@@ -728,19 +738,19 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * They used the same data source for both the
      * jta-data-source and non-jta-data-source and we
      * can determine the data source will not work as
      * a non-jta-data-source
-     * <p/>
+     *
      * We should generate the missing data source for them
      * based on the one they supplied.
      *
@@ -775,19 +785,19 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * They used the same data source for both the
      * jta-data-source and non-jta-data-source and we
      * can determine the data source will not work as
      * a jta-data-source
-     * <p/>
+     *
      * We should generate the missing data source for them
      * based on the one they supplied.
      *
@@ -822,14 +832,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "OrangeOne", jta managed
      * Existing data source "OrangeTwo", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>OrangeOne</jta-data-source>
      * <non-jta-data-source>OrangeOne</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * They used the same data source for both the
      * jta-data-source and non-jta-data-source and we
      * can determine the data source will not work as
@@ -860,14 +870,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "OrangeOne", jta managed
      * Existing data source "OrangeTwo", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>OrangeTwo</jta-data-source>
      * <non-jta-data-source>OrangeTwo</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * They used the same data source for both the
      * jta-data-source and non-jta-data-source and we
      * can determine the data source will not work as
@@ -898,14 +908,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", jta managed
      * Existing data source "OrangeUnmanaged", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>java:foo/bar/baz/Orange</jta-data-source>
      * <non-jta-data-source>java:foo/bar/baz/OrangeUnamanged</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * The datasources should be mapped correctly despite the
      * vendor specific prefix.
      *
@@ -930,14 +940,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", jta managed
      * Existing data source "OrangeUnmanaged", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>DoesNotExist</jta-data-source>
      * <non-jta-data-source>AlsoDoesNotExist</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should automatically hook them up to the configured
      * datasources that do match
      *
@@ -964,14 +974,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "OrangeOne", not jta managed
      * Existing data source "OrangeTwo", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>OrangeOne</jta-data-source>
      * <non-jta-data-source>OrangeTwo</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This configuration should be rejected
      *
      * @throws Exception
@@ -995,14 +1005,14 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "OrangeOne", jta managed
      * Existing data source "OrangeTwo", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>OrangeOne</jta-data-source>
      * <non-jta-data-source>OrangeTwo</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This configuration should be rejected
      *
      * @throws Exception
@@ -1025,13 +1035,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "OrangeOne", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>OrangeOne</jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This configuration should be rejected
      *
      * @throws Exception
@@ -1052,13 +1062,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "OrangeOne", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <non-jta-data-source>OrangeOne</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * This configuration should be rejected
      *
      * @throws Exception
@@ -1081,13 +1091,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange" not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should generate a <jta-data-source> based on
      * the <non-jta-data-source>
      *
@@ -1119,13 +1129,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange" jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should generate a <non-jta-data-source> based on
      * the <jta-data-source>
      *
@@ -1159,13 +1169,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", not jta managed
      * Existing data source "Lime", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should generate a <jta-data-source> based on
      * the <non-jta-data-source>.  We should not select
      * the Lime datasource which is for a different database.
@@ -1201,13 +1211,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
     /**
      * Existing data source "Orange", jta managed
      * Existing data source "Lime", non jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should generate a <non-jta-data-source> based on
      * the <jta-data-source>.  We should not select the
      * Lime datasource which is for a different database.
@@ -1247,13 +1257,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
      * Existing data source "Orange", not jta managed
      * Existing data source "Lime", jta managed
      * Existing data source "JtaOrange", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <non-jta-data-source>Orange</non-jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should select the <jta-data-source> based on
      * the closest match to the <non-jta-data-source>
      *
@@ -1282,13 +1292,13 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
      * Existing data source "Orange", jta managed
      * Existing data source "Lime", not jta managed
      * Existing data source "OrangeUnamanged", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * <jta-data-source>Orange</jta-data-source>
      * </persistence-unit>
-     * <p/>
+     *
      * We should select the <non-jta-data-source> based on
      * the closest match to the <jta-data-source>
      *
@@ -1317,15 +1327,15 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * </persistence-unit>
-     * <p/>
+     *
      * The <non-jta-data-source> should be auto linked
      * to the Orange data source
-     * <p/>
+     *
      * We should generate a <jta-data-source> based on
      * the <non-jta-data-source>
      *
@@ -1357,15 +1367,15 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * </persistence-unit>
-     * <p/>
+     *
      * The <jta-data-source> should be auto linked
      * to the Orange data source
-     * <p/>
+     *
      * We should generate a <non-jta-data-source> based on
      * the <jta-data-source>
      *
@@ -1400,17 +1410,17 @@ public class AutoConfigPersistenceUnitsTest extends TestCase {
 
     /**
      * Existing data source "Orange", not jta managed
-     * <p/>
+     *
      * Persistence xml like so:
-     * <p/>
+     *
      * <persistence-unit name="orange-unit">
      * </persistence-unit>
-     * <p/>
+     *
      * A set of default data sources should be generated
-     * <p/>
+     *
      * The <non-jta-data-source> should be auto linked
      * to the Default JDBC Database data source
-     * <p/>
+     *
      * The <jta-data-source> should be auto linked
      * to the Default Unmanaged JDBC Database data source
      *

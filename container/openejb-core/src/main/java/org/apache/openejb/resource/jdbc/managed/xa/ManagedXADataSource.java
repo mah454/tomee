@@ -23,10 +23,11 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.CommonDataSource;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 
 public class ManagedXADataSource extends ManagedDataSource {
+
     private static final Class<?>[] CONNECTION_CLASS = new Class<?>[]{Connection.class};
 
     private final TransactionManager txMgr;
@@ -47,6 +48,10 @@ public class ManagedXADataSource extends ManagedDataSource {
     }
 
     private Connection managedXA(final String u, final String p) throws SQLException {
+        final Connection resource = getTxConnection(delegate, u, p, transactionManager, registry);
+        if (resource != null) {
+            return resource;
+        }
         return Connection.class.cast(Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), CONNECTION_CLASS,
                 new ManagedXAConnection(delegate, txMgr, registry, u, p)));
     }

@@ -20,11 +20,11 @@ package org.apache.openejb.persistence;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Parameter;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Parameter;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.TypedQuery;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
@@ -94,18 +94,28 @@ public class CriteriaLogQuery<T> implements TypedQuery<T> {
         }
 
         final String msg = "executing query '" + query + "'";
-        if (logLevel.equals("info")) {
-            LOGGER.info(msg);
-        } else if (logLevel.equals("debug") || logLevel.equals("fine") || logLevel.equals("finest")) {
-            LOGGER.debug(msg);
-        } else if (logLevel.equals("error")) {
-            LOGGER.error(msg);
-        } else if (logLevel.equals("fatal")) {
-            LOGGER.fatal(msg);
-        } else if (logLevel.equals("warning") || logLevel.equals("warn")) {
-            LOGGER.warning(msg);
-        } else {
-            LOGGER.debug(msg);
+        switch (logLevel) {
+            case "info":
+                LOGGER.info(msg);
+                break;
+            case "debug":
+            case "fine":
+            case "finest":
+                LOGGER.debug(msg);
+                break;
+            case "error":
+                LOGGER.error(msg);
+                break;
+            case "fatal":
+                LOGGER.fatal(msg);
+                break;
+            case "warning":
+            case "warn":
+                LOGGER.warning(msg);
+                break;
+            default:
+                LOGGER.debug(msg);
+                break;
         }
     }
 

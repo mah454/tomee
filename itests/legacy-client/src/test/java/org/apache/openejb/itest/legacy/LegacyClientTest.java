@@ -31,10 +31,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.ejb.EJBException;
+import jakarta.ejb.EJBException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,6 +186,10 @@ public class LegacyClientTest {
 
         final InitialContext context = new InitialContext(environment);
         final Calculator bean = (Calculator) context.lookup("CalculatorBeanRemote");
+        // Lets restart one server. This will change the cluster configuration so when we call
+        // 'bean' business methods new ClusterMetaDataUpdated event will be triggered
+        servers.get("red").kill();
+        servers.get("red").start(1, TimeUnit.MINUTES);
 
         for (final Map.Entry<String, StandaloneServer> entry : servers.entrySet()) {
             final String name = entry.getKey();
@@ -209,7 +214,7 @@ public class LegacyClientTest {
 
             final String name = bean.name();
             Assert.fail("Server should be destroyed: " + name);
-        } catch (final EJBException e) {
+        } catch (final javax.ejb.EJBException e) { // mind that since TomEE 9, we moved to jakarta, but old clients still see javax
             logger.info(String.format("Pass.  Request resulted in %s: %s", e.getCause().getClass().getSimpleName(), e.getMessage()));
             // good
         }

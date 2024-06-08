@@ -33,14 +33,12 @@ import org.apache.openejb.core.timer.EjbTimerService;
 import org.apache.openejb.core.transaction.TransactionPolicy;
 import org.apache.openejb.loader.Options;
 import org.apache.openejb.loader.SystemInstance;
-import org.apache.openejb.monitoring.LocalMBeanServer;
-import org.apache.openejb.monitoring.ManagedMBean;
-import org.apache.openejb.monitoring.ObjectNameBuilder;
-import org.apache.openejb.monitoring.StatsInterceptor;
+import org.apache.openejb.monitoring.*;
 import org.apache.openejb.resource.XAResourceWrapper;
 import org.apache.openejb.spi.SecurityService;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
+import org.apache.openejb.util.StringTemplate;
 import org.apache.xbean.recipe.ObjectRecipe;
 import org.apache.xbean.recipe.Option;
 
@@ -61,21 +59,18 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.naming.NamingException;
-import javax.resource.ResourceException;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.UnavailableException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ActivationSpec;
+import jakarta.resource.spi.ResourceAdapter;
+import jakarta.resource.spi.UnavailableException;
 import javax.transaction.xa.XAResource;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -182,18 +177,19 @@ public class MdbContainer implements RpcContainer, BaseMdbContainer {
         beanContext.setContainerData(endpointFactory);
         deployments.put(deploymentId, beanContext);
 
+        final MBeanServer server = LocalMBeanServer.get();
+
         // Create stats interceptor
         if (StatsInterceptor.isStatsActivated()) {
             final StatsInterceptor stats = new StatsInterceptor(beanContext.getBeanClass());
             beanContext.addFirstSystemInterceptor(stats);
 
-            final MBeanServer server = LocalMBeanServer.get();
 
             final ObjectNameBuilder jmxName = new ObjectNameBuilder("openejb.management");
             jmxName.set("J2EEServer", "openejb");
             jmxName.set("J2EEApplication", null);
             jmxName.set("EJBModule", beanContext.getModuleID());
-            jmxName.set("StatelessSessionBean", beanContext.getEjbName());
+            jmxName.set("MessageDrivenBean", beanContext.getEjbName());
             jmxName.set("j2eeType", "");
             jmxName.set("name", beanContext.getEjbName());
 
@@ -209,6 +205,29 @@ public class MdbContainer implements RpcContainer, BaseMdbContainer {
                 logger.error("Unable to register MBean ", e);
             }
         }
+
+        // Expose InstanceLimit/InstanceCount stats through JMX
+        {
+            final ObjectNameBuilder jmxName = new ObjectNameBuilder("openejb.management");
+            jmxName.set("J2EEServer", "openejb");
+            jmxName.set("J2EEApplication", null);
+            jmxName.set("EJBModule", beanContext.getModuleID());
+            jmxName.set("MessageDrivenBean", beanContext.getEjbName());
+            jmxName.set("j2eeType", "");
+            jmxName.set("name", beanContext.getEjbName());
+
+            try {
+                final ObjectName objectName = jmxName.set("j2eeType", "Instances").build();
+                if (server.isRegistered(objectName)) {
+                    server.unregisterMBean(objectName);
+                }
+                server.registerMBean(new ManagedMBean(new InstanceMonitor(instanceFactory)), objectName);
+                endpointFactory.jmxNames.add(objectName);
+            } catch (final Exception e) {
+                logger.error("Unable to register MBean ", e);
+            }
+        }
+
 
         // activate the endpoint
         CURRENT.set(beanContext);
@@ -253,17 +272,46 @@ public class MdbContainer implements RpcContainer, BaseMdbContainer {
         }
     }
 
-    private ActivationSpec createActivationSpec(final BeanContext beanContext) throws OpenEJBException {
+    // visibility to allow unit testing
+    public ActivationSpec createActivationSpec(final BeanContext beanContext) throws OpenEJBException {
         try {
             // initialize the object recipe
             final ObjectRecipe objectRecipe = new ObjectRecipe(activationSpecClass);
             objectRecipe.allow(Option.IGNORE_MISSING_PROPERTIES);
             objectRecipe.disallow(Option.FIELD_INJECTION);
 
-
             final Map<String, String> activationProperties = beanContext.getActivationProperties();
+
+            final Map<String, String> context = new HashMap<>();
+            context.put("ejbJarId", beanContext.getModuleContext().getId());
+            context.put("ejbName", beanContext.getEjbName());
+            context.put("appId", beanContext.getModuleContext().getAppContext().getId());
+
+            String hostname;
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                hostname = "hostname-unknown";
+            }
+
+            context.put("hostName", hostname);
+
+            String uniqueId = Long.toString(System.currentTimeMillis());
+            try {
+                Class idGen = Class.forName("org.apache.activemq.util.IdGenerator");
+                final Object generator = idGen.getConstructor().newInstance();
+                final Method generateId = idGen.getDeclaredMethod("generateId");
+                final Object ID = generateId.invoke(generator);
+
+                uniqueId = ID.toString();
+            } catch (Exception e) {
+                // ignore and use the timestamp
+            }
+
+            context.put("uniqueId", uniqueId);
+
             for (final Map.Entry<String, String> entry : activationProperties.entrySet()) {
-                objectRecipe.setMethodProperty(entry.getKey(), entry.getValue());
+                objectRecipe.setMethodProperty(entry.getKey(), new StringTemplate(entry.getValue()).apply(context));
             }
             objectRecipe.setMethodProperty("beanClass", beanContext.getBeanClass());
 
@@ -729,6 +777,24 @@ public class MdbContainer implements RpcContainer, BaseMdbContainer {
         @Override
         public AttributeList setAttributes(final AttributeList attributes) {
             return ATTRIBUTE_LIST;
+        }
+    }
+
+    public static class InstanceMonitor {
+        private final MdbInstanceFactory instanceFactory;
+
+        public InstanceMonitor(MdbInstanceFactory instanceFactory) {
+            this.instanceFactory = instanceFactory;
+        }
+
+        @Managed
+        public int getInstanceLimit() {
+            return instanceFactory.getInstanceLimit();
+        }
+
+        @Managed
+        public int getInstanceCount() {
+            return instanceFactory.getInstanceCount();
         }
     }
 }

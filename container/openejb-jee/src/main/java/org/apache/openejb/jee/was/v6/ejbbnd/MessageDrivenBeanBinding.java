@@ -16,33 +16,33 @@
  */
 package org.apache.openejb.jee.was.v6.ejbbnd;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Binding information for MessageDrivenBeans.
- * <p/>
- * <p/>
- * <p/>
+ *
+ *
+ *
  * Java class for MessageDrivenBeanBinding complex type.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained within
  * this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="MessageDrivenBeanBinding">
- *   &lt;complexContent>
- *     &lt;extension base="{ejbbnd.xmi}EnterpriseBeanBinding">
- *       &lt;attribute name="activationSpecAuthAlias" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="activationSpecJndiName" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="destinationJndiName" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="listenerInputPortName" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="MessageDrivenBeanBinding"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{ejbbnd.xmi}EnterpriseBeanBinding"&gt;
+ *       &lt;attribute name="activationSpecAuthAlias" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="activationSpecJndiName" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="destinationJndiName" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="listenerInputPortName" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)

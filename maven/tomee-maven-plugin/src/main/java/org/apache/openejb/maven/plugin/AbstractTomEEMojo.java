@@ -82,6 +82,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.SimpleFormatter;
@@ -497,6 +498,12 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
     protected boolean checkStarted;
 
     /**
+     * The amount of attempts to check if the container is started.
+     */
+    @Parameter(property = "tomee-plugin.check-started-attempts", defaultValue = "60")
+    protected int checkStartedAttempts;
+
+    /**
      * The Use console.
      */
     @Parameter(property = "tomee-plugin.use-console", defaultValue = "true")
@@ -559,7 +566,7 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
      * the actual path used in server.xml for the https keystore if relevant.
      * Common usage will be to put in src/main/tomee/conf a keystore foo.jks
      * and set this value to ${catalina.base}/foo.jks.
-     * <p/>
+     *
      * Note: if not set we'll check for any *.jks in conf/. You can set it to "ignore" to skip this.
      */
     @Parameter(property = "tomee-plugin.keystore")
@@ -1231,7 +1238,7 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
 
         final File[] files = dir.listFiles();
         if (files != null) {
-            final Collection<File> copied = new ArrayList<File>();
+            final Collection<File> copied = new ArrayList<>();
             for (final File f : files) {
                 if (f.isHidden()) {
                     continue;
@@ -1296,7 +1303,18 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
         System.setProperty("server.shutdown.port", String.valueOf(tomeeShutdownPort));
         System.setProperty("server.shutdown.command", tomeeShutdownCommand);
 
-        server = new RemoteServer(getConnectAttempts(), debug);
+        // We might need to override static cached env vars in RemoteServer
+        // Reason: Multiple execution in same JVM, i.e. in Maven Integration Tests
+        Properties override = new Properties();
+        override.setProperty("openejb.home", System.getProperty("openejb.home"));
+        if (debug) {
+            override.setProperty("openejb.server.debug", System.getProperty("openejb.server.debug"));
+            override.setProperty("server.debug.port", System.getProperty("server.debug.port"));
+        }
+        override.setProperty("server.shutdown.port", System.getProperty("server.shutdown.port"));
+        override.setProperty("server.shutdown.command", System.getProperty("server.shutdown.command"));
+
+        server = new RemoteServer(override, getConnectAttempts(), debug);
         server.setAdditionalClasspath(getAdditionalClasspath());
 
         addShutdownHooks(server); // some shutdown hooks are always added (see UpdatableTomEEMojo)
@@ -1315,7 +1333,7 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
             getLog().info("Running '" + getClass().getSimpleName().replace("TomEEMojo", "").toLowerCase(Locale.ENGLISH));
         }
 
-        final InputStream originalIn = System.in; // piped when starting resmote server so saving it
+        final InputStream originalIn = System.in; // piped when starting remote server so saving it
 
         serverCmd(server, strings);
 
@@ -1562,14 +1580,14 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
             forceReloadable = true;
         }
         if (docBases == null) {
-            docBases = new ArrayList<File>();
+            docBases = new ArrayList<>();
         }
         if (docBases.isEmpty() && webappResources.exists()) {
             getLog().info("adding " + webappResources.toString() + " docBase");
             docBases.add(webappResources);
         }
         if (externalRepositories == null) {
-            externalRepositories = new ArrayList<File>();
+            externalRepositories = new ArrayList<>();
         }
         if (externalRepositories.isEmpty() && webappClasses.exists()) {
             getLog().info("adding " + webappClasses.toString() + " externalRepository");
@@ -1584,7 +1602,7 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
     }
 
     private static String filesToString(final Collection<File> files) {
-        final Collection<String> paths = new ArrayList<String>(files.size());
+        final Collection<String> paths = new ArrayList<>(files.size());
         for (final File path : files) { // don't use relative paths (toString())
             paths.add(path.getAbsolutePath());
         }
@@ -1713,7 +1731,7 @@ public abstract class AbstractTomEEMojo extends AbstractAddressMojo {
                 // no-op
             }
         } else if (remoteRepos != null && remoteRepos.isEmpty()) {
-            remoteRepos = new ArrayList<ArtifactRepository>();
+            remoteRepos = new ArrayList<>();
         }
 
         if ((tomeeClassifier != null && (tomeeClassifier.isEmpty() || tomeeClassifier.equals("ignore")))

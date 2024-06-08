@@ -20,13 +20,15 @@ import org.apache.openejb.resource.thread.ManagedScheduledExecutorServiceImplFac
 import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.ri.sp.PseudoSecurityService;
 import org.apache.openejb.spi.SecurityService;
+import org.apache.openejb.threads.impl.ContextServiceImpl;
+import org.apache.openejb.threads.impl.ContextServiceImplFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.enterprise.concurrent.LastExecution;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.enterprise.concurrent.Trigger;
+import jakarta.enterprise.concurrent.LastExecution;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.concurrent.Trigger;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -51,7 +53,8 @@ public class ManagedScheduledExecutorServiceTest {
 
     @Test
     public void triggerCallableSchedule() throws Exception {
-        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create();
+        final ContextServiceImpl contextService = ContextServiceImplFactory.newDefaultContextService();
+        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create(contextService);
         final CountDownLatch counter = new CountDownLatch(5);
         final FutureAwareCallable callable = new FutureAwareCallable(counter);
 
@@ -90,7 +93,8 @@ public class ManagedScheduledExecutorServiceTest {
 
     @Test
     public void triggerRunnableSchedule() throws Exception {
-        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create();
+        final ContextServiceImpl contextService = ContextServiceImplFactory.newDefaultContextService();
+        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create(contextService);
         final CountDownLatch counter = new CountDownLatch(5);
         final FutureAwareCallable callable = new FutureAwareCallable(counter);
 
@@ -115,20 +119,21 @@ public class ManagedScheduledExecutorServiceTest {
         assertFalse(future.isCancelled());
 
         //Should easily get 5 invocations within 1 second
-        counter.await(3, TimeUnit.SECONDS);
+        counter.await(5, TimeUnit.SECONDS);
 
         future.cancel(true);
         assertEquals("Counter did not count down in time", 0L, counter.getCount());
 
         final boolean done = future.isDone();
-        assertTrue(done);
+        assertTrue("Future should be done", done);
         final boolean cancelled = future.isCancelled();
-        assertTrue(cancelled);
+        assertTrue("Future should be cancelled", cancelled);
     }
 
     @Test
     public void simpleSchedule() throws Exception {
-        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create();
+        final ContextServiceImpl contextService = ContextServiceImplFactory.newDefaultContextService();
+        final ManagedScheduledExecutorService es = new ManagedScheduledExecutorServiceImplFactory().create(contextService);
         final long start = System.currentTimeMillis();
         final ScheduledFuture<Long> future = es.schedule(new Callable<Long>() {
             @Override

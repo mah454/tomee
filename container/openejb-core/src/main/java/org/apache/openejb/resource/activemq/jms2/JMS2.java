@@ -16,33 +16,36 @@
  */
 package org.apache.openejb.resource.activemq.jms2;
 
-import javax.jms.BytesMessage;
-import javax.jms.IllegalStateRuntimeException;
-import javax.jms.InvalidClientIDException;
-import javax.jms.InvalidClientIDRuntimeException;
-import javax.jms.InvalidDestinationException;
-import javax.jms.InvalidDestinationRuntimeException;
-import javax.jms.InvalidSelectorException;
-import javax.jms.InvalidSelectorRuntimeException;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-import javax.jms.JMSSecurityException;
-import javax.jms.JMSSecurityRuntimeException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageFormatRuntimeException;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.MessageNotWriteableRuntimeException;
-import javax.jms.ObjectMessage;
-import javax.jms.ResourceAllocationException;
-import javax.jms.ResourceAllocationRuntimeException;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
-import javax.jms.TransactionInProgressException;
-import javax.jms.TransactionInProgressRuntimeException;
-import javax.jms.TransactionRolledBackException;
-import javax.jms.TransactionRolledBackRuntimeException;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.IllegalStateRuntimeException;
+import jakarta.jms.InvalidClientIDException;
+import jakarta.jms.InvalidClientIDRuntimeException;
+import jakarta.jms.InvalidDestinationException;
+import jakarta.jms.InvalidDestinationRuntimeException;
+import jakarta.jms.InvalidSelectorException;
+import jakarta.jms.InvalidSelectorRuntimeException;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.JMSSecurityException;
+import jakarta.jms.JMSSecurityRuntimeException;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.MessageFormatException;
+import jakarta.jms.MessageFormatRuntimeException;
+import jakarta.jms.MessageNotWriteableException;
+import jakarta.jms.MessageNotWriteableRuntimeException;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.ResourceAllocationException;
+import jakarta.jms.ResourceAllocationRuntimeException;
+import jakarta.jms.StreamMessage;
+import jakarta.jms.TextMessage;
+import jakarta.jms.TransactionInProgressException;
+import jakarta.jms.TransactionInProgressRuntimeException;
+import jakarta.jms.TransactionRolledBackException;
+import jakarta.jms.TransactionRolledBackRuntimeException;
+import jakarta.transaction.SystemException;
+
+import org.apache.openejb.OpenEJB;
 
 public final class JMS2 {
     private JMS2() {
@@ -50,7 +53,7 @@ public final class JMS2 {
     }
 
     public static JMSRuntimeException toRuntimeException(final JMSException e) {
-        if (e instanceof javax.jms.IllegalStateException) {
+        if (e instanceof jakarta.jms.IllegalStateException) {
             return new IllegalStateRuntimeException(e.getMessage(), e.getErrorCode(), e);
         }
         if (e instanceof InvalidClientIDException) {
@@ -83,6 +86,7 @@ public final class JMS2 {
         return new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Message> T wrap(final T message10) {
         if (message10 == null) {
             return null;
@@ -111,5 +115,14 @@ public final class JMS2 {
             return (T) new WrappingStreamMessage(StreamMessage.class.cast(message10));
         }
         return (T) new DelegateMessage(message10);
+    }
+
+
+    public static boolean inTx() {
+        try {
+            return OpenEJB.getTransactionManager().getTransaction() != null;
+        } catch (SystemException | NullPointerException e) {
+            return false;
+        }
     }
 }

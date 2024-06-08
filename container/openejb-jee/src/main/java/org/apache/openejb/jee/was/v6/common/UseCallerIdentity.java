@@ -16,30 +16,30 @@
  */
 package org.apache.openejb.jee.was.v6.common;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * The use-caller-identity element specifies that the caller's security identity
  * be used as the security identity for the execution of the enterprise bean's
  * methods.
- * <p/>
- * <p/>
- * <p/>
+ *
+ *
+ *
  * Java class for UseCallerIdentity complex type.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained within
  * this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="UseCallerIdentity">
- *   &lt;complexContent>
- *     &lt;extension base="{common.xmi}SecurityIdentity">
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="UseCallerIdentity"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{common.xmi}SecurityIdentity"&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)

@@ -350,9 +350,7 @@ public class DataSourceFactory {
                     Class.forName(value, false, containerLoader);
                 }
             }
-        } catch (final ClassNotFoundException cnfe) {
-            return false;
-        } catch (final NoClassDefFoundError cnfe) {
+        } catch (final ClassNotFoundException | NoClassDefFoundError cnfe) {
             return false;
         }
 
@@ -412,7 +410,7 @@ public class DataSourceFactory {
         properties.remove(key);
 
         // If someone is using the legacy property, use it
-        if (properties.contains(oldKey)) {
+        if (properties.containsKey(oldKey)) {
             return;
         }
         properties.remove(oldKey);

@@ -17,13 +17,13 @@
 package org.apache.tomee.myfaces;
 
 import org.apache.myfaces.config.annotation.DefaultAnnotationProvider;
-import org.apache.myfaces.shared.util.ClassUtils;
+import org.apache.myfaces.util.lang.ClassUtils;
 import org.apache.openejb.assembler.classic.WebAppBuilder;
 import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 
-import javax.faces.context.ExternalContext;
+import jakarta.faces.context.ExternalContext;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;

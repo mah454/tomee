@@ -24,7 +24,7 @@ import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.SetAccessible;
 
-import javax.interceptor.InvocationContext;
+import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class InterceptorBindingBuilder {
 
     public InterceptorBindingBuilder(final ClassLoader cl, final EjbJarInfo ejbJarInfo) throws OpenEJBException {
         bindings = new ArrayList<>(ejbJarInfo.interceptorBindings);
-        Collections.sort(bindings, new IntercpetorBindingComparator());
+        bindings.sort(new IntercpetorBindingComparator());
         Collections.reverse(bindings);
 
         packageAndClassBindings = new ArrayList<>();
@@ -80,6 +80,7 @@ public class InterceptorBindingBuilder {
             toMethods(clazz, info.aroundInvoke, interceptor.getAroundInvoke());
             toMethods(clazz, info.postActivate, interceptor.getPostActivate());
             toMethods(clazz, info.prePassivate, interceptor.getPrePassivate());
+            toMethods(clazz, info.aroundConstruct, interceptor.getAroundConstruct());
             toMethods(clazz, info.postConstruct, interceptor.getPostConstruct());
             toMethods(clazz, info.preDestroy, interceptor.getPreDestroy());
             toMethods(clazz, info.afterBegin, interceptor.getAfterBegin());
@@ -271,7 +272,8 @@ public class InterceptorBindingBuilder {
 
     /**
      * Used for getting the java.lang.reflect.Method objects for the following callbacks:
-     * <p/>
+     *
+     * - @AroundConstruct <any-scope> void <method-name>(InvocationContext)
      * - @PostConstruct <any-scope> void <method-name>(InvocationContext)
      * - @PreDestroy <any-scope> void <method-name>(InvocationContext)
      * - @PrePassivate <any-scope> void <method-name>(InvocationContext)
@@ -321,14 +323,15 @@ public class InterceptorBindingBuilder {
                 logger.warning("Interceptor method not found (skipping): public Object " + callbackInfo.method + "(InvocationContext); in class " + clazz.getName());
             }
         }
-        Collections.sort(methods, new MethodCallbackComparator());
+        methods.sort(new MethodCallbackComparator());
 
         callbacks.addAll(methods);
     }
 
     /**
      * Used for getting the java.lang.reflect.Method objects for the following callbacks:
-     * <p/>
+     *
+     * - @AroundConstruct <any-scope> void <method-name>()
      * - @PostConstruct <any-scope> void <method-name>()
      * - @PreDestroy <any-scope> void <method-name>()
      * - @PrePassivate <any-scope> void <method-name>()
@@ -336,7 +339,7 @@ public class InterceptorBindingBuilder {
      * - @AfterBegin <any-scope> void <method-name>()
      * - @BeforeCompletion <any-scope> void <method-name>()
      * - @AfterCompletion <any-scope> void <method-name>(boolean)
-     * <p/>
+     *
      * These apply to the bean class only, interceptor methods use InvocationContext as
      * a parameter.  The toMethods method is used for those.
      *
@@ -392,7 +395,7 @@ public class InterceptorBindingBuilder {
                 throw new IllegalStateException(message, e);
             }
         }
-        Collections.sort(methods, new MethodCallbackComparator());
+        methods.sort(new MethodCallbackComparator());
         callbacks.addAll(methods);
     }
 

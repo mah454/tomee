@@ -16,18 +16,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <!-- $Rev: 661532 $ $Date: 2008-05-29 16:46:42 -0700 (Thu, 29 May 2008) $ -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.superbiz</groupId>
   <artifactId>ear-testing</artifactId>
-  <version>8.0.0-SNAPSHOT</version>
+  <version>10.0.0-M2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>OpenEJB :: Examples :: Ear Testing</name>
+  <name>TomEE :: Examples :: Ear Testing</name>
   <modules>
     <module>business-model</module>
     <module>business-logic</module>
@@ -58,7 +54,10 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.18.1</version>
+          <version>3.2.5</version>
+          <configuration>
+            <argLine>-Djdk.attach.allowAttachSelf</argLine>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -67,13 +66,13 @@
     <dependencies>
       <dependency>
         <groupId>org.apache.tomee</groupId>
-              <artifactId>javaee-api</artifactId>
-       <version>8.0</version>
+        <artifactId>jakartaee-api</artifactId>
+        <version>10.0-M2</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.12</version>
+        <version>4.13.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -92,6 +91,4 @@
       <url>file://${basedir}/target/snapshot-repo/</url>
     </snapshotRepository>
   </distributionManagement>
-
 </project>
-

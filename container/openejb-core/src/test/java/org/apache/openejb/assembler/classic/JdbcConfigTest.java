@@ -23,7 +23,7 @@ import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.spi.ContainerSystem;
 
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -87,11 +87,8 @@ public class JdbcConfigTest extends TestCase {
                 } catch (final SQLException expected) {
                 }
 
-                final Statement statement = connection.createStatement();
-                try {
+                try (Statement statement = connection.createStatement()) {
                     statement.getQueryTimeout();
-                } finally {
-                    statement.close();
                 }
             }
         } finally {
@@ -109,11 +106,8 @@ public class JdbcConfigTest extends TestCase {
                 unmanagedConnections.add(connection);
                 assertTrue("Expected connection.getAutoCommit() to be true", connection.getAutoCommit());
                 connection.setAutoCommit(true);
-                final Statement statement = connection.createStatement();
-                try {
+                try (Statement statement = connection.createStatement()) {
                     statement.getQueryTimeout();
-                } finally {
-                    statement.close();
                 }
                 connection.commit();
                 connection.setAutoCommit(false);

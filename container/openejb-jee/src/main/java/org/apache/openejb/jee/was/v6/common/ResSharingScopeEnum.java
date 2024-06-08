@@ -16,25 +16,25 @@
  */
 package org.apache.openejb.jee.was.v6.common;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 
 /**
- * <p/>
+ *
  * Java class for ResSharingScopeType.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained within
  * this class.
- * <p/>
- * <p/>
+ *
+ *
  * <pre>
- * &lt;simpleType name="ResSharingScopeType">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}NCName">
- *     &lt;enumeration value="Shareable"/>
- *     &lt;enumeration value="Unshareable"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="ResSharingScopeType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}NCName"&gt;
+ *     &lt;enumeration value="Shareable"/&gt;
+ *     &lt;enumeration value="Unshareable"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  */
 @XmlEnum

@@ -29,38 +29,54 @@ import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.spi.CallerPrincipal;
 import org.apache.openejb.spi.SecurityService;
 import org.apache.openejb.util.JavaSecurityManagers;
+import org.apache.openejb.util.LogCategory;
+import org.apache.openejb.util.Logger;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
-import javax.security.jacc.EJBMethodPermission;
-import javax.security.jacc.PolicyConfigurationFactory;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.security.jacc.EJBMethodPermission;
+import jakarta.security.jacc.PolicyConfigurationFactory;
+import jakarta.security.jacc.PolicyContext;
+import jakarta.security.jacc.PolicyContextException;
+import jakarta.security.jacc.PolicyContextHandler;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.security.AccessControlContext;
 import java.security.AccessControlException;
 import java.security.AccessController;
+import java.security.CodeSource;
 import java.security.Policy;
 import java.security.Principal;
 import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Arrays.asList;
 
 /**
  * This security service chooses a UUID as its token as this can be serialized
  * to clients, is mostly secure, and can be deserialized in a client vm without
  * addition openejb-core classes.
  */
-public abstract class AbstractSecurityService implements DestroyableResource, SecurityService<UUID>, ThreadContextListener, BasicPolicyConfiguration.RoleResolver {
+public abstract class AbstractSecurityService implements DestroyableResource, SecurityService<UUID>, ThreadContextListener,
+                                                         BasicPolicyConfiguration.RoleResolver, PolicyContextHandler {
+
+    private static final Logger LOGGER = Logger.getInstance(LogCategory.OPENEJB_SECURITY, "org.apache.openejb.util.resources");
+
+    protected static final String KEY_SUBJECT = "javax.security.auth.Subject.container";
+    protected static final String KEY_REQUEST = "jakarta.servlet.http.HttpServletRequest";
+    protected static final Set<String> KEYS = new HashSet<>(asList(KEY_REQUEST, KEY_SUBJECT));
+
     private static final Map<Object, Identity> identities = new ConcurrentHashMap<Object, Identity>();
     protected static final ThreadLocal<Identity> clientIdentity = new ThreadLocal<Identity>();
     protected String defaultUser = "guest";
@@ -82,12 +98,24 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
         // set the default subject and the default context
         updateSecurityContext();
 
+        // we can now add the role resolver for Jacc to convert into strings
         SystemInstance.get().setComponent(BasicPolicyConfiguration.RoleResolver.class, this);
+
+        // and finally we can register ourself as a PolicyContextHandler
+        // we can register policy handlers and the role mapper
+        try {
+            for (String key : getKeys()) {
+                PolicyContext.registerHandler(key, this, true);
+            }
+        } catch (final PolicyContextException e) {
+            // best would probably to fail start if something wrong happens
+            LOGGER.warning("Can't register PolicyContextHandler", e);
+        }
     }
 
     @Override
     public void destroyResource() {
-        // no-op
+        ThreadContext.removeThreadContextListener(this);
     }
 
     public void onLogout(final HttpServletRequest request) {
@@ -279,6 +307,40 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
         return false;
     }
 
+    protected Subject getSubject() {
+        final ThreadContext threadContext = ThreadContext.getThreadContext();
+        if (threadContext == null) {
+            final Identity id = clientIdentity.get();
+            if (id != null) {
+                return id.getSubject();
+            }
+            return new Subject();
+        }
+
+        final SecurityContext securityContext = threadContext.get(SecurityContext.class);
+        if (securityContext == null) { // unlikely
+            return new Subject();
+        }
+        return securityContext.subject;
+    }
+
+    @Override
+    public <P extends Principal> Set<P> getPrincipalsByType(final Class<P> pType) {
+        if (pType == null) {
+            throw new IllegalArgumentException("Principal type can't be null");
+        }
+        return getSubject().getPrincipals(pType);
+    }
+
+    @Override
+    public ProtectionDomain getProtectionDomain() {
+        return new ProtectionDomain(
+            new CodeSource(null, (java.security.cert.Certificate[]) null),
+            null, null,
+            getSubject().getPrincipals().toArray(new Principal[0])
+        );
+    }
+
     @Override
     public Principal getCallerPrincipal() {
         final ThreadContext threadContext = ThreadContext.getThreadContext();
@@ -340,7 +402,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
     protected static void installJacc() {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
-        final String providerKey = "javax.security.jacc.PolicyConfigurationFactory.provider";
+        final String providerKey = "jakarta.security.jacc.PolicyConfigurationFactory.provider";
         try {
             if (JavaSecurityManagers.getSystemProperty(providerKey) == null) {
                 JavaSecurityManagers.setSystemProperty(providerKey, JaccProvider.Factory.class.getName());
@@ -348,7 +410,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
                 Thread.currentThread().setContextClassLoader(cl);
             }
 
-            // Force the loading of the javax.security.jacc.PolicyConfigurationFactory.provider
+            // Force the loading of the jakarta.security.jacc.PolicyConfigurationFactory.provider
             // Hopefully it will be cached thereafter and ClassNotFoundExceptions thrown
             // from the equivalent call in JaccPermissionsBuilder can be avoided.
             PolicyConfigurationFactory.getPolicyConfigurationFactory();
@@ -358,7 +420,19 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
 
-        final String policyProvider = SystemInstance.get().getOptions().get("javax.security.jacc.policy.provider", JaccProvider.Policy.class.getName());
+        // check the system provided provider first - if for some reason it isn't loaded, load it
+        final String systemPolicyProvider = SystemInstance.get().getOptions().getProperties().getProperty("jakarta.security.jacc.policy.provider");
+        if (systemPolicyProvider != null && Policy.getPolicy() == null) {
+            installPolicy(systemPolicyProvider);
+        }
+
+        if (! JaccProvider.Policy.class.getName().equals(Policy.getPolicy().getClass().getName())) {
+            // this should delegate to the policy installed above
+            installPolicy(JaccProvider.Policy.class.getName());
+        }
+    }
+
+    private static void installPolicy(String policyProvider) {
         try {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final Class policyClass = Class.forName(policyProvider, true, classLoader);
@@ -369,6 +443,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
             throw new IllegalStateException("Could not install JACC Policy Provider: " + policyProvider, e);
         }
     }
+
 
     protected Subject createSubject(final String name, final String groupName) {
         if (name == null) {
@@ -404,6 +479,24 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
         return defaultContext;
     }
 
+    @Override
+    public boolean supports(final String key) throws PolicyContextException {
+        return KEY_SUBJECT.equals(key);
+    }
+
+    @Override
+    public String[] getKeys() throws PolicyContextException {
+        return new String[] {KEY_SUBJECT};
+    }
+
+    @Override
+    public Object getContext(final String key, final Object data) throws PolicyContextException {
+        if (KEY_SUBJECT.equals(key)) {
+            return getSubject();
+        }
+        throw new PolicyContextException("Handler does not support key: " + key);
+    }
+
     public static final class ProvidedSecurityContext {
         public final SecurityContext context;
 
@@ -420,12 +513,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
         @SuppressWarnings("unchecked")
         public SecurityContext(final Subject subject) {
             this.subject = subject;
-            this.acc = (AccessControlContext) Subject.doAsPrivileged(subject, new PrivilegedAction() {
-                @Override
-                public Object run() {
-                    return AccessController.getContext();
-                }
-            }, null);
+            this.acc = (AccessControlContext) Subject.doAsPrivileged(subject, (PrivilegedAction) AccessController::getContext, null);
         }
     }
 
@@ -453,7 +541,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
         }
     }
 
-    public static class Group implements java.security.acl.Group {
+    public static class Group implements java.security.Principal {
 
         private final List<Principal> members = new ArrayList<>();
         private final String name;
@@ -462,24 +550,8 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
             this.name = name;
         }
 
-        @Override
         public boolean addMember(final Principal user) {
             return members.add(user);
-        }
-
-        @Override
-        public boolean removeMember(final Principal user) {
-            return members.remove(user);
-        }
-
-        @Override
-        public boolean isMember(final Principal member) {
-            return members.contains(member);
-        }
-
-        @Override
-        public Enumeration<? extends Principal> members() {
-            return Collections.enumeration(members);
         }
 
         @Override
@@ -512,7 +584,7 @@ public abstract class AbstractSecurityService implements DestroyableResource, Se
             }
 
             final User user = User.class.cast(o);
-            return !(name != null ? !name.equals(user.name) : user.name != null);
+            return !(!Objects.equals(name, user.name));
 
         }
 

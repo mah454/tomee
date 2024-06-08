@@ -17,11 +17,11 @@
 
 package org.apache.openejb.core.cmp.cmp2;
 
-import org.apache.xbean.asm7.ClassWriter;
-import org.apache.xbean.asm7.FieldVisitor;
-import org.apache.xbean.asm7.MethodVisitor;
-import org.apache.xbean.asm7.Opcodes;
-import org.apache.xbean.asm7.Type;
+import org.apache.xbean.asm9.ClassWriter;
+import org.apache.xbean.asm9.FieldVisitor;
+import org.apache.xbean.asm9.MethodVisitor;
+import org.apache.xbean.asm9.Opcodes;
+import org.apache.xbean.asm9.Type;
 
 /**
  * Class for generating a class file that implements
@@ -58,7 +58,7 @@ public class Cmp1Generator implements Opcodes {
     public byte[] generate() {
         // We're creating a superclass for the implementation.  We force this to implement
         // EntityBean to allow POJOs to be used as the bean class. 
-        cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, implClassName, null, beanClassName, new String[]{"javax/ejb/EntityBean"});
+        cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, implClassName, null, beanClassName, new String[]{"jakarta/ejb/EntityBean"});
 
         // if we have an unknown pk, we need to add a field for the pk
         if (unknownPk) {

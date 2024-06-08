@@ -16,7 +16,6 @@
  */
 package org.apache.openejb.activemq;
 
-import org.apache.activemq.ActiveMQXAConnectionFactory;
 import org.apache.openejb.jee.MessageDrivenBean;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Configuration;
@@ -26,20 +25,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.XAConnection;
-import javax.jms.XAConnectionFactory;
+import jakarta.annotation.Resource;
+import jakarta.ejb.ActivationConfigProperty;
+import jakarta.ejb.MessageDriven;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
+import jakarta.jms.XAConnection;
+import jakarta.jms.XAConnectionFactory;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -69,9 +68,6 @@ public class AMQXASupportTest {
             .p("cf", "new://Resource?type=" + ConnectionFactory.class.getName())
             .p("cf.ResourceAdapter", "amq")
 
-            .p("xaCf", "new://Resource?class-name=" + ActiveMQXAConnectionFactory.class.getName())
-            .p("xaCf.BrokerURL", "vm://localhost")
-
             .build();
     }
 
@@ -82,9 +78,6 @@ public class AMQXASupportTest {
 
     @Resource(name = "target")
     private Queue destination;
-
-    @Resource(name = "xaCf")
-    private XAConnectionFactory xacf;
 
     @Resource(name = "cf")
     private ConnectionFactory cf;
@@ -105,9 +98,9 @@ public class AMQXASupportTest {
 
     @Test
     public void xaCode() throws Exception {
-        assertNotNull(xacf);
+        assertNotNull(cf);
 
-        final Connection connection = xacf.createXAConnection();
+        final Connection connection = cf.createConnection();
         assertThat(connection, instanceOf(XAConnection.class));
         testConnection(connection);
     }
@@ -128,7 +121,7 @@ public class AMQXASupportTest {
     }
 
     @MessageDriven(activationConfig = {
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "target")
     })
     public static class Listener implements MessageListener {

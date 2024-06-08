@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,9 @@ import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.OpenEjbVersion;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
@@ -127,12 +127,6 @@ public class HttpResponseImpl implements HttpResponse {
     }
 
     @Override
-    public void setStatus(final int i, final String s) {
-        setCode(i);
-        setStatusMessage(s);
-    }
-
-    @Override
     public void addCookie(final Cookie cookie) {
         setHeader(cookie.getName(), cookie.getValue());
     }
@@ -170,16 +164,6 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public String encodeRedirectURL(final String s) {
         return toEncoded(s);
-    }
-
-    @Override
-    public String encodeUrl(final String s) {
-        return toEncoded(s);
-    }
-
-    @Override
-    public String encodeRedirectUrl(final String s) {
-        return encodeRedirectURL(s);
     }
 
     /**
@@ -277,7 +261,7 @@ public class HttpResponseImpl implements HttpResponse {
 
     /**
      * sets the HTTP response code to be sent to the browser.  These codes are:
-     * <p/>
+     *
      * OPTIONS = 0
      * GET     = 1
      * HEAD    = 2
@@ -420,7 +404,7 @@ public class HttpResponseImpl implements HttpResponse {
 
     /**
      * Takes care of sending the response line, headers and body
-     * <p/>
+     *
      * HTTP/1.1 200 OK
      * Server: Netscape-Enterprise/3.6 SP3
      * Date: Thu, 07 Jun 2001 17:30:42 GMT
@@ -454,7 +438,7 @@ public class HttpResponseImpl implements HttpResponse {
 
     /**
      * Creates a string version of the response similar to:
-     * <p/>
+     *
      * HTTP/1.1 200 OK
      *
      * @return the string value of this HttpResponseImpl
@@ -498,9 +482,9 @@ public class HttpResponseImpl implements HttpResponse {
 
     /**
      * Writes a response line similar to this:
-     * <p/>
+     *
      * HTTP/1.1 200 OK
-     * <p/>
+     *
      * to the browser
      *
      * @param out the output stream to write the response line to

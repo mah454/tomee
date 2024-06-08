@@ -37,24 +37,24 @@ import org.apache.openejb.jee.jpa.unit.Persistence;
 import org.apache.openejb.jee.jpa.unit.PersistenceUnit;
 import org.apache.openjpa.persistence.ArgumentException;
 
-import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.ejb.Local;
-import javax.ejb.NoSuchEJBException;
-import javax.ejb.Remove;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Local;
+import jakarta.ejb.NoSuchEJBException;
+import jakarta.ejb.Remove;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.PersistenceContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static javax.persistence.PersistenceContextType.EXTENDED;
-import static javax.persistence.PersistenceContextType.TRANSACTION;
+import static jakarta.persistence.PersistenceContextType.EXTENDED;
+import static jakarta.persistence.PersistenceContextType.TRANSACTION;
 
 public class EntityManagerPropogationTest extends TestCase {
 
@@ -182,7 +182,7 @@ public class EntityManagerPropogationTest extends TestCase {
     /**
      * Test that two Stateful session bean siblings
      * do not share the same extended persistence context
-     * <p/>
+     *
      * A stateful session bean must be a child in order
      * for the context to be propogated to that bean.
      *
@@ -457,7 +457,7 @@ public class EntityManagerPropogationTest extends TestCase {
      * of the persistence context and all children downstream
      * with an EXTENDED persistence context should share the same
      * persistence context and underlying EntityManager
-     * <p/>
+     *
      * Transactions are dissabled to ensure that we aren't relying
      * on the JTA propogation that also exists with an EXTENDED
      * persistence context

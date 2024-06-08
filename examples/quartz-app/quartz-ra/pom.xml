@@ -16,17 +16,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.superbiz.quartz</groupId>
     <artifactId>quartz-app</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>quartz-ra</artifactId>
   <packaging>jar</packaging>
-  <name>OpenEJB :: Examples :: Quartz :: Quartz Resource Adapter</name>
+  <name>TomEE :: Examples :: Quartz :: Quartz Resource Adapter</name>
   <description>
     Maven doesn't allow rar files in the test classpath for some reason,
     so we have to pull this trick to get it in the classpath.
@@ -37,11 +36,10 @@
       <artifactId>quartz</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.tomee</groupId>
-      <artifactId>openejb-core</artifactId>
+      <groupId>org.apache.tomee.bom</groupId>
+      <artifactId>tomee-plus</artifactId>
     </dependency>
   </dependencies>
-
   <!--
   This section allows you to configure where to publish libraries for sharing.
   It is not required and may be deleted.  For more information see:

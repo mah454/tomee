@@ -17,19 +17,19 @@
 package org.apache.openejb.resource.activemq.jms2;
 
 import org.apache.xbean.propertyeditor.PropertyEditorException;
-import org.apache.xbean.propertyeditor.PropertyEditors;
+import org.apache.xbean.propertyeditor.PropertyEditorRegistry;
 
-import javax.jms.BytesMessage;
-import javax.jms.CompletionListener;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.JMSProducer;
-import javax.jms.JMSRuntimeException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageFormatRuntimeException;
-import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.CompletionListener;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.MessageFormatRuntimeException;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.ObjectMessage;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +40,7 @@ import java.util.Set;
 import static org.apache.openejb.resource.activemq.jms2.JMS2.toRuntimeException;
 import static org.apache.openejb.resource.activemq.jms2.JMS2.wrap;
 
+@SuppressWarnings("deprecation")
 class JMSProducerImpl implements JMSProducer {
     private final JMSContextImpl context;
     private final MessageProducer producer;
@@ -52,10 +53,12 @@ class JMSProducerImpl implements JMSProducer {
     private String jmsHeaderCorrelationID;
     private byte[] jmsHeaderCorrelationIDAsBytes;
     private String jmsHeaderType;
+    private PropertyEditorRegistry propertyEditorRegistry = new PropertyEditorRegistry();
 
     JMSProducerImpl(final JMSContextImpl jmsContext, final MessageProducer innerProducer) {
         this.context = jmsContext;
         this.producer = innerProducer;
+        this.propertyEditorRegistry.registerDefaults();
     }
 
     private <T> T getProperty(final String key, final Class<T> type) {
@@ -64,7 +67,7 @@ class JMSProducerImpl implements JMSProducer {
             return type.cast(val);
         }
         try {
-            return type.cast(PropertyEditors.getValue(type, val.toString()));
+            return type.cast(propertyEditorRegistry.getValue(type, val.toString()));
         } catch (final PropertyEditorException pee) {
             throw new MessageFormatRuntimeException(pee.getMessage());
         }

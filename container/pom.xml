@@ -16,18 +16,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>tomee-project</artifactId>
     <groupId>org.apache.tomee</groupId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>container</artifactId>
   <packaging>pom</packaging>
-  <name>OpenEJB :: Container</name>
+  <name>TomEE :: Container</name>
 
   <modules>
     <module>mbean-annotation-api</module>
@@ -37,7 +36,9 @@
     <module>openejb-javaagent</module>
     <module>openejb-jee</module>
     <module>openejb-jee-accessors</module>
-    <module>openejb-junit</module>
     <module>openejb-jpa-integration</module>
+    <module>openejb-junit</module>
+    <module>openejb-junit5</module>
+    <module>openejb-junit5-backward</module>
   </modules>
 </project>

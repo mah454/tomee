@@ -19,17 +19,17 @@ package org.apache.openejb.test.stateless;
 import org.apache.openejb.test.beans.TimerSync;
 import org.apache.openejb.test.object.OperationsPolicy;
 
-import javax.ejb.EJBObject;
+import jakarta.ejb.EJBObject;
 
 /**
  * [9] Should be run as the nineth test suite of the BasicStatelessTestClients
- * <p/>
+ *
  * <PRE>
  * =========================================================================
  * Operations allowed in the methods of a stateless SessionBean with
  * container-managed transaction demarcation
  * =========================================================================
- * <p/>
+ *
  * Bean method           | Bean method can perform the following operations
  * ______________________|__________________________________________________
  * |

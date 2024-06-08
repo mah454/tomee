@@ -46,39 +46,40 @@ import org.apache.openejb.assembler.classic.TransactionServiceInfo;
 import org.apache.openejb.jee.EjbJar;
 import org.apache.openejb.jee.StatefulBean;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
-import javax.annotation.security.RunAs;
-import javax.ejb.CreateException;
-import javax.ejb.EJB;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-import javax.ejb.Init;
-import javax.ejb.Local;
-import javax.ejb.LocalHome;
-import javax.ejb.PostActivate;
-import javax.ejb.PrePassivate;
-import javax.ejb.Remote;
-import javax.ejb.RemoteHome;
-import javax.ejb.Remove;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import javax.jms.Topic;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RunAs;
+import jakarta.ejb.CreateException;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBHome;
+import jakarta.ejb.EJBLocalHome;
+import jakarta.ejb.EJBLocalObject;
+import jakarta.ejb.EJBObject;
+import jakarta.ejb.Init;
+import jakarta.ejb.Local;
+import jakarta.ejb.LocalHome;
+import jakarta.ejb.PostActivate;
+import jakarta.ejb.PrePassivate;
+import jakarta.ejb.Remote;
+import jakarta.ejb.RemoteHome;
+import jakarta.ejb.Remove;
+import jakarta.ejb.Timeout;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
+import jakarta.jms.Topic;
 import javax.sql.DataSource;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
 /**
  * @version $Rev$ $Date$
@@ -294,8 +295,8 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.jndiName != null ? !a.jndiName.equals(b.jndiName) : b.jndiName != null) return false;
-        if (a.jndiProviderId != null ? !a.jndiProviderId.equals(b.jndiProviderId) : b.jndiProviderId != null)
+        if (!Objects.equals(a.jndiName, b.jndiName)) return false;
+        if (!Objects.equals(a.jndiProviderId, b.jndiProviderId))
             return false;
 
         return true;
@@ -325,9 +326,9 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.type != null ? !a.type.equals(b.type) : b.type != null) return false;
-        if (a.value != null ? !a.value.equals(b.value) : b.value != null) return false;
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.type, b.type)) return false;
+        if (!Objects.equals(a.value, b.value)) return false;
         if (!equals(a.location, b.location)) return false;
         if (!equalsInjectionInfos(a.targets, b.targets)) return false;
 
@@ -358,8 +359,8 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.propertyName != null ? !a.propertyName.equals(b.propertyName) : b.propertyName != null) return false;
-        if (a.className != null ? !a.className.equals(b.className) : b.className != null) return false;
+        if (!Objects.equals(a.propertyName, b.propertyName)) return false;
+        if (!Objects.equals(a.className, b.className)) return false;
 
         return true;
     }
@@ -388,13 +389,13 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.homeClassName != null ? !a.homeClassName.equals(b.homeClassName) : b.homeClassName != null) return false;
-        if (a.interfaceClassName != null ? !a.interfaceClassName.equals(b.interfaceClassName) : b.interfaceClassName != null)
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.homeClassName, b.homeClassName)) return false;
+        if (!Objects.equals(a.interfaceClassName, b.interfaceClassName))
             return false;
-        if (a.ejbDeploymentId != null ? !a.ejbDeploymentId.equals(b.ejbDeploymentId) : b.ejbDeploymentId != null)
+        if (!Objects.equals(a.ejbDeploymentId, b.ejbDeploymentId))
             return false;
-        if (a.link != null ? !a.link.equals(b.link) : b.link != null) return false;
+        if (!Objects.equals(a.link, b.link)) return false;
         if (a.externalReference != b.externalReference) return false;
         if (!equals(a.location, b.location)) return false;
         if (!equalsInjectionInfos(a.targets, b.targets)) return false;
@@ -442,11 +443,11 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.referenceType != null ? !a.referenceType.equals(b.referenceType) : b.referenceType != null) return false;
-        if (a.referenceAuth != null ? !a.referenceAuth.equals(b.referenceAuth) : b.referenceAuth != null) return false;
-        if (a.resourceID != null ? !a.resourceID.equals(b.resourceID) : b.resourceID != null) return false;
-        if (a.properties != null ? !a.properties.equals(b.properties) : b.properties != null) return false;
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.referenceType, b.referenceType)) return false;
+        if (!Objects.equals(a.referenceAuth, b.referenceAuth)) return false;
+        if (!Objects.equals(a.resourceID, b.resourceID)) return false;
+        if (!Objects.equals(a.properties, b.properties)) return false;
         if (!equals(a.location, b.location)) return false;
         if (!equalsInjectionInfos(a.targets, b.targets)) return false;
 
@@ -477,10 +478,10 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.persistenceUnitName != null ? !a.persistenceUnitName.equals(b.persistenceUnitName) : b.persistenceUnitName != null)
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.persistenceUnitName, b.persistenceUnitName))
             return false;
-        if (a.unitId != null ? !a.unitId.equals(b.unitId) : b.unitId != null) return false;
+        if (!Objects.equals(a.unitId, b.unitId)) return false;
         if (!equals(a.location, b.location)) return false;
         if (!equalsInjectionInfos(a.targets, b.targets)) return false;
 
@@ -511,10 +512,10 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.persistenceUnitName != null ? !a.persistenceUnitName.equals(b.persistenceUnitName) : b.persistenceUnitName != null)
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.persistenceUnitName, b.persistenceUnitName))
             return false;
-        if (a.unitId != null ? !a.unitId.equals(b.unitId) : b.unitId != null) return false;
+        if (!Objects.equals(a.unitId, b.unitId)) return false;
         if (a.extended != b.extended) return false;
         if (a.properties != null ? !a.properties.equals(b.properties) : b.properties != null) return false;
         if (!equals(a.location, b.location)) return false;
@@ -547,12 +548,12 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null)
+        if (!Objects.equals(a.referenceName, b.referenceName))
             return false;
-        if (a.resourceEnvRefType != null ? !a.resourceEnvRefType.equals(b.resourceEnvRefType) : b.resourceEnvRefType != null)
+        if (!Objects.equals(a.resourceEnvRefType, b.resourceEnvRefType))
             return false;
-        if (a.mappedName != null ? !a.mappedName.equals(b.mappedName) : b.mappedName != null) return false;
-        if (a.resourceID != null ? !a.resourceID.equals(b.resourceID) : b.resourceID != null) return false;
+        if (!Objects.equals(a.mappedName, b.mappedName)) return false;
+        if (!Objects.equals(a.resourceID, b.resourceID)) return false;
         if (!equals(a.location, b.location)) return false;
         if (!equalsInjectionInfos(a.targets, b.targets)) return false;
 
@@ -584,15 +585,15 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.referenceName != null ? !a.referenceName.equals(b.referenceName) : b.referenceName != null) return false;
-        if (a.serviceQName != null ? !a.serviceQName.equals(b.serviceQName) : b.serviceQName != null) return false;
-        if (a.serviceType != null ? !a.serviceType.equals(b.serviceType) : b.serviceType != null) return false;
-        if (a.portQName != null ? !a.portQName.equals(b.portQName) : b.portQName != null) return false;
-        if (a.referenceType != null ? !a.referenceType.equals(b.referenceType) : b.referenceType != null) return false;
-        if (a.wsdlFile != null ? !a.wsdlFile.equals(b.wsdlFile) : b.wsdlFile != null) return false;
-        if (a.jaxrpcMappingFile != null ? !a.jaxrpcMappingFile.equals(b.jaxrpcMappingFile) : b.jaxrpcMappingFile != null)
+        if (!Objects.equals(a.referenceName, b.referenceName)) return false;
+        if (!Objects.equals(a.serviceQName, b.serviceQName)) return false;
+        if (!Objects.equals(a.serviceType, b.serviceType)) return false;
+        if (!Objects.equals(a.portQName, b.portQName)) return false;
+        if (!Objects.equals(a.referenceType, b.referenceType)) return false;
+        if (!Objects.equals(a.wsdlFile, b.wsdlFile)) return false;
+        if (!Objects.equals(a.jaxrpcMappingFile, b.jaxrpcMappingFile))
             return false;
-        if (a.id != null ? !a.id.equals(b.id) : b.id != null) return false;
+        if (!Objects.equals(a.id, b.id)) return false;
         if (!equalsHandlerChainInfos(a.handlerChains, b.handlerChains)) return false;
         if (!equalsPortRefInfos(a.portRefs, b.portRefs)) return false;
         if (!equals(a.location, b.location)) return false;
@@ -625,9 +626,9 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.serviceNamePattern != null ? !a.serviceNamePattern.equals(b.serviceNamePattern) : b.serviceNamePattern != null)
+        if (!Objects.equals(a.serviceNamePattern, b.serviceNamePattern))
             return false;
-        if (a.portNamePattern != null ? !a.portNamePattern.equals(b.portNamePattern) : b.portNamePattern != null)
+        if (!Objects.equals(a.portNamePattern, b.portNamePattern))
             return false;
         if (a.protocolBindings != null ? !a.protocolBindings.equals(b.protocolBindings) : b.protocolBindings != null)
             return false;
@@ -660,8 +661,8 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.handlerClass != null ? !a.handlerClass.equals(b.handlerClass) : b.handlerClass != null) return false;
-        if (a.handlerName != null ? !a.handlerName.equals(b.handlerName) : b.handlerName != null) return false;
+        if (!Objects.equals(a.handlerClass, b.handlerClass)) return false;
+        if (!Objects.equals(a.handlerName, b.handlerName)) return false;
         if (a.initParams != null ? !a.initParams.equals(b.initParams) : b.initParams != null) return false;
         if (a.soapHeaders != null ? !a.soapHeaders.equals(b.soapHeaders) : b.soapHeaders != null) return false;
         if (a.soapRoles != null ? !a.soapRoles.equals(b.soapRoles) : b.soapRoles != null) return false;
@@ -693,8 +694,8 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.qname != null ? !a.qname.equals(b.qname) : b.qname != null) return false;
-        if (a.serviceEndpointInterface != null ? !a.serviceEndpointInterface.equals(b.serviceEndpointInterface) : b.serviceEndpointInterface != null)
+        if (!Objects.equals(a.qname, b.qname)) return false;
+        if (!Objects.equals(a.serviceEndpointInterface, b.serviceEndpointInterface))
             return false;
         if (a.properties != null ? !a.properties.equals(b.properties) : b.properties != null) return false;
         if (a.enableMtom != b.enableMtom) return false;
@@ -726,8 +727,8 @@ public class InheritenceTest extends TestCase {
     public static boolean equals(final CallbackInfo a, final CallbackInfo b) {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
-        if (a.className != null ? !a.className.equals(b.className) : b.className != null) return false;
-        if (a.method != null ? !a.method.equals(b.method) : b.method != null) return false;
+        if (!Objects.equals(a.className, b.className)) return false;
+        if (!Objects.equals(a.method, b.method)) return false;
         return true;
     }
 
@@ -755,8 +756,8 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.roleName != null ? !a.roleName.equals(b.roleName) : b.roleName != null) return false;
-        if (a.roleLink != null ? !a.roleLink.equals(b.roleLink) : b.roleLink != null) return false;
+        if (!Objects.equals(a.roleName, b.roleName)) return false;
+        if (!Objects.equals(a.roleLink, b.roleLink)) return false;
         return true;
     }
 
@@ -824,9 +825,9 @@ public class InheritenceTest extends TestCase {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
 
-        if (a.id != null ? !a.id.equals(b.id) : b.id != null) return false;
-        if (a.methodName != null ? !a.methodName.equals(b.methodName) : b.methodName != null) return false;
-        if (a.methodParams != null ? !a.methodParams.equals(b.methodParams) : b.methodParams != null) return false;
+        if (!Objects.equals(a.id, b.id)) return false;
+        if (!Objects.equals(a.methodName, b.methodName)) return false;
+        if (!Objects.equals(a.methodParams, b.methodParams)) return false;
         return true;
     }
 

@@ -95,7 +95,7 @@ class SetupCommand {
 
 
         Paths paths = new Paths(new File("${catalinaHome}/webapps/tomee" as String))
-        Installer installer = new Installer(paths, true)
+        Installer installer = new Installer(paths, properties, true)
         installer.installFull()
 
         // clean up duplicate jars since in TomEE it is useless
@@ -106,6 +106,7 @@ class SetupCommand {
 
         deleteWithRetry(file: paths.findOpenEJBWebJar('tomee-loader'))
         deleteWithRetry(file: paths.findOpenEJBWebJar('swizzle-stream'))
+        deleteWithRetry(file: paths.findTomEELibJar('jakarta.activation-api'))
 
         log.info('Assigning execute privileges to scripts in Tomcat bin directory')
         ant.chmod(dir: "${workDir}/apache-tomcat-${tomcatVersion}/bin", perm: 'u+x', includes: '**/*.sh')

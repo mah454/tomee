@@ -20,9 +20,11 @@ package org.apache.openejb.spi;
 import org.apache.openejb.InterfaceType;
 
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.security.ProtectionDomain;
+import java.util.Set;
 
 /**
  * The generic value T is any serializable token of the SecurityService
@@ -63,11 +65,14 @@ public interface SecurityService<T> extends Service {
     /**
      * Implementors are encouraged to return a java.security.Principal
      * object that implements org.apache.openejb.spi.CallerPrincipal
-     * <p/>
+     *
      * JAAS LoginModule implementors are encouraged to use the CallerPrincipal
      * interface to denote the best fitting Principal for getCallerPrincipal.
      */
     Principal getCallerPrincipal();
+
+    <P extends Principal> Set<P> getPrincipalsByType(final Class<P> pType);
+    ProtectionDomain getProtectionDomain();
 
     /**
      * Active

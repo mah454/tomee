@@ -15,19 +15,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>org.superbiz</groupId>
   <artifactId>datasource-versioning</artifactId>
   <packaging>jar</packaging>
-  <version>8.0.0-SNAPSHOT</version>
-  <name>OpenEJB :: Examples :: Datasource Versioning</name>
+  <version>10.0.0-M2-SNAPSHOT</version>
+  <name>TomEE :: Examples :: Datasource Versioning</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <tomee.version>8.0.0-SNAPSHOT</tomee.version>
+    <tomee.version>10.0.0-M2-SNAPSHOT</tomee.version>
   </properties>
 
   <build>
@@ -114,7 +113,7 @@
       <dependency>
         <groupId>org.jboss.arquillian</groupId>
         <artifactId>arquillian-bom</artifactId>
-        <version>1.1.10.Final</version>
+        <version>1.7.1.Final</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -124,14 +123,14 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.tomee</groupId>
-            <artifactId>javaee-api</artifactId>
-       <version>8.0</version>
+      <artifactId>jakartaee-api</artifactId>
+      <version>10.0-M2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.arquillian.junit</groupId>
       <artifactId>arquillian-junit-container</artifactId>
-      <version>1.1.10.Final</version>
+      <version>1.8.0.Final</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -155,7 +154,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <!--
@@ -165,19 +164,19 @@
     <dependency>
       <groupId>org.apache.tomee</groupId>
       <artifactId>openejb-core</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-jdbc</artifactId>
-      <version>8.0.24</version>
+      <version>10.1.24</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.tomee</groupId>
       <artifactId>tomee-jdbc</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

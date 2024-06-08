@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,6 +22,9 @@ import org.apache.openejb.loader.SystemInstance;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.jar.JarFile;
 
 public class Installer implements InstallerInterface {
@@ -31,9 +33,11 @@ public class Installer implements InstallerInterface {
     private final Paths paths;
     private Status status = Status.NONE;
     private boolean force;
+    private Map<String, String> properties;
 
     private static final boolean LISTENER_INSTALLED;
     private static final boolean AGENT_INSTALLED;
+
     static {
         final Options opts = SystemInstance.get().getOptions();
         // is the OpenEJB listener installed
@@ -59,11 +63,18 @@ public class Installer implements InstallerInterface {
         if (LISTENER_INSTALLED && AGENT_INSTALLED) {
             status = Status.INSTALLED;
         }
+
+        this.properties = new HashMap<>();
     }
 
     public Installer(final Paths paths, final boolean force) {
         this(paths);
         this.force = force;
+    }
+
+    public Installer(final Paths paths, final Map<String, String> properties, final boolean force) {
+        this(paths, force);
+        this.properties = properties;
     }
 
     @Override
@@ -225,8 +236,24 @@ public class Installer implements InstallerInterface {
         if (!tomeeXml.exists()) {
             Installers.writeAll(tomeeXml,
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                            "<!--\n" +
+                            "    Licensed to the Apache Software Foundation (ASF) under one or more\n" +
+                            "    contributor license agreements.  See the NOTICE file distributed with\n" +
+                            "    this work for additional information regarding copyright ownership.\n" +
+                            "    The ASF licenses this file to You under the Apache License, Version 2.0\n" +
+                            "    (the \"License\"); you may not use this file except in compliance with\n" +
+                            "    the License.  You may obtain a copy of the License at\n" +
+                            "\n" +
+                            "       http://www.apache.org/licenses/LICENSE-2.0\n" +
+                            "\n" +
+                            "    Unless required by applicable law or agreed to in writing, software\n" +
+                            "    distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                            "    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                            "    See the License for the specific language governing permissions and\n" +
+                            "    limitations under the License.\n" +
+                            "-->\n" +
                             "<tomee>\n" +
-                            "  <!-- see http://tomee.apache.org/containers-and-resources.html -->\n\n" +
+                            "  <!-- see https://tomee.apache.org/latest/docs/admin/configuration/containers.html -->\n\n" +
                             "  <!-- activate next line to be able to deploy applications in apps -->\n" +
                             "  <!-- <Deployments dir=\"apps\" /> -->\n" +
                             "</tomee>\n", alerts);
@@ -259,6 +286,55 @@ public class Installer implements InstallerInterface {
 */
 
     private void moveLibs() {
+
+        /*
+         * When there are several SNAPSHOT versions of a jar available, Maven will often copy
+         * the jar into the assembly as openejb-core-8.0.7-20210418.032600-163.jar rather than
+         * openejb-core-10.0.0-M1-SNAPSHOT.jar.  This breaks our TCK setup which expects it can
+         * point at jars like "lib/openejb-core-$version.jar", where $version is something like
+         * "10.0.0-M1-SNAPSHOT".
+         *
+         * If we see that for any jar containing our version we will rename it from the date
+         * stamped version to the "-SNAPSHOT" version.
+         */
+
+        Function<String, String> normalizeVersion = Function.identity();
+        if (properties.containsKey("remove.datestamp")) {
+            final String removeDatestamp = properties.get("remove.datestamp");
+            final String[] strings = removeDatestamp.split(" *, *");
+            for (final String string : strings) {
+                if (!string.contains("-SNAPSHOT")) continue;
+                normalizeVersion = normalizeVersion.andThen(removeDatestamp(string.trim()));
+            }
+        }
+
+        /*
+         * In TomEE 9 we produce the final server zip by bytecode transforming the classes
+         * so they use jakarta instead of javax.  We do this by inputting the TomEE 8.x
+         * jar and running them through a transformer and creating a new TomEE 9.x zip.
+         *
+         * In this process we also want to rename any libraries from 8.x to 9.x
+         */
+        if (properties.containsKey("rename.version")) {
+            final String renameVersion = properties.get("rename.version");
+
+            final String[] split = renameVersion.split(" *, *");
+            if (split.length != 2) {
+                throw new IllegalStateException("rename.version should be in the form of " +
+                        "'version1, version2' for example '8.0.7, 9.0.0'.  Found '" + renameVersion + "'");
+            }
+
+            final String from = split[0].trim();
+            final String to = split[1].trim();
+
+            normalizeVersion = normalizeVersion
+                    .andThen(removeDatestamp(from))
+                    .andThen(removeDatestamp(to))
+                    .andThen(changeVersion(from, to));
+
+        }
+
+
         final File libs = paths.getCatalinaLibDir();
         final File[] files = paths.getOpenEJBLibDir().listFiles();
         if (files != null) {
@@ -266,24 +342,65 @@ public class Installer implements InstallerInterface {
                 if (file.isDirectory()) {
                     continue;
                 }
-                if (!file.getName().endsWith(".jar")) {
+
+                final String name = normalizeVersion.apply(file.getName());
+
+                if (!name.endsWith(".jar")) {
                     continue;
                 }
 
                 try {
-                    Installers.copyFile(file, new File(libs, file.getName()));
+                    Installers.copyFile(file, new File(libs, name));
                     if (!file.delete()) {
                         file.deleteOnExit();
                     }
-                    alerts.addInfo("Copy " + file.getName() + " to lib");
+                    alerts.addInfo("Copy " + name + " to lib");
                 } catch (final IOException e) {
-                    alerts.addError("Unable to " + file.getName() + " to Tomcat lib directory.  This will need to be " +
+                    alerts.addError("Unable to " + name + " to Tomcat lib directory.  This will need to be " +
                             "performed manually.", e);
                 }
             }
         }
     }
 
+    public static Function<String, String> removeDatestamp(final String version) {
+        return jarName -> removeDatestamp(version, jarName);
+    }
+
+    public static Function<String, String> changeVersion(final String from, final String to) {
+        return jarName -> {
+            if (!jarName.endsWith(from + ".jar")) return jarName;
+            return jarName.replace(from + ".jar", to + ".jar");
+        };
+    }
+
+    /**
+     * Maven will occasionally give a datestamped version of a snapshot.  Our TCK
+     * test harness and likely tooling others have expects the version number to
+     * be predictable ("10.0.0-M1-SNAPSHOT" or "8.0.5") so it can build paths without
+     * fancy logic, i.e. a simple "openejb-core-" + version +" .jar"
+     *
+     * This doesn't work if the version number essentially contains a random string.
+     *
+     * If we see any Maven datestamps on our jars where we are expecting SNAPSHOT,
+     * rename the jar to the expected "-SNAPSHOT" name.
+     */
+    public static String removeDatestamp(final String version, final String jarName) {
+        if (!version.contains("-SNAPSHOT")) return jarName;
+
+        final String versionNumber = version.replaceAll("-SNAPSHOT", "");
+        if (!jarName.contains(versionNumber)) return jarName;
+
+        // Replace 8.0.7-20210418.035728-165 with 10.0.0-M1-SNAPSHOT
+
+        final String regex = ""
+                // turn 8.0.7 into 8\.0\.7
+                + versionNumber.replace(".", "\\.")
+                // replace the 'd' with '[0-9]'
+                + "-dddddddd.dddddd-ddd".replace("d", "[0-9]");
+
+        return jarName.replaceAll(regex, version);
+    }
     /*
     private void addJavaeeInEndorsed() {
         final File endorsed = new File(paths.getCatalinaHomeDir(), "endorsed");
@@ -443,8 +560,8 @@ public class Installer implements InstallerInterface {
             newServerXml = Installers.replace(newServerXml,
                     "<Connector port=\"8443\"",
                     "<Connector port=\"8443\"",
-                    "/>",
-                    "xpoweredBy=\"false\" server=\"Apache TomEE\" />");
+                    ">",
+                    " xpoweredBy=\"false\" server=\"Apache TomEE\" >");
         } catch (final IOException e) {
             alerts.addError("Error adding server attribute to server.xml file", e);
         }
@@ -482,6 +599,9 @@ public class Installer implements InstallerInterface {
                 alerts.addInfo("Copy " + paths.getOpenEJBJavaagentJar().getName() + " to lib");
             } catch (final IOException e) {
                 alerts.addError("Unable to copy OpenEJB javaagent jar to Tomcat lib directory.  This will need to be performed manually.", e);
+            } catch (final NullPointerException npe) {
+                alerts.addError("Unable to find OpenEJB javaagent jar to Tomcat lib directory.", npe);
+
             }
         }
 
@@ -511,7 +631,7 @@ public class Installer implements InstallerInterface {
 
         // add our magic bits to the catalina sh file
         String openejbJavaagentPath = paths.getCatalinaHomeDir().toURI().relativize(javaagentJar.toURI()).getPath();
-        final String newCatalinaSh = catalinaShOriginal.replace("# ----- Execute The Requested Command",
+        String newCatalinaSh = catalinaShOriginal.replace("# ----- Execute The Requested Command",
                 "# Add OpenEJB javaagent\n" +
                         "if [ -r \"$CATALINA_HOME\"/" + openejbJavaagentPath + " ]; then\n" +
                         "  JAVA_OPTS=\"\\\"-javaagent:$CATALINA_HOME/" + openejbJavaagentPath + "\\\" $JAVA_OPTS\"\n" +
@@ -519,20 +639,27 @@ public class Installer implements InstallerInterface {
                         "\n" +
                         "# ----- Execute The Requested Command");
 
+        newCatalinaSh = newCatalinaSh.replace("    \"$_RUNJAVA\"   \\\n" +
+            "      -classpath \"$CATALINA_HOME/lib/catalina.jar\" \\\n" +
+            "      org.apache.catalina.util.ServerInfo",
+            "   eval \"\\\"$_RUNJAVA\\\"\" \"$JAVA_OPTS\" \\\n" +
+                "         -classpath \"\\\"$CATALINA_HOME/lib/catalina.jar:$CATALINA_HOME/lib/openejb-core-"+ properties.get("tomee.version") + ".jar\\\"\" \\\n" +
+                "         org.apache.catalina.util.ServerInfo");
+
         // overwrite the catalina.sh file
         if (Installers.writeAll(paths.getCatalinaShFile(), newCatalinaSh, alerts)) {
             alerts.addInfo("Add OpenEJB JavaAgent to catalina.sh");
         }
 
         boolean isCatalinaShExecutable = paths.getCatalinaShFile().canExecute();
-        if(!isCatalinaShExecutable) {
+        if (!isCatalinaShExecutable) {
             try {
                 isCatalinaShExecutable = paths.getCatalinaShFile().setExecutable(true);
             } catch (final SecurityException e) {
                 alerts.addWarning("Cannot change CatalinaSh executable attribute.");
             }
         }
-        if(!isCatalinaShExecutable) {
+        if (!isCatalinaShExecutable) {
             alerts.addWarning("CatalinaSh is not executable.");
         }
 
@@ -561,13 +688,16 @@ public class Installer implements InstallerInterface {
 
         // add our magic bits to the catalina bat file
         openejbJavaagentPath = openejbJavaagentPath.replace('/', '\\');
-        final String newCatalinaBat = catalinaBatOriginal.replace("rem ----- Execute The Requested Command",
+        String newCatalinaBat = catalinaBatOriginal.replace("rem ----- Execute The Requested Command",
                 "rem Add OpenEJB javaagent\r\n" +
                         "if not exist \"%CATALINA_HOME%\\" + openejbJavaagentPath + "\" goto noOpenEJBJavaagent\r\n" +
                         "set JAVA_OPTS=\"-javaagent:%CATALINA_HOME%\\" + openejbJavaagentPath + "\" %JAVA_OPTS%\r\n" +
                         ":noOpenEJBJavaagent\r\n" +
                         "\r\n" +
                         "rem ----- Execute The Requested Command");
+
+        newCatalinaBat = newCatalinaBat.replace("%_EXECJAVA% %JAVA_OPTS% -classpath \"%CATALINA_HOME%\\lib\\catalina.jar\" org.apache.catalina.util.ServerInfo",
+            "%_EXECJAVA% %JAVA_OPTS% -classpath \"%CATALINA_HOME%\\lib\\catalina.jar;%CATALINA_HOME%\\lib\\openejb-core-" + properties.get("tomee.version") + ".jar\" org.apache.catalina.util.ServerInfo");
 
         // overwrite the catalina.bat file
         if (Installers.writeAll(paths.getCatalinaBatFile(), newCatalinaBat, alerts)) {
@@ -696,14 +826,31 @@ public class Installer implements InstallerInterface {
             try {
                 systemPropertiesWriter = new FileWriter(openejbSystemProperties);
 
+                systemPropertiesWriter.write("# Licensed to the Apache Software Foundation (ASF) under one or more\n" +
+                        "# contributor license agreements.  See the NOTICE file distributed with\n" +
+                        "# this work for additional information regarding copyright ownership.\n" +
+                        "# The ASF licenses this file to You under the Apache License, Version 2.0\n" +
+                        "# (the \"License\"); you may not use this file except in compliance with\n" +
+                        "# the License.  You may obtain a copy of the License at\n" +
+                        "#\n" +
+                        "#     http://www.apache.org/licenses/LICENSE-2.0\n" +
+                        "#\n" +
+                        "# Unless required by applicable law or agreed to in writing, software\n" +
+                        "# distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                        "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                        "# See the License for the specific language governing permissions and\n" +
+                        "# limitations under the License.\n" +
+                        "\n");
+
+
                 systemPropertiesWriter.write("# all this properties are added at JVM system properties at startup\n");
                 systemPropertiesWriter.write("# here some default Apache TomEE system properties\n");
                 systemPropertiesWriter.write("# for more information please see http://tomee.apache.org/properties-listing.html\n");
 
                 systemPropertiesWriter.write("\n");
                 systemPropertiesWriter.write(
-                    "# allowed packages to be deserialized, by security we denied all by default, " +
-                    "tune tomee.serialization.class.whitelist packages to change it\n");
+                        "# allowed packages to be deserialized, by security we denied all by default, " +
+                                "tune tomee.serialization.class.whitelist packages to change it\n");
                 systemPropertiesWriter.write("# tomee.remote.support = true\n");
                 systemPropertiesWriter.write("tomee.serialization.class.blacklist = *\n");
                 systemPropertiesWriter.write("# tomee.serialization.class.whitelist = my.package\n");
@@ -770,10 +917,10 @@ public class Installer implements InstallerInterface {
                 systemPropertiesWriter.write("# openejb.web.xml.major = \n");
                 systemPropertiesWriter.write("# openjpa.Log = \n");
                 systemPropertiesWriter.write("# openejb.jdbc.log = false\n");
-                systemPropertiesWriter.write("# javax.persistence.provider = org.apache.openjpa.persistence.PersistenceProviderImpl\n");
-                systemPropertiesWriter.write("# javax.persistence.transactionType = \n");
-                systemPropertiesWriter.write("# javax.persistence.jtaDataSource = \n");
-                systemPropertiesWriter.write("# javax.persistence.nonJtaDataSource = \n");
+                systemPropertiesWriter.write("# jakarta.persistence.provider = org.apache.openjpa.persistence.PersistenceProviderImpl\n");
+                systemPropertiesWriter.write("# jakarta.persistence.transactionType = \n");
+                systemPropertiesWriter.write("# jakarta.persistence.jtaDataSource = \n");
+                systemPropertiesWriter.write("# jakarta.persistence.nonJtaDataSource = \n");
 
                 systemPropertiesWriter.write("#\n");
                 systemPropertiesWriter.write("# Properties for JAS RS\n");
@@ -786,16 +933,17 @@ public class Installer implements InstallerInterface {
                 systemPropertiesWriter.write("#\n");
                 systemPropertiesWriter.write("# These properties are only for cxf service (SOAP webservices) and TomEE+\n");
                 systemPropertiesWriter.write("# If you don't use special tricks and sun default implementation, uncommenting these 4 lines forces TomEE to use it without overhead at all = \n");
-                systemPropertiesWriter.write("# javax.xml.soap.MessageFactory = com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl\n");
-                systemPropertiesWriter.write("# javax.xml.soap.SOAPFactory = com.sun.xml.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl\n");
-                systemPropertiesWriter.write("# javax.xml.soap.SOAPConnectionFactory = com.sun.xml.messaging.saaj.client.p2p.HttpSOAPConnectionFactory\n");
-                systemPropertiesWriter.write("# javax.xml.soap.MetaFactory = com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl\n");
+                systemPropertiesWriter.write("# jakarta.xml.soap.MessageFactory = com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl\n");
+                systemPropertiesWriter.write("# jakarta.xml.soap.SOAPFactory = com.sun.xml.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl\n");
+                systemPropertiesWriter.write("# jakarta.xml.soap.SOAPConnectionFactory = com.sun.xml.messaging.saaj.client.p2p.HttpSOAPConnectionFactory\n");
+                systemPropertiesWriter.write("# jakarta.xml.soap.MetaFactory = com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl\n");
 
-                systemPropertiesWriter.write("#\n");
-                systemPropertiesWriter.write("# Which paths / libraries should be scanned?\n");
-                systemPropertiesWriter.write("openejb.scan.webapp.container = true\n");
-                systemPropertiesWriter.write("openejb.scan.webapp.container.includes = .*(geronimo|mp-jwt|mp-common|failsafe).*\n");
-                systemPropertiesWriter.write("openejb.scan.webapp.container.excludes = \n");
+                final String flavour = properties.getOrDefault("tomee.webapp", "");
+                if (flavour.contains("microprofile")) {
+                    systemPropertiesWriter.write("#\n");
+                    systemPropertiesWriter.write("# MicroProfile\n");
+                    systemPropertiesWriter.write("tomee.mp.scan = all\n");
+                }
 
             } catch (final IOException e) {
                 // ignored, this file is far to be mandatory
@@ -822,6 +970,44 @@ public class Installer implements InstallerInterface {
         } catch (final IOException e) {
             // no-op
         }
+
+        //
+        // conf/catalina.policy
+        //
+
+        // if we can't backup the file, do not modify it
+        if (!Installers.backup(paths.getCatalinaPolicy() , alerts)) {
+            return;
+        }
+
+        String catalinaPolicy = Installers.readAll(paths.getCatalinaPolicy(), alerts);
+
+        // catalina.policy will be null if we couldn't read the file
+        if (catalinaPolicy == null) {
+            return;
+        }
+
+        //Add TomEE-specific policies (see TOMEE-3840)
+        try {
+            catalinaPolicy = Installers.replace(catalinaPolicy,
+                    "        permission java.util.PropertyPermission \"org.apache.juli.ClassLoaderLogManager.debug\", \"read\";",
+                    "        permission java.util.PropertyPermission \"org.apache.juli.ClassLoaderLogManager.debug\", \"read\";",
+                    "        permission java.util.PropertyPermission \"catalina.base\", \"read\";",
+                    "        permission java.util.PropertyPermission \"catalina.base\", \"read\";\n\n" +
+                            "        // TOMEE-3840\n" +
+                            "        permission java.util.PropertyPermission \"tomee.skip-tomcat-log\", \"read\";\n" +
+                            "        permission java.lang.RuntimePermission \"accessDeclaredMembers\";\n");
+
+        } catch (final IOException e) {
+            alerts.addError("Error adding TomEE specific policies to catalina.policy file", e);
+        }
+
+        // overwrite catalina.policy
+        if (Installers.writeAll(paths.getCatalinaPolicy(), catalinaPolicy, alerts)) {
+            alerts.addInfo("Add TomEE specific policies to catalina.policy");
+        }
+
+
     }
 
     private void installTomEEJuli(final Alerts alerts, final File loggingPropsFile, final String newLoggingProps) {

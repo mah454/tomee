@@ -25,14 +25,15 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Swiped verbatim from ActiveMQ... the URI kings.
- * <p/>
+ *
  * URI relativize(URI, URI) added afterwards to deal with the
  * non-functional URI.relativize(URI) method
  */
@@ -41,11 +42,11 @@ public class URISupport {
     /**
      * URI absoluteA = new URI("/Users/dblevins/work/openejb3/container/openejb-jee/apple/");
      * URI absoluteB = new URI("/Users/dblevins/work/openejb3/container/openejb-core/foo.jar");
-     * <p/>
+     *
      * URI relativeB = URISupport.relativize(absoluteA, absoluteB);
-     * <p/>
+     *
      * assertEquals("../../openejb-core/foo.jar", relativeB.toString());
-     * <p/>
+     *
      * URI resolvedB = absoluteA.resolve(relativeB);
      * assertTrue(resolvedB.equals(absoluteB));
      *
@@ -171,14 +172,14 @@ public class URISupport {
             final Map<String, String> rc = new LinkedHashMap<>();
             if (uri != null) {
                 final String[] parameters = uri.split("&");
-                for (int i = 0; i < parameters.length; i++) {
-                    final int p = parameters[i].indexOf('=');
+                for (String parameter : parameters) {
+                    final int p = parameter.indexOf('=');
                     if (p >= 0) {
-                        final String name = URLDecoder.decode(parameters[i].substring(0, p), "UTF-8");
-                        final String value = URLDecoder.decode(parameters[i].substring(p + 1), "UTF-8");
+                        final String name = URLDecoder.decode(parameter.substring(0, p), "UTF-8");
+                        final String value = URLDecoder.decode(parameter.substring(p + 1), "UTF-8");
                         rc.put(name, value);
                     } else {
-                        rc.put(parameters[i], null);
+                        rc.put(parameter, null);
                     }
                 }
             }
@@ -313,14 +314,14 @@ public class URISupport {
             if (options.size() > 0) {
                 final StringBuilder rc = new StringBuilder();
                 boolean first = true;
-                for (final Iterator iter = options.keySet().iterator(); iter.hasNext(); ) {
+                for (Object o : options.keySet()) {
                     if (first) {
                         first = false;
                     } else {
                         rc.append("&");
                     }
 
-                    final String key = (String) iter.next();
+                    final String key = (String) o;
                     final String value = (String) options.get(key);
                     rc.append(URLEncoder.encode(key, "UTF-8"));
                     rc.append("=");
@@ -377,5 +378,29 @@ public class URISupport {
         final int result = -1;
 
         return result;
+    }
+
+    /**
+     * This method adds new parameters to a URI. Any parameters provided that already exist in the URI will *not* be replaced.
+     * @param uri The URI to add parameters to
+     * @param newParameters The parameters to add
+     * @return The URI with the new parameters added
+     * @throws URISyntaxException If there is a syntax error with the provided URI.
+     */
+    public static URI addParameters(final URI uri, final Map<String, String> newParameters) throws URISyntaxException {
+        if (newParameters == null || newParameters.size() == 0) {
+            return uri;
+        }
+
+        final Map<String, String> parameters = new HashMap<>(parseParamters(uri));
+
+        final Set<String> keys = newParameters.keySet();
+        for (final String key : keys) {
+            if (! parameters.containsKey(key)) {
+                parameters.put(key, newParameters.get(key));
+            }
+        }
+
+        return createRemainingURI(uri, parameters);
     }
 }

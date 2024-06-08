@@ -20,23 +20,23 @@ package org.apache.openejb.core.transaction;
 import org.apache.openejb.ApplicationException;
 import org.apache.openejb.SystemException;
 
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionRequiredException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionRequiredException;
 
 /**
  * 17.6.2.5 Mandatory
- * <p/>
+ *
  * The Container must invoke an enterprise Bean method whose transaction
  * attribute is set to Mandatory in a client's transaction context. The client
  * is required to call with a transaction context.
- * <p/>
+ *
  * * If the client calls with a transaction context, the container invokes the
  * enterprise Bean's method in the client's transaction context.
- * <p/>
+ *
  * * If the client calls without a transaction context, the Container throws the
- * javax.transaction.TransactionRequiredException exception if the client is a
- * remote client, or the javax.ejb.TransactionRequiredLocalException if the
+ * jakarta.transaction.TransactionRequiredException exception if the client is a
+ * remote client, or the jakarta.ejb.TransactionRequiredLocalException if the
  * client is a local client.
  */
 public class TxMandatory extends JtaTransactionPolicy {

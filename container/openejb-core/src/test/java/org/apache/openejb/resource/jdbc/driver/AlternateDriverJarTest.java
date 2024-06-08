@@ -25,10 +25,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Singleton;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Singleton;
 import javax.sql.DataSource;
 import java.io.File;
 import java.sql.Connection;
@@ -58,11 +58,7 @@ public class AlternateDriverJarTest {
         p.put("JdbcOne.Password", PASSWORD);
         p.put("JdbcOne.JtaManaged", "false");
 
-        final File file = new File(drivers, "derby-10.9.1.0.jar");
-        Assert.assertTrue("Failed to find: " + file, file.exists());
-
-        p.put("JdbcTwo", "new://Resource?type=DataSource&classpath="
-            + file.getAbsolutePath().replace("\\", "/"));
+        p.put("JdbcTwo", "new://Resource?type=DataSource&classpath=mvn:org.apache.derby:derby:10.14.2.0");
         p.put("JdbcTwo.JdbcDriver", "org.apache.derby.jdbc.EmbeddedDriver");
         p.put("JdbcTwo.JdbcUrl", "jdbc:derby:memory:JdbcTwo;create=true");
         p.put("JdbcTwo.UserName", USER);
@@ -93,7 +89,7 @@ public class AlternateDriverJarTest {
 
         final String twoDriverVersion = two.getDriverVersion();
         System.out.println("twoDriverVersion = " + twoDriverVersion);
-        Assert.assertEquals("Should be using 10.9.1.0 - (1344872)", "10.9.1.0 - (1344872)", twoDriverVersion);
+        Assert.assertEquals("Should be using 10.14.2.0 - (1828579)", "10.14.2.0 - (1828579)", twoDriverVersion);
     }
 
     @LocalBean

@@ -16,37 +16,31 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.superbiz</groupId>
   <artifactId>cucumber-jvm</artifactId>
   <packaging>jar</packaging>
-  <version>8.0.0-SNAPSHOT</version>
-  <name>OpenEJB :: Examples :: Cucumber JVM</name>
-
+  <version>10.0.0-M2-SNAPSHOT</version>
+  <name>TomEE :: Examples :: Cucumber JVM</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.10.1</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
+      
     </plugins>
   </build>
-
   <repositories>
     <repository>
       <id>apache-m2-snapshot</id>
@@ -57,14 +51,14 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.tomee</groupId>
-            <artifactId>javaee-api</artifactId>
-       <version>8.0</version>
+      <artifactId>jakartaee-api</artifactId>
+      <version>10.0-M2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <!-- The <scope>test</scope> guarantees that none of your runtime code 
@@ -72,35 +66,34 @@
     <dependency>
       <groupId>org.apache.tomee</groupId>
       <artifactId>openejb-core</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>info.cukes</groupId>
-      <artifactId>cucumber-openejb</artifactId>
-      <version>1.2.2</version>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-jakarta-openejb</artifactId>
+      <version>7.6.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.openejb</groupId>
+          <groupId>org.apache.tomee</groupId>
           <artifactId>openejb-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>info.cukes</groupId>
+      <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit</artifactId>
-      <version>1.2.2</version>
+      <version>7.6.0</version>
       <scope>test</scope>
     </dependency>
-    <dependency> <!-- needed by last released versino of cucumber-openejb -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>7.6.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <!-- This section allows you to configure where to publish libraries for
     sharing. It is not required and may be deleted. For more information see:
     http://maven.apache.org/plugins/maven-deploy-plugin/ -->
@@ -114,6 +107,4 @@
       <url>file://${basedir}/target/snapshot-repo/</url>
     </snapshotRepository>
   </distributionManagement>
-
 </project>
-

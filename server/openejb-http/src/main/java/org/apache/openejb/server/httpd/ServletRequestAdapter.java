@@ -17,19 +17,12 @@
  */
 package org.apache.openejb.server.httpd;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,7 +49,7 @@ public class ServletRequestAdapter implements HttpRequest {
     }
 
     public HttpSession getSession(boolean create) {
-        javax.servlet.http.HttpSession session = request.getSession(create);
+        jakarta.servlet.http.HttpSession session = request.getSession(create);
         if (session != null) {
             return new ServletSessionAdapter(session);
         } else {
@@ -72,11 +65,6 @@ public class ServletRequestAdapter implements HttpRequest {
     @Override
     public boolean isRequestedSessionIdFromCookie() {
         return request.isRequestedSessionIdFromCookie();
-    }
-
-    @Override
-    public boolean isRequestedSessionIdFromUrl() {
-        return request.isRequestedSessionIdFromUrl();
     }
 
     @Override
@@ -105,7 +93,7 @@ public class ServletRequestAdapter implements HttpRequest {
     }
 
     public HttpSession getSession() {
-        javax.servlet.http.HttpSession session = request.getSession();
+        jakarta.servlet.http.HttpSession session = request.getSession();
         if (session != null) {
             return new ServletSessionAdapter(session);
         } else {
@@ -161,6 +149,21 @@ public class ServletRequestAdapter implements HttpRequest {
     @Override
     public DispatcherType getDispatcherType() {
         return request.getDispatcherType();
+    }
+
+    @Override
+    public String getRequestId() {
+        return request.getRequestId();
+    }
+
+    @Override
+    public String getProtocolRequestId() {
+        return request.getProtocolRequestId();
+    }
+
+    @Override
+    public ServletConnection getServletConnection() {
+        return request.getServletConnection();
     }
 
     @Override
@@ -302,11 +305,6 @@ public class ServletRequestAdapter implements HttpRequest {
     @Override
     public BufferedReader getReader() throws IOException {
         return request.getReader();
-    }
-
-    @Override
-    public String getRealPath(String s) {
-        return request.getRealPath(s);
     }
 
     public Map getParameters() {

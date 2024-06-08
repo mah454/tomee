@@ -24,10 +24,10 @@ import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 import static org.testng.Assert.assertEquals;
 
@@ -61,7 +61,7 @@ public class StatelessWithAroundInvokeOnlyTest {
         @AroundInvoke
         private Object aroundInvoke(InvocationContext ctx) throws Exception {
             final Integer result = (Integer) ctx.proceed();
-            return -result.intValue();
+            return -result;
         }
     }
 }

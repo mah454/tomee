@@ -18,39 +18,39 @@ package org.apache.openejb.jee.was.v6.common;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.openejb.jee.was.v6.java.JavaClass;
 
 /**
  * @since J2EE1.4 moved from webapp
- * <p/>
+ *
  * Declares a class in the application must be registered as a web
  * application listener bean.
- * <p/>
- * <p/>
- * <p/>
+ *
+ *
+ *
  * Java class for Listener complex type.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained
  * within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="Listener">
- *   &lt;complexContent>
- *     &lt;extension base="{common.xmi}CompatibilityDescriptionGroup">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element name="listenerClass" type="{java.xmi}JavaClass"/>
- *       &lt;/choice>
- *       &lt;attribute name="listenerClass" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Listener"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{common.xmi}CompatibilityDescriptionGroup"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element name="listenerClass" type="{java.xmi}JavaClass"/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attribute name="listenerClass" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -64,22 +64,22 @@ public class Listener extends CompatibilityDescriptionGroup {
 
     /**
      * Gets the value of the listenerClasses property.
-     * <p/>
-     * <p/>
+     *
+     *
      * This accessor method returns a reference to the live list, not a
      * snapshot. Therefore any modification you make to the returned list will
      * be present inside the JAXB object. This is why there is not a
      * <CODE>set</CODE> method for the listenerClasses property.
-     * <p/>
-     * <p/>
+     *
+     *
      * For example, to add a new item, do as follows:
-     * <p/>
+     *
      * <pre>
      * getListenerClasses().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
+     *
+     *
      * Objects of the following type(s) are allowed in the list
      * {@link JavaClass }
      */

@@ -27,11 +27,12 @@ public class MvnTest {
     @Test
     public void main() {
         final Archive<?> war = Mvn.war();
+        System.out.println(war.toString(true));
         assertTrue(war.get("/WEB-INF/classes/org/apache/ziplock/maven/Mvn.class") != null);
         assertTrue(war.getContent(new Filter<ArchivePath>() {
             @Override
             public boolean include(final ArchivePath archivePath) {
-                return archivePath.get().startsWith("/WEB-INF/lib") && archivePath.get().contains("javaee-api");
+                return archivePath.get().startsWith("/WEB-INF/lib") && archivePath.get().contains("jakartaee-api");
             }
         }).size() == 1);
         assertTrue(war.getContent(new Filter<ArchivePath>() {
@@ -45,11 +46,12 @@ public class MvnTest {
     @Test
     public void test() {
         final Archive<?> war = Mvn.testWar();
+        System.out.println(war.toString(true));
         assertTrue(war.get("/WEB-INF/classes/org/apache/ziplock/maven/Mvn.class") != null);
         assertTrue(war.getContent(new Filter<ArchivePath>() {
             @Override
             public boolean include(final ArchivePath archivePath) {
-                return archivePath.get().startsWith("/WEB-INF/lib") && archivePath.get().contains("javaee-api");
+                return archivePath.get().startsWith("/WEB-INF/lib") && archivePath.get().contains("jakartaee-api");
             }
         }).size() == 1);
         assertTrue(war.getContent(new Filter<ArchivePath>() {

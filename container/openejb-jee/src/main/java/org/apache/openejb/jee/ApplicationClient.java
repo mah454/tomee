@@ -16,16 +16,16 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,37 +34,37 @@ import java.util.Map;
 
 /**
  * application-client_6.xsd
- * <p/>
+ *
  * <p>Java class for application-clientType complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="application-clientType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="module-name" type="{http://java.sun.com/xml/ns/javaee}string" minOccurs="0"/>
- *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}descriptionGroup"/>
- *         &lt;element name="env-entry" type="{http://java.sun.com/xml/ns/javaee}env-entryType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="ejb-ref" type="{http://java.sun.com/xml/ns/javaee}ejb-refType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}service-refGroup"/>
- *         &lt;element name="resource-ref" type="{http://java.sun.com/xml/ns/javaee}resource-refType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="resource-env-ref" type="{http://java.sun.com/xml/ns/javaee}resource-env-refType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="message-destination-ref" type="{http://java.sun.com/xml/ns/javaee}message-destination-refType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="persistence-unit-ref" type="{http://java.sun.com/xml/ns/javaee}persistence-unit-refType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="post-construct" type="{http://java.sun.com/xml/ns/javaee}lifecycle-callbackType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="pre-destroy" type="{http://java.sun.com/xml/ns/javaee}lifecycle-callbackType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="callback-handler" type="{http://java.sun.com/xml/ns/javaee}fully-qualified-classType" minOccurs="0"/>
- *         &lt;element name="message-destination" type="{http://java.sun.com/xml/ns/javaee}message-destinationType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="data-source" type="{http://java.sun.com/xml/ns/javaee}data-sourceType" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="version" use="required" type="{http://java.sun.com/xml/ns/javaee}dewey-versionType" fixed="6" />
- *       &lt;attribute name="metadata-complete" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}ID" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="application-clientType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="module-name" type="{http://java.sun.com/xml/ns/javaee}string" minOccurs="0"/&gt;
+ *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}descriptionGroup"/&gt;
+ *         &lt;element name="env-entry" type="{http://java.sun.com/xml/ns/javaee}env-entryType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="ejb-ref" type="{http://java.sun.com/xml/ns/javaee}ejb-refType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}service-refGroup"/&gt;
+ *         &lt;element name="resource-ref" type="{http://java.sun.com/xml/ns/javaee}resource-refType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="resource-env-ref" type="{http://java.sun.com/xml/ns/javaee}resource-env-refType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="message-destination-ref" type="{http://java.sun.com/xml/ns/javaee}message-destination-refType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="persistence-unit-ref" type="{http://java.sun.com/xml/ns/javaee}persistence-unit-refType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="post-construct" type="{http://java.sun.com/xml/ns/javaee}lifecycle-callbackType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="pre-destroy" type="{http://java.sun.com/xml/ns/javaee}lifecycle-callbackType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="callback-handler" type="{http://java.sun.com/xml/ns/javaee}fully-qualified-classType" minOccurs="0"/&gt;
+ *         &lt;element name="message-destination" type="{http://java.sun.com/xml/ns/javaee}message-destinationType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="data-source" type="{http://java.sun.com/xml/ns/javaee}data-sourceType" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="version" use="required" type="{http://java.sun.com/xml/ns/javaee}dewey-versionType" fixed="6" /&gt;
+ *       &lt;attribute name="metadata-complete" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}ID" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlRootElement(name = "application-client")
@@ -89,7 +89,8 @@ import java.util.Map;
     "messageDestination",
     "dataSource",
     "jmsConnectionFactories",
-    "jmsDestinations"
+    "jmsDestinations",
+    "contextService"
 
 })
 public class ApplicationClient implements JndiConsumer, Lifecycle, NamedModule {
@@ -149,6 +150,8 @@ public class ApplicationClient implements JndiConsumer, Lifecycle, NamedModule {
 
     @XmlTransient
     protected String mainClass;
+    @XmlElement(name="context-service")
+    private KeyedCollection<String, ContextService> contextService;
 
     public ApplicationClient() {
     }
@@ -446,5 +449,13 @@ public class ApplicationClient implements JndiConsumer, Lifecycle, NamedModule {
     @Override
     public Map<String, JMSDestination> getJMSDestinationMap() {
         return KeyedCollection.class.cast(getJMSDestination()).toMap();
+    }
+
+    @Override
+    public Map<String, ContextService> getContextServiceMap() {
+        if (contextService == null) {
+            contextService = new KeyedCollection<String, ContextService>();
+        }
+        return this.contextService.toMap();
     }
 }

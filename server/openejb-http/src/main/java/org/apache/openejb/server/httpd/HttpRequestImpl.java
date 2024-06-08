@@ -16,6 +16,7 @@
  */
 package org.apache.openejb.server.httpd;
 
+import jakarta.servlet.*;
 import org.apache.openejb.assembler.classic.AppInfo;
 import org.apache.openejb.assembler.classic.Assembler;
 import org.apache.openejb.assembler.classic.WebAppInfo;
@@ -55,22 +56,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import javax.security.auth.login.LoginException;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -86,12 +78,7 @@ public class HttpRequestImpl implements HttpRequest {
     private static final String CHUNKED = "chunked";
 
     public static final Class<?>[] SERVLET_CONTEXT_INTERFACES = new Class<?>[]{ServletContext.class};
-    public static final InvocationHandler SERVLET_CONTEXT_HANDLER = new InvocationHandler() {
-        @Override
-        public Object invoke(final Object proxy, final java.lang.reflect.Method method, final Object[] args) throws Throwable {
-            return null;
-        }
-    };
+    public static final InvocationHandler SERVLET_CONTEXT_HANDLER = (proxy, method, args) -> null;
 
     private EndWebBeansListener end;
     private BeginWebBeansListener begin;
@@ -185,13 +172,13 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public Enumeration<String> getHeaderNames() {
-        return new ArrayEnumeration(new ArrayList<>(headers.keySet()));
+        return new ArrayEnumeration<>(new ArrayList<>(headers.keySet()));
     }
 
     @Override
     public Enumeration<String> getHeaders(String s) {
         final List<String> list = headers.get(s);
-        return new ArrayEnumeration(list == null ? Collections.emptyList() : list);
+        return new ArrayEnumeration<>(list == null ? Collections.emptyList() : list);
     }
 
     @Override
@@ -271,7 +258,7 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public String getQueryString() {
-        StringBuilder str = new StringBuilder("");
+        StringBuilder str = new StringBuilder();
         for (final Map.Entry<String, List<String>> q : queryParams.entrySet()) {
             for (final String v : q.getValue()) {
                 str.append(q.getKey()).append("=").append(v).append("&");
@@ -354,6 +341,25 @@ public class HttpRequestImpl implements HttpRequest {
         return DispatcherType.REQUEST;
     }
 
+    @Override
+    public String getRequestId() {
+        //TODO implement
+        return null;
+    }
+
+    @Override
+    public String getProtocolRequestId() {
+        //TODO implement
+        return null;
+    }
+
+    @Override
+    public ServletConnection getServletConnection() {
+        //TODO implement
+        return null;
+    }
+
+    @Override
     public ServletInputStream getInputStream() throws IOException {
         return this.in;
     }
@@ -370,7 +376,7 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public Enumeration<Locale> getLocales() {
-        return new ArrayEnumeration(Arrays.asList(Locale.getAvailableLocales()));
+        return new ArrayEnumeration<>(Arrays.asList(Locale.getAvailableLocales()));
     }
 
     @Override
@@ -579,7 +585,7 @@ public class HttpRequestImpl implements HttpRequest {
 
             List<String> list = queryParams.get(name);
             if (list == null) {
-                list = new LinkedList<String>();
+                list = new LinkedList<>();
                 queryParams.put(name, list);
             }
             list.add(value);
@@ -839,7 +845,7 @@ public class HttpRequestImpl implements HttpRequest {
     public Cookie[] getCookies() {
         if (cookies != null) return toCookies(cookies);
 
-        cookies = new HashMap<String, String>();
+        cookies = new HashMap<>();
 
         String cookieHeader = getHeader(HEADER_COOKIE);
         if (cookieHeader == null) return toCookies(cookies);
@@ -857,7 +863,7 @@ public class HttpRequestImpl implements HttpRequest {
     protected Map<?, ?> getInternalCookies() {
         if (cookies != null) return cookies;
 
-        cookies = new HashMap<String, String>();
+        cookies = new HashMap<>();
 
         String cookieHeader = getHeader(HEADER_COOKIE);
         if (cookieHeader == null) return cookies;
@@ -944,11 +950,6 @@ public class HttpRequestImpl implements HttpRequest {
     }
 
     @Override
-    public boolean isRequestedSessionIdFromUrl() {
-        return false;
-    }
-
-    @Override
     public boolean isRequestedSessionIdFromURL() {
         return false;
     }
@@ -1014,7 +1015,7 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public Enumeration<String> getAttributeNames() {
-        return new ArrayEnumeration(new ArrayList<String>(attributes.keySet()));
+        return new ArrayEnumeration<>(new ArrayList<>(attributes.keySet()));
     }
 
     @Override
@@ -1045,7 +1046,7 @@ public class HttpRequestImpl implements HttpRequest {
         final WebBeansContext webBeansContext = AppFinder.findAppContextOrWeb(
                 Thread.currentThread().getContextClassLoader(), AppFinder.WebBeansContextTransformer.INSTANCE);
         return webBeansContext != null ?
-                new EEFilter.AsynContextWrapper(asyncContext, servletRequest, webBeansContext) : asyncContext;
+                new EEFilter.AsynContextWrapper(asyncContext, servletRequest, servletResponse, webBeansContext) : asyncContext;
     }
 
     public void addInternalParameter(final String key, final String val) {
@@ -1059,7 +1060,7 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        final Map<String, String[]> params = new HashMap<String, String[]>();
+        final Map<String, String[]> params = new HashMap<>();
         for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
             final List<String> values = p.getValue();
             params.put(p.getKey(), values.toArray(new String[values.size()]));
@@ -1069,7 +1070,7 @@ public class HttpRequestImpl implements HttpRequest {
 
     @Override
     public Enumeration<String> getParameterNames() {
-        return new ArrayEnumeration(new ArrayList<>(parameters.keySet()));
+        return new ArrayEnumeration<>(new ArrayList<>(parameters.keySet()));
     }
 
     @Override
@@ -1088,14 +1089,9 @@ public class HttpRequestImpl implements HttpRequest {
         return null;
     }
 
-    @Override
-    public String getRealPath(String s) {
-        return path;
-    }
-
     @Deprecated // TODO should be dropped, do we drop axis module as well?
     public Map<String, String> getParameters() {
-        final HashMap<String, String> converted = new HashMap<String, String>(parameters.size());
+        final HashMap<String, String> converted = new HashMap<>(parameters.size());
         for (final Map.Entry<String, List<String>> entry : parameters.entrySet()) {
             converted.put(entry.getKey(), entry.getValue().iterator().next());
         }
@@ -1246,7 +1242,7 @@ public class HttpRequestImpl implements HttpRequest {
     protected class SessionInvalidateListener extends ServletSessionAdapter {
         private final BeginWebBeansListener listener;
 
-        public SessionInvalidateListener(final javax.servlet.http.HttpSession session, final BeginWebBeansListener end) {
+        public SessionInvalidateListener(final jakarta.servlet.http.HttpSession session, final BeginWebBeansListener end) {
             super(session);
             listener = end;
         }

@@ -47,14 +47,14 @@ import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.SetAccessible;
 
-import javax.ejb.EJBContext;
-import javax.ejb.EJBException;
-import javax.ejb.ScheduleExpression;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
+import jakarta.ejb.EJBContext;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.ScheduleExpression;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerConfig;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -220,9 +220,6 @@ public class EjbTimerServiceImpl implements EjbTimerService, Serializable {
         }
         if (!properties.containsKey(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME)) {
             properties.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "OpenEJB-TimerService-Scheduler");
-        }
-        if (!properties.containsKey(StdSchedulerFactory.PROP_SCHED_SKIP_UPDATE_CHECK)) {
-            properties.put(StdSchedulerFactory.PROP_SCHED_SKIP_UPDATE_CHECK, "true");
         }
         if (!properties.containsKey("org.terracotta.quartz.skipUpdateCheck")) {
             properties.put("org.terracotta.quartz.skipUpdateCheck", "true");
@@ -586,9 +583,11 @@ public class EjbTimerServiceImpl implements EjbTimerService, Serializable {
 
         final Collection<Timer> timers = new ArrayList<>();
         for (final TimerData timerData : timerStore.getTimers((String) deployment.getDeploymentID())) {
-            // if (!CalendarTimerData.class.isInstance(timerData) || !CalendarTimerData.class.cast(timerData).isAutoCreated()) {
-                timers.add(timerData.getTimer());
-            // }
+            // Returns all active timers associated with this bean.
+            if (timerData.isCancelled() || timerData.isExpired() || timerData.isStopped()) {
+                continue;
+            }
+            timers.add(timerData.getTimer());
         }
         return timers;
     }
@@ -748,7 +747,7 @@ public class EjbTimerServiceImpl implements EjbTimerService, Serializable {
 
     /**
      * This method calls the ejbTimeout method and starts a transaction if the timeout is transacted.
-     * <p/>
+     *
      * This method will retry failed ejbTimeout calls until retryAttempts is exceeded.
      *
      * @param timerData the timer to call.
@@ -776,7 +775,7 @@ public class EjbTimerServiceImpl implements EjbTimerService, Serializable {
                     try {
                         transactionManager.begin();
                     } catch (final Exception e) {
-                        log.warning("Exception occured while starting container transaction", e);
+                        log.warning("Exception occurred while starting container transaction", e);
                         return;
                     }
                 }

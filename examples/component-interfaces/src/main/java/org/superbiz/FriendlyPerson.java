@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,13 +16,13 @@
  */
 package org.superbiz;
 
-import javax.ejb.Init;
-import javax.ejb.Local;
-import javax.ejb.LocalHome;
-import javax.ejb.Remote;
-import javax.ejb.RemoteHome;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
+import jakarta.ejb.Init;
+import jakarta.ejb.Local;
+import jakarta.ejb.LocalHome;
+import jakarta.ejb.Remote;
+import jakarta.ejb.RemoteHome;
+import jakarta.ejb.Remove;
+import jakarta.ejb.Stateful;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,7 +30,7 @@ import java.util.Properties;
 
 /**
  * This is an EJB 3 style pojo stateful session bean
- * it does not need to implement javax.ejb.SessionBean
+ * it does not need to implement jakarta.ejb.SessionBean
  */
 //START SNIPPET: code
 
@@ -70,7 +70,7 @@ public class FriendlyPerson implements FriendlyPersonLocal, FriendlyPersonRemote
     /**
      * This method corresponds to the FriendlyPersonEjbHome.create() method
      * and the FriendlyPersonEjbLocalHome.create()
-     * <p/>
+     *
      * If you do not have an EJBHome or EJBLocalHome interface, this method
      * can be deleted.
      */
@@ -84,7 +84,7 @@ public class FriendlyPerson implements FriendlyPersonLocal, FriendlyPersonRemote
      * - EJBHome.remove(ejbObject)
      * - EJBLocalObject.remove()
      * - EJBLocalHome.remove(ejbObject)
-     * <p/>
+     *
      * If you do not have an EJBHome or EJBLocalHome interface, this method
      * can be deleted.
      */

@@ -21,6 +21,7 @@ import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerFactoryHandler;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.jmx.ManagementContext;
 import org.apache.activemq.network.DiscoveryNetworkConnector;
 import org.apache.activemq.network.NetworkConnector;
 import org.apache.activemq.ra.ActiveMQResourceAdapter;
@@ -36,7 +37,7 @@ import org.apache.openejb.spi.ContainerSystem;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.xbean.propertyeditor.PropertyEditorException;
-import org.apache.xbean.propertyeditor.PropertyEditors;
+import org.apache.xbean.propertyeditor.PropertyEditorRegistry;
 import org.apache.xbean.recipe.ObjectRecipe;
 
 import javax.naming.Context;
@@ -65,6 +66,7 @@ public class ActiveMQ5Factory implements BrokerFactoryHandler {
     protected static final Map<URI, BrokerService> brokers = new HashMap<URI, BrokerService>();
     private static Throwable throwable;
     private static final AtomicBoolean started = new AtomicBoolean(false);
+    private static PropertyEditorRegistry propertyEditorRegistry = new PropertyEditorRegistry().registerDefaults();
 
     public static void setThreadProperties(final Properties p) {
         properties = p;
@@ -184,6 +186,10 @@ public class ActiveMQ5Factory implements BrokerFactoryHandler {
             broker.setSystemExitOnShutdown(false);
 
             broker.setStartAsync(false);
+
+            final ManagementContext managementContext = new ManagementContext();
+            managementContext.setCreateConnector(false);
+            broker.setManagementContext(managementContext);
 
             final BrokerService bs = broker;
 
@@ -433,7 +439,7 @@ public class ActiveMQ5Factory implements BrokerFactoryHandler {
                     final Object field = params.remove(key);
                     if (field != null) {
                         try {
-                            final Object toSet = PropertyEditors.getValue(m.getParameterTypes()[0], field.toString());
+                            final Object toSet = propertyEditorRegistry.getValue(m.getParameterTypes()[0], field.toString());
                             m.invoke(persistenceAdapter, toSet);
                         } catch (final PropertyEditorException cantConvertException) {
                             throw new IllegalArgumentException("can't convert " + field + " for " + m.getName(), cantConvertException);

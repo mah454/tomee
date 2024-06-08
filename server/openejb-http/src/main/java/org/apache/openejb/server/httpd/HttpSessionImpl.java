@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSessionContext;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSessionContext;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 public class HttpSessionImpl implements HttpSession {
     private Collection<HttpSessionListener> listeners;
@@ -79,18 +79,6 @@ public class HttpSessionImpl implements HttpSession {
     }
 
     @Override
-    public void removeValue(final String s) {
-        Iterator<String> it = attributes.keySet().iterator();
-        while (it.hasNext()) {
-            String key = it.next();
-            if (attributes.get(key).equals(s)) {
-                attributes.remove(key);
-            }
-        }
-        touch();
-    }
-
-    @Override
     public void invalidate() {
         if (!valid) {
             return;
@@ -132,32 +120,15 @@ public class HttpSessionImpl implements HttpSession {
     }
 
     @Override
-    public Object getValue(String s) {
-        touch();
-        return attributes.get(s);
-    }
-
-    @Override
     public Enumeration<String> getAttributeNames() {
         touch();
         return new ArrayEnumeration(new ArrayList(attributes.keySet()));
     }
 
     @Override
-    public String[] getValueNames() {
-        touch();
-        return attributes.keySet().toArray(new String[attributes.size()]);
-    }
-
-    @Override
     public void setAttribute(String name, Object value) {
         attributes.put(name, value);
         touch();
-    }
-
-    @Override
-    public void putValue(String s, Object o) {
-        setAttribute(s, o);
     }
 
     @Override
@@ -191,23 +162,5 @@ public class HttpSessionImpl implements HttpSession {
     public int getMaxInactiveInterval() {
         // touch(); // TODO: dont use it internally
         return (int) timeout;
-    }
-
-    @Override
-    public HttpSessionContext getSessionContext() {
-        touch();
-        final SessionManager component = SystemInstance.get().getComponent(SessionManager.class);
-        return new HttpSessionContext() {
-            @Override
-            public javax.servlet.http.HttpSession getSession(final String sessionId) {
-                final HttpSessionEvent event = component.findSession(sessionId);
-                return event == null ? null : event.getSession();
-            }
-
-            @Override
-            public Enumeration<String> getIds() {
-                return Collections.enumeration(component.findSessionIds());
-            }
-        };
     }
 }

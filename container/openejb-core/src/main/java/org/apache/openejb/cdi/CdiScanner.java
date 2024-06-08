@@ -42,7 +42,7 @@ import org.apache.webbeans.spi.BdaScannerService;
 import org.apache.webbeans.spi.BeanArchiveService;
 import org.apache.webbeans.xml.DefaultBeanArchiveInformation;
 
-import javax.decorator.Decorator;
+import jakarta.decorator.Decorator;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -61,6 +61,7 @@ import static java.util.Arrays.asList;
  * @version $Rev:$ $Date:$
  */
 public class CdiScanner implements BdaScannerService {
+    private static final Logger logger = Logger.getInstance(LogCategory.OPENEJB_CDI, OpenEJBLifecycle.class);
     public static final String OPENEJB_CDI_FILTER_CLASSLOADER = "openejb.cdi.filter.classloader";
 
     private static final Class<?>[] TRANSACTIONAL_INTERCEPTORS = new Class<?>[]{
@@ -156,6 +157,14 @@ public class CdiScanner implements BdaScannerService {
 
             final Map<BeansInfo.BDAInfo, BeanArchiveService.BeanArchiveInformation> infoByBda = new HashMap<>();
             for (final BeansInfo.BDAInfo bda : beans.bdas) {
+/*                if (!startupObject.isFromWebApp() &&
+                    ejbJar.webapp &&
+                    !appInfo.webAppAlone &&
+                    ejbJar.path != null &&
+                    bda.uri.toString().contains(ejbJar.path)) {
+                    continue;
+                }*/
+
                 if (bda.uri != null) {
                     try {
                         beansXml.add(bda.uri.toURL());
@@ -163,11 +172,16 @@ public class CdiScanner implements BdaScannerService {
                         // no-op
                     }
                 }
-                infoByBda.put(bda, handleBda(startupObject, classLoader, comparator, beans, scl, filterByClassLoader, beanArchiveService, openejb, bda));
+                infoByBda.put(bda, handleBda(startupObject, classLoader, comparator, ejbJar, scl, filterByClassLoader, beanArchiveService, openejb, bda));
             }
+/*
+            if (!startupObject.isFromWebApp() && ejbJar.webapp && !appInfo.webAppAlone) {
+                continue;
+            }*/
+            
             for (final BeansInfo.BDAInfo bda : beans.noDescriptorBdas) {
                 // infoByBda.put() not needed since we know it means annotated
-                handleBda(startupObject, classLoader, comparator, beans, scl, filterByClassLoader, beanArchiveService, openejb, bda);
+                handleBda(startupObject, classLoader, comparator, ejbJar, scl, filterByClassLoader, beanArchiveService, openejb, bda);
             }
 
             if (startupObject.getBeanContexts() != null) {
@@ -202,7 +216,10 @@ public class CdiScanner implements BdaScannerService {
 
             if ("true".equalsIgnoreCase(SystemInstance.get().getProperty("openejb.cdi.debug", "false"))) {
                 final Logger logger =  Logger.getInstance(LogCategory.OPENEJB, CdiScanner.class.getName());
-                logger.info("CDI beans for " + startupObject.getAppInfo().appId + (startupObject.getWebContext() != null ? " webcontext = " + startupObject.getWebContext().getContextRoot() : ""));
+                final String webContextName = startupObject.getWebContext() != null ?
+                                 " webcontext = " + startupObject.getWebContext().getContextRoot() :
+                                 "";
+                logger.info("Found " + classes.size() + " CDI beans for " + startupObject.getAppInfo().appId + webContextName);
                 final List<String> names = new ArrayList<>(classes.size());
                 for (final Class<?> c : classes) {
                     names.add(c.getName());
@@ -220,11 +237,7 @@ public class CdiScanner implements BdaScannerService {
     }
 
     private void addClasses(BeanArchiveService.BeanArchiveInformation bdaInfo, final Collection<String> list, final ClassLoader loader) {
-        Set<Class<?>> classes = beanClassesPerBda.get(bdaInfo);
-        if (classes == null) {
-            classes = new HashSet<>();
-            beanClassesPerBda.put(bdaInfo, classes);
-        }
+        Set<Class<?>> classes = beanClassesPerBda.computeIfAbsent(bdaInfo, k -> new HashSet<>());
 
         for (final String s : list) {
             final Class<?> load = load(s, loader);
@@ -234,11 +247,7 @@ public class CdiScanner implements BdaScannerService {
         }
     }
     private void addClasses(BeanArchiveService.BeanArchiveInformation bdaInfo, final Collection<Class<?>> list) {
-        Set<Class<?>> classes = beanClassesPerBda.get(bdaInfo);
-        if (classes == null) {
-            classes = new HashSet<>();
-            beanClassesPerBda.put(bdaInfo, classes);
-        }
+        Set<Class<?>> classes = beanClassesPerBda.computeIfAbsent(bdaInfo, k -> new HashSet<>());
 
         classes.addAll(list);
     }
@@ -249,13 +258,13 @@ public class CdiScanner implements BdaScannerService {
     }
 
     private BeanArchiveService.BeanArchiveInformation handleBda(final StartupObject startupObject, final ClassLoader classLoader, final ClassLoaderComparator comparator,
-                                                                final BeansInfo beans, final ClassLoader scl, final boolean filterByClassLoader,
+                                                                final EjbJarInfo ejbJarInfo, final ClassLoader scl, final boolean filterByClassLoader,
                                                                 final BeanArchiveService beanArchiveService, final boolean openejb,
                                                                 final BeansInfo.BDAInfo bda) {
         BeanArchiveService.BeanArchiveInformation information;
         if (openejb) {
             final OpenEJBBeanInfoService beanInfoService = OpenEJBBeanInfoService.class.cast(beanArchiveService);
-            information = beanInfoService.createBeanArchiveInformation(bda, beans, classLoader);
+            information = beanInfoService.createBeanArchiveInformation(bda, ejbJarInfo.beans, classLoader);
             // TODO: log a warn is discoveryModes.get(key) == null
             try {
                 beanInfoService.getBeanArchiveInfo().put(bda.uri == null ? null : bda.uri.toURL(), information);
@@ -304,7 +313,12 @@ public class CdiScanner implements BdaScannerService {
                 if (scanModeAnnotated) {
                     if (isBean(clazz)) {
                         classes.add(clazz);
-                        if (beans.startupClasses.contains(name)) {
+                        if (ejbJarInfo.beans.startupClasses.contains(name)) {
+                            logger.debug("Adding class " + clazz.getName()
+                                    + " from " + getLocation(clazz) + ", in module " + ejbJarInfo.moduleId
+                                    + " to startup list. Scan mode="
+                                    + information.getBeanDiscoveryMode().toString() + ". EAR webapp=" + !isNotEarWebApp);
+
                             startupClasses.add(clazz);
                         }
                     }
@@ -316,7 +330,12 @@ public class CdiScanner implements BdaScannerService {
                             || comparator.isSame(loader)
                             || ((loader.equals(scl) || loader == containerLoader) && isNotEarWebApp)) {
                         classes.add(clazz);
-                        if (beans.startupClasses.contains(name)) {
+                        if (ejbJarInfo.beans.startupClasses.contains(name)) {
+                            logger.debug("Adding class " + clazz.getName()
+                                    + " from " + getLocation(clazz) + ", in module " + ejbJarInfo.moduleId
+                                    + " to startup list. Scan mode=" + information.getBeanDiscoveryMode().toString()
+                                    + ". EAR webapp=" + !isNotEarWebApp);
+                            
                             startupClasses.add(clazz);
                         }
                     }
@@ -404,5 +423,18 @@ public class CdiScanner implements BdaScannerService {
 
     public Set<Class<?>> getStartupClasses() {
         return startupClasses;
+    }
+
+    public static String getLocation(final Class<?> clazz) {
+
+        if (clazz != null
+                && clazz.getProtectionDomain() != null
+                && clazz.getProtectionDomain().getCodeSource() != null
+                && clazz.getProtectionDomain().getCodeSource().getLocation() != null) {
+
+            return clazz.getProtectionDomain().getCodeSource().getLocation().toString();
+        }
+
+        return "<not available>";
     }
 }

@@ -17,9 +17,9 @@
 
 package org.apache.openejb.core.security;
 
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyConfigurationFactory;
-import javax.security.jacc.PolicyContextException;
+import jakarta.security.jacc.PolicyConfiguration;
+import jakarta.security.jacc.PolicyConfigurationFactory;
+import jakarta.security.jacc.PolicyContextException;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -103,6 +103,16 @@ public abstract class JaccProvider {
             return get().getPolicyConfiguration(contextID, remove);
         }
 
+        @Override
+        public PolicyConfiguration getPolicyConfiguration(final String contextID) {
+            return get().getPolicyConfiguration(contextID);
+        }
+
+        @Override
+        public PolicyConfiguration getPolicyConfiguration() {
+            return get().getPolicyConfiguration();
+        }
+
         public boolean inService(final String contextID) throws PolicyContextException {
             return get().inService(contextID);
         }
@@ -129,6 +139,10 @@ public abstract class JaccProvider {
 
     public abstract PolicyConfiguration getPolicyConfiguration(String contextID, boolean remove) throws PolicyContextException;
 
+    public abstract PolicyConfiguration getPolicyConfiguration(String contextID);
+
+    public abstract PolicyConfiguration getPolicyConfiguration();
+
     public abstract boolean inService(String contextID) throws PolicyContextException;
 
     public abstract PermissionCollection getPermissions(CodeSource codesource);
@@ -136,4 +150,6 @@ public abstract class JaccProvider {
     public abstract void refresh();
 
     public abstract boolean implies(ProtectionDomain domain, Permission permission);
+
+    public abstract boolean hasAccessToWebResource(final String resource, final String... methods);
 }

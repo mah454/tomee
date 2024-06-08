@@ -25,8 +25,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Annotation intented to represent the principal that should be returned
- * from calls to javax.ejb.EJBContext.getCallerPrincipal()
- * <p/>
+ * from calls to jakarta.ejb.EJBContext.getCallerPrincipal()
+ *
  * Implementations of org.apache.openejb.spi.SecurityService are encouraged
  * to return a java.security.Principal object that implements CallerPrinciple
  *

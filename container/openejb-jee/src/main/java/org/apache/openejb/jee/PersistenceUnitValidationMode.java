@@ -16,25 +16,25 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
  * persistence_2_0.xsd
- * <p/>
+ *
  * <p>Java class for persistence-unit-validation-mode-type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;simpleType name="persistence-unit-validation-mode-type">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *     &lt;enumeration value="AUTO"/>
- *     &lt;enumeration value="CALLBACK"/>
- *     &lt;enumeration value="NONE"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="persistence-unit-validation-mode-type"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token"&gt;
+ *     &lt;enumeration value="AUTO"/&gt;
+ *     &lt;enumeration value="CALLBACK"/&gt;
+ *     &lt;enumeration value="NONE"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  */
 @XmlType(name = "persistence-unit-validation-mode-type", namespace = "http://java.sun.com/xml/ns/persistence")

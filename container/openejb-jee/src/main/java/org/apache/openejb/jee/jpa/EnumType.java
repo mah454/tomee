@@ -17,22 +17,22 @@
 
 package org.apache.openejb.jee.jpa;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
  * <p>Java class for enum-type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;simpleType name="enum-type">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *     &lt;enumeration value="ORDINAL"/>
- *     &lt;enumeration value="STRING"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="enum-type"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token"&gt;
+ *     &lt;enumeration value="ORDINAL"/&gt;
+ *     &lt;enumeration value="STRING"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  */
 @XmlType(name = "enum-type")

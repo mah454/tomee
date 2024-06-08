@@ -16,17 +16,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>arquillian</artifactId>
     <groupId>org.apache.tomee</groupId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
 
   <artifactId>arquillian-tomee-webapp-remote</artifactId>
-  <name>OpenEJB :: Arquillian Adaptors Parent :: Webapp Remote</name>
+  <name>TomEE :: Arquillian Adaptors Parent :: Webapp Remote</name>
 
   <properties>
     <tomee.build.name>${project.groupId}.arquillian.tomee.webapp.remote</tomee.build.name>
@@ -57,8 +56,8 @@
 
     <dependency>
       <groupId>org.jboss.arquillian.protocol</groupId>
-      <artifactId>arquillian-protocol-servlet</artifactId>
-      <version>${version.arquillian}</version>
+      <artifactId>arquillian-protocol-servlet-jakarta</artifactId>
+      <version>${version.arquillian-protocol-servlet-jakarta}</version>
       <exclusions>
         <exclusion>
           <artifactId>shrinkwrap-descriptors-spi</artifactId>
@@ -85,7 +84,7 @@
       <version>${tomcat.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.eclipse.jdt.core.compiler</groupId>
+          <groupId>org.eclipse.jdt</groupId>
           <artifactId>ecj</artifactId>
         </exclusion>
       </exclusions>
@@ -121,146 +120,14 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <artifactId>mbean-annotation-api</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-lang3</artifactId>
-          <groupId>org.apache.commons</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>javaee-api-embedded</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openejb-api</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openejb-javaagent</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openejb-jee</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-cli</artifactId>
-          <groupId>commons-cli</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>activemq-ra</artifactId>
-          <groupId>org.apache.activemq</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>activemq-broker</artifactId>
-          <groupId>org.apache.activemq</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>geronimo-connector</artifactId>
-          <groupId>org.apache.geronimo.components</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>geronimo-transaction</artifactId>
-          <groupId>org.apache.geronimo.components</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>howl</artifactId>
-          <groupId>org.objectweb.howl</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>geronimo-javamail_1.4_mail</artifactId>
-          <groupId>org.apache.geronimo.javamail</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-asm7-shaded</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-finder-shaded</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-reflect</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-naming</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-bundleutils</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hsqldb</artifactId>
-          <groupId>hsqldb</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bval-jsr</artifactId>
-          <groupId>org.apache.bval</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openjpa</artifactId>
-          <groupId>org.apache.openjpa</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openwebbeans-web</artifactId>
-          <groupId>org.apache.openwebbeans</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>org.apache.commons</artifactId>
-          <groupId>commons-dbcp2</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>org.apache.commons</artifactId>
-          <groupId>commons-pool2</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>swizzle-stream</artifactId>
-          <groupId>org.codehaus.swizzle</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>wsdl4j</artifactId>
-          <groupId>wsdl4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>quartz-openejb-shade</artifactId>
-          <groupId>org.apache.openejb.shade</groupId>
-        </exclusion>
-        <!-- <exclusion>
-          <artifactId>openwebbeans-impl</artifactId>
-          <groupId>org.apache.openwebbeans</groupId>
-        </exclusion>-->
-        <exclusion>
-          <artifactId>openwebbeans-ee-common</artifactId>
-          <groupId>org.apache.openwebbeans</groupId>
-        </exclusion>
-        <!--<exclusion>-->
-        <!--<artifactId>openwebbeans-spi</artifactId>-->
-        <!--<groupId>org.apache.openwebbeans</groupId>-->
-        <!--</exclusion>-->
-        <exclusion>
-          <artifactId>openwebbeans-ejb</artifactId>
-          <groupId>org.apache.openwebbeans</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openwebbeans-ee</artifactId>
-          <groupId>org.apache.openwebbeans</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>javaee-api</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>openejb-bval</artifactId>
-          <groupId>org.apache.openejb.patch</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>mbean-annotation-api</artifactId>
-          <groupId>${project.groupId}</groupId>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.openwebbeans</groupId>
+      <artifactId>openwebbeans-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

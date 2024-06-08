@@ -16,17 +16,17 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,22 +37,22 @@ import java.util.Map;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;all>
- *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}interceptors" minOccurs="0"/>
- *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}decorators" minOccurs="0"/>
- *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}alternatives" minOccurs="0"/>
- *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}trim" minOccurs="0" maxOccurs="1"/>
- *       &lt;/all>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;all&gt;
+ *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}interceptors" minOccurs="0"/&gt;
+ *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}decorators" minOccurs="0"/&gt;
+ *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}alternatives" minOccurs="0"/&gt;
+ *         &lt;element ref="{http://java.sun.com/xml/ns/javaee}trim" minOccurs="0" maxOccurs="1"/&gt;
+ *       &lt;/all&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -152,11 +152,7 @@ public class Beans {
     }
 
     public void addManagedClass(final URL url, final String clazz) {
-        List<String> list = managedClasses.get(url);
-        if (list == null) {
-            list = new LinkedList<>();
-            managedClasses.put(url, list);
-        }
+        List<String> list = managedClasses.computeIfAbsent(url, k -> new LinkedList<>());
         list.add(clazz);
     }
 
@@ -259,20 +255,20 @@ public class Beans {
 
     /**
      * <p>Java class for anonymous complex type.
-     * <p/>
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * <p/>
+     *
      * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;choice maxOccurs="unbounded" minOccurs="0">
-     *         &lt;element name="class" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *         &lt;element name="stereotype" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *       &lt;/choice>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;complexContent&gt;
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+     *         &lt;element name="class" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *         &lt;element name="stereotype" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *       &lt;/choice&gt;
+     *     &lt;/restriction&gt;
+     *   &lt;/complexContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      */
     @XmlAccessorType(XmlAccessType.FIELD)

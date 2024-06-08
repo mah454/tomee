@@ -33,7 +33,6 @@ import org.apache.cxf.management.InstrumentationManager;
 import org.apache.cxf.management.counters.CounterRepository;
 import org.apache.cxf.management.jmx.InstrumentationManagerImpl;
 import org.apache.cxf.message.Message;
-import org.apache.cxf.transport.http.CXFAuthenticator;
 import org.apache.cxf.transport.http.HttpDestinationFactory;
 import org.apache.openejb.OpenEJBRuntimeException;
 import org.apache.openejb.assembler.classic.OpenEjbConfiguration;
@@ -49,8 +48,13 @@ import org.apache.openejb.server.cxf.transport.OpenEJBHttpDestinationFactory;
 import org.apache.openejb.server.cxf.transport.event.BusCreated;
 import org.apache.openejb.util.PropertiesHelper;
 import org.apache.openejb.util.reflection.Reflections;
+import org.apache.webbeans.intercept.DefaultInterceptorHandler;
+import org.apache.webbeans.proxy.InterceptorHandler;
+import org.apache.webbeans.proxy.OwbInterceptorProxy;
+import org.apache.webbeans.util.ExceptionUtil;
 
 import javax.management.MBeanServer;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -61,6 +65,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
+
+import static org.apache.webbeans.proxy.InterceptorDecoratorProxyFactory.FIELD_INTERCEPTOR_HANDLER;
 
 public final class CxfUtil {
     public static final String ENDPOINT_PROPERTIES = "properties";
@@ -121,6 +127,41 @@ public final class CxfUtil {
                     }
                     return c == Object.class ? aClass : c;
                 }
+
+                @Override
+                public Class<?> getRealClassFromClass(Class<?> aClass) {
+                    return aClass;
+                }
+
+                @Override
+                public Object getRealObject(Object o) {
+                    // special case for OWB proxies - ie, a webservice endpoint with a CDI interceptor
+                    // we'll want to unwrap this and set the field on the proxied instance, rather than set the field
+                    // straight on the proxy
+                    if (o instanceof OwbInterceptorProxy) {
+                        return getProxiedInstance(o);
+                    }
+
+                    return o;
+                }
+
+                private Object getProxiedInstance(Object o) {
+                    try {
+                        final Field field = o.getClass().getDeclaredField(FIELD_INTERCEPTOR_HANDLER);
+                        field.setAccessible(true);
+
+                        final Object fieldValue = field.get(o);
+
+                        if (fieldValue instanceof DefaultInterceptorHandler) {
+                            final DefaultInterceptorHandler handler = (DefaultInterceptorHandler) fieldValue;
+                            return handler.getTarget();
+                        } else {
+                            throw new IllegalStateException("Expected OwbInterceptorProxy handler to be an instance of Default Interceptor Handler.");
+                        }
+                    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             });
 
             SystemInstance.get().addObserver(new LifecycleManager());
@@ -134,11 +175,12 @@ public final class CxfUtil {
     }
 
     private static void initAuthenticators() { // TODO: drop when we get a fully supporting java 9 version of CXF
+/*      Removing to bump to CXF 3.3.0 which supports Java 11  
         try {
             CXFAuthenticator.addAuthenticator();
         } catch (final RuntimeException re) {
             // we swallow it while cxf doesnt support java 9, this workaround is enough to make most of cases passing
-        }
+        }*/
     }
 
     public static Bus getBus() {
@@ -304,7 +346,6 @@ public final class CxfUtil {
                 final InstrumentationManagerImpl manager = InstrumentationManagerImpl.class.cast(mgr);
                 manager.setEnabled(true);
                 manager.setServer(LocalMBeanServer.get());
-                manager.setDaemon(true);
 
                 try { // avoid to bother our nice logs
                     LogUtils.getL7dLogger(InstrumentationManagerImpl.class).setLevel(Level.WARNING);

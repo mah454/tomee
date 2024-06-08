@@ -16,7 +16,7 @@
         ServerUrl = tcp://someHostName:61616
     </Resource>
 
-    <Resource id="MyJmsConnectionFactory" type="javax.jms.ConnectionFactory">
+    <Resource id="MyJmsConnectionFactory" type="jakarta.jms.ConnectionFactory">
         ResourceAdapter = MyJmsResourceAdapter
     </Resource>
 
@@ -24,8 +24,8 @@
         ResourceAdapter = MyJmsResourceAdapter
     </Container>
 
-    <Resource id="FooQueue" type="javax.jms.Queue"/>
-    <Resource id="BarTopic" type="javax.jms.Topic"/>
+    <Resource id="FooQueue" type="jakarta.jms.Queue"/>
+    <Resource id="BarTopic" type="jakarta.jms.Topic"/>
 </tomee>
 ----
 
@@ -43,7 +43,7 @@ work, such as 'failover:'.
         ServerUrl       =  tcp://someHostName:61616
     </Resource>
 
-    <Resource id="MyJmsConnectionFactory" type="javax.jms.ConnectionFactory">
+    <Resource id="MyJmsConnectionFactory" type="jakarta.jms.ConnectionFactory">
         ResourceAdapter = MyJmsResourceAdapter
     </Resource>
 
@@ -51,8 +51,8 @@ work, such as 'failover:'.
         ResourceAdapter = MyJmsResourceAdapter
     </Container>
 
-    <Resource id="FooQueue" type="javax.jms.Queue"/>
-    <Resource id="BarTopic" type="javax.jms.Topic"/>
+    <Resource id="FooQueue" type="jakarta.jms.Queue"/>
+    <Resource id="BarTopic" type="jakarta.jms.Topic"/>
 </tomee>
 ----
 
@@ -120,7 +120,7 @@ belog.
         ServerUrl       =  tcp://someHostName:61616
     </Resource>
 
-    <Resource id="MyJmsConnectionFactory" type="javax.jms.ConnectionFactory">
+    <Resource id="MyJmsConnectionFactory" type="jakarta.jms.ConnectionFactory">
         ResourceAdapter = MyJmsResourceAdapter
     </Resource>
 
@@ -128,8 +128,8 @@ belog.
         ResourceAdapter = MyJmsResourceAdapter
     </Container>
 
-    <Resource id="FooQueue" type="javax.jms.Queue"/>
-    <Resource id="BarTopic" type="javax.jms.Topic"/>
+    <Resource id="FooQueue" type="jakarta.jms.Queue"/>
+    <Resource id="BarTopic" type="jakarta.jms.Topic"/>
 </tomee>
 ----
 
@@ -149,14 +149,14 @@ p.put("MyJmsResourceAdapter", "new://Resource?type=ActiveMQResourceAdapter");
 p.put("MyJmsResourceAdapter.ServerUrl", "tcp://someHostName:61616");
 p.put("MyJmsResourceAdapter.BrokerXmlConfig", "");
 
-p.put("MyJmsConnectionFactory", "new://Resource?type=javax.jms.ConnectionFactory");
+p.put("MyJmsConnectionFactory", "new://Resource?type=jakarta.jms.ConnectionFactory");
 p.put("MyJmsConnectionFactory.ResourceAdapter", "MyJmsResourceAdapter");
 
 p.put("MyJmsMdbContainer", "new://Container?type=MESSAGE");
 p.put("MyJmsMdbContainer.ResourceAdapter", "MyJmsResourceAdapter");
 
-p.put("FooQueue", "new://Resource?type=javax.jms.Queue");
-p.put("BarTopic", "new://Resource?type=javax.jms.Topic");
+p.put("FooQueue", "new://Resource?type=jakarta.jms.Queue");
+p.put("BarTopic", "new://Resource?type=jakarta.jms.Topic");
 
 InitialContext context = new InitialContext(p);
 ----
@@ -168,195 +168,119 @@ above resources like so:
 
 [source,properties]
 ----
-javax.jms.ConnectionFactory cf = (ConnectionFactory)
+jakarta.jms.ConnectionFactory cf = (ConnectionFactory)
         context.lookup("openejb:Resource/MyJmsConnectionFactory");
 
-javax.jms.Queue queue = (Queue) context.lookup("openejb:Resource/FooQueue");
-javax.jms.Topic topic = (Topic) context.lookup("openejb:Resource/BarTopic");
+jakarta.jms.Queue queue = (Queue) context.lookup("openejb:Resource/FooQueue");
+jakarta.jms.Topic topic = (Topic) context.lookup("openejb:Resource/BarTopic");
 ----
 
 == MDB ActivationConfig
 
 Here, the value for `destination` is the physical name of the desired
 destination. The value for `destinationType` is the class name that
-defines the type of destination. It should be `javax.jms.Queue` or
-`javax.jms.Topic`.
+defines the type of destination. It should be `jakarta.jms.Queue` or
+`jakarta.jms.Topic`.
 
 The Activation Spec properties that can be configured are:
 
-Property Name
-
-Required
-
-Default Value
-
-Description
-
-acknowledgeMode
-
-no
-
-Auto-acknowledge
-
-The JMS Acknowledgement mode to use. Valid values are: Auto-acknowledge
-or Dups-ok-acknowledge
-
-clientId
-
-no
-
-set in resource adapter
-
-The JMS Client ID to use (only really required for durable topics)
-
-destinationType
-
-yes
-
-null
-
-The type of destination; a queue or topic
-
-destination
-
-yes
-
-null
-
-The destination name (queue or topic name)
-
-enableBatch
-
-no
-
-false
-
-Used to enable transaction batching for increased performance
-
-maxMessagesPerBatch
-
-no
-
-10
-
-The number of messages per transaction batch
-
-maxMessagesPerSessions
-
-no
-
-10
-
-This is actually the prefetch size for the subscription. (Yes, badly
-named).
-
-maxSessions
-
-no
-
-10
-
-The maximum number of concurrent sessions to use
-
-messageSelector
-
-no
-
-null
-
-Message Selector to use on the subscription to perform content based
-routing filtering the messages
-
-noLocal
-
-no
-
-false
-
-Only required for topic subscriptions; indicates if locally published
-messages should be included in the subscription or not
-
-password
-
-no
-
-set in resource adapter
-
-The password for the JMS connection
-
-subscriptionDurability
-
-no
-
-NonDurable
-
-Whether or not a durable (topic) subscription is required. Valid values
-are: Durable or NonDurable
-
-subscriptionName
-
-no
-
-null
-
-The name of the durable subscriber. Only used for durable topics and
-combined with the clientID to uniquely identify the durable topic
-subscription
-
-userName
-
-no
-
-set in resource adapter
-
-The user for the JMS connection
-
-useRAManagedTransaction
-
-no
-
-false
-
-Typically, a resource adapter delivers messages to an endpoint which is
-managed by a container. Normally, this container likes to be the one
-that wants to control the transaction that the inbound message is being
-delivered on. But sometimes, you want to deliver to a simpler container
-system that will not be controlling the inbound transaction. In these
-cases, if you set useRAManagedTransaction to true, the resource adapter
-will commit the transaction if no exception was generated from the
-MessageListener and rollback if an exception is thrown.
-
-initialRedeliveryDelay
-
-no
-
-1000
-
-The delay before redeliveries start. Also configurable on the
-ResourceAdapter
-
-maximumRedeliveries
-
-no
-
-5
-
-The maximum number of redeliveries or -1 for no maximum. Also
-configurable on the ResourceAdapter
-
-redeliveryBackOffMultiplier
-
-no
-
-5
-
-The multiplier to use if exponential back off is enabled. Also
-configurable on the ResourceAdapter
-
-redeliveryUseExponentialBackOff
-
-no
-
-false
-
-To enable exponential backoff. Also configurable on the ResourceAdapter
+[.table.table-bordered,options="header"]
+|===
+|Property Name |Required |Default Value |Description
+
+|*acknowledgeMode*
+|no
+|_Auto-acknowledge_
+|The JMS Acknowledgement mode to use. Valid values are: Auto-acknowledge or Dups-ok-acknowledge
+
+|*clientId*
+|no
+|_set in resource adapter_
+|The JMS Client ID to use (only really required for durable topics)
+
+|*destinationType*
+|yes
+|_null_
+|The type of destination; a queue or topic
+
+|*destination*
+|yes
+|_null_
+|The destination name (queue or topic name)
+
+|*enableBatch*
+|no
+|_false_
+|Used to enable transaction batching for increased performance
+
+|*maxMessagesPerBatch*
+|no
+|_10_
+|The number of messages per transaction batch
+
+|*maxMessagesPerSessions*
+|no
+|_10_
+|This is actually the prefetch size for the subscription. (Yes, badlynamed).
+
+|*maxSessions*
+|no
+|_10_
+|The maximum number of concurrent sessions to use
+
+|*messageSelector*
+|no
+|null
+|Message Selector to use on the subscription to perform content based routing filtering the messages
+
+|*noLocal*
+|no
+|_false_
+|Only required for topic subscriptions; indicates if locally published messages should be included in the subscription or not
+
+|*password*
+|no
+|_set in resource adapter_
+|The password for the JMS connection
+
+|*subscriptionDurability*
+|no
+|_NonDurable_
+|Whether or not a durable (topic) subscription is required. Valid values are: Durable or NonDurable
+
+|*subscriptionName*
+|no
+|_null_
+|The name of the durable subscriber. Only used for durable topics and combined with the clientID to uniquely identify the durable topic subscription
+
+|*userName*
+|no
+|_set in resource adapter_
+|The user for the JMS connection
+
+|*useRAManagedTransaction*
+|no
+|_false_
+|Typically, a resource adapter delivers messages to an endpoint which is managed by a container. Normally, this container likes to be the one that wants to control the transaction that the inbound message is being delivered on. But sometimes, you want to deliver to a simpler container system that will not be controlling the inbound transaction. In these cases, if you set useRAManagedTransaction to true, the resource adapter will commit the transaction if no exception was generated from the MessageListener and rollback if an exception is thrown.
+
+|*initialRedeliveryDelay*
+|no
+|_1000_
+|The delay before redeliveries start. Also configurable on the ResourceAdapter
+
+|*maximumRedeliveries*
+|no
+|_5_
+|The maximum number of redeliveries or -1 for no maximum. Also configurable on the ResourceAdapter
+
+|*redeliveryBackOffMultiplier*
+|no
+|_5_
+|The multiplier to use if exponential back off is enabled. Also configurable on the ResourceAdapter
+
+|*redeliveryUseExponentialBackOff*
+|no
+|_false_
+|To enable exponential backoff. Also configurable on the ResourceAdapter
+
+|===

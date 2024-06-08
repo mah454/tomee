@@ -16,32 +16,32 @@
  */
 package org.apache.openejb.jee.was.v6.ecore;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * <p/>
+ *
  * Java class for EStructuralFeature complex type.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained within
  * this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="EStructuralFeature">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.eclipse.org/emf/2002/Ecore}ETypedElement">
- *       &lt;attribute name="changeable" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="defaultValueLiteral" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="derived" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="transient" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="unsettable" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="volatile" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="EStructuralFeature"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{http://www.eclipse.org/emf/2002/Ecore}ETypedElement"&gt;
+ *       &lt;attribute name="changeable" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="defaultValueLiteral" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="derived" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="transient" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="unsettable" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="volatile" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)

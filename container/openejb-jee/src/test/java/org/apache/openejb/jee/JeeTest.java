@@ -26,7 +26,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.*;
+import jakarta.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -167,7 +167,7 @@ public class JeeTest extends TestCase {
 
         final NamedMethod timeoutMethod = timer.getTimeoutMethod();
         assertEquals("testScheduleMethod", timeoutMethod.getMethodName());
-        assertEquals("javax.ejb.Timer", timeoutMethod.getMethodParams().getMethodParam().get(0));
+        assertEquals("jakarta.ejb.Timer", timeoutMethod.getMethodParams().getMethodParam().get(0));
 
         assertEquals(Boolean.FALSE, timer.getPersistent());
         assertEquals("America/New_York", timer.getTimezone());
@@ -191,13 +191,13 @@ public class JeeTest extends TestCase {
         <message-selector>mySelector</message-selector>
         <acknowledge-mode>Auto-acknowledge</acknowledge-mode>
         <message-driven-destination>
-        <destination-type>javax.jms.Queue</destination-type>
+        <destination-type>jakarta.jms.Queue</destination-type>
         <subscription-durability>Durable</subscription-durability>
 
          */
         assertEquals("mySelector", properties.get("messageSelector"));
         assertEquals("Auto-acknowledge", properties.get("acknowledgeMode"));
-        assertEquals("javax.jms.Queue", properties.get("destinationType"));
+        assertEquals("jakarta.jms.Queue", properties.get("destinationType"));
         assertEquals("Durable", properties.get("subscriptionDurability"));
     }
 
@@ -217,10 +217,14 @@ public class JeeTest extends TestCase {
         marshalAndUnmarshal(WebApp.class, "web_2.3-example.xml", "web_2.3-example-expected.xml");
     }
 
+    public void testWar5() throws Exception {
+        marshalAndUnmarshal(WebApp.class, "web_5-example.xml", "web_5-example-expected.xml");
+    }
+
     public void testTld() throws Exception {
         marshalAndUnmarshal(TldTaglib.class, "tld-example.xml", null);
     }
-
+    
     public void testRar10() throws Exception {
         final Connector10 c10 = marshalAndUnmarshal(Connector10.class, "connector-1.0-example.xml", null);
         final Connector c = Connector.newConnector(c10);
@@ -258,8 +262,7 @@ public class JeeTest extends TestCase {
     public void testWebServiceHandlers() throws Exception {
         final QName[] expectedServiceNames = {new QName("http://www.helloworld.org", "HelloService", "ns1"), new QName("http://www.bar.org", "HelloService", "bar"),
             new QName("http://www.bar1.org", "HelloService", "bar"), new QName(XMLConstants.NULL_NS_URI, "HelloService", "foo"), new QName(XMLConstants.NULL_NS_URI, "*"), null};
-        final InputStream in = this.getClass().getClassLoader().getResourceAsStream("handler.xml");
-        try {
+        try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("handler.xml")) {
             final HandlerChains handlerChains = (HandlerChains) JaxbJavaee.unmarshalHandlerChains(HandlerChains.class, in);
             for (int index = 0; index < handlerChains.getHandlerChain().size(); index++) {
                 final HandlerChain handlerChain = handlerChains.getHandlerChain().get(index);
@@ -272,9 +275,11 @@ public class JeeTest extends TestCase {
                 }
             }
             System.out.println(JaxbJavaee.marshal(HandlerChains.class, handlerChains));
-        } finally {
-            in.close();
         }
+    }
+    
+    public void testWebFragment() throws Exception {
+        marshalAndUnmarshal(WebFragment.class, "web-fragment-example.xml", null);
     }
 
     public static <T> T marshalAndUnmarshal(final Class<T> type, final String sourceXmlFile, final String expectedXmlFile) throws Exception {
@@ -305,7 +310,7 @@ public class JeeTest extends TestCase {
         try {
             StaxCompare.compare(expected, actual);
         } catch (final Exception e) {
-//            System.out.append(actual);
+            System.out.append(actual);
             writeToTmpFile(bytes, sourceXmlFile);
             throw e;
         }

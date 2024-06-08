@@ -24,10 +24,10 @@ import org.apache.openejb.testing.RandomPort;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.URL;
@@ -52,7 +52,7 @@ public class TestCLIFromJaxRSTest {
                 ClientBuilder.newClient().target(base.toExternalForm()).path("openejb/endpoint").request(MediaType.TEXT_PLAIN)
                         .get(String.class));
 
-        assertEquals("BeAUgMQKg6SzYbDM5vtzsQ==\n", out.toString());
+        assertEquals("BeAUgMQKg6SzYbDM5vtzsQ==" + System.lineSeparator(), out.toString());
     }
 
     @Path("endpoint")

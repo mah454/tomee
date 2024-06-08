@@ -21,34 +21,44 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.openejb.arquillian.tests</groupId>
   <version>1.0.0</version>
-  <artifactId>codi-deps</artifactId>
+  <artifactId>hibernate-deps</artifactId>
 
+  <properties>
+    <version.hibernate.orm>6.1.4.Final</version.hibernate.orm>
+    <version.hibernate.validator>7.0.5.Final</version.hibernate.validator>
+  </properties>
   <dependencies>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-entitymanager</artifactId>
-      <version>4.1.12.Final</version>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${version.hibernate.orm}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.hibernate.javax.persistence</groupId>
-          <artifactId>hibernate-jpa-2.0-api</artifactId>
+          <groupId>jakarta.persistence</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.jboss.spec.javax.transaction</groupId>
-          <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+          <groupId>jakarta.transaction</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>5.1.2.Final</version>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>${version.hibernate.validator}</version>
     </dependency>
   </dependencies>
 </project>

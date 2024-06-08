@@ -16,50 +16,50 @@
  */
 package org.apache.openejb.resource.activemq.jms2.cdi;
 
-import org.apache.openejb.OpenEJB;
 import org.apache.openejb.assembler.classic.OpenEjbConfiguration;
 import org.apache.openejb.assembler.classic.ResourceInfo;
 import org.apache.openejb.loader.SystemInstance;
+import org.apache.openejb.resource.activemq.jms2.JMS2;
 import org.apache.openejb.spi.ContainerSystem;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-import javax.jms.BytesMessage;
-import javax.jms.ConnectionFactory;
-import javax.jms.ConnectionMetaData;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSConnectionFactory;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSPasswordCredential;
-import javax.jms.JMSProducer;
-import javax.jms.JMSRuntimeException;
-import javax.jms.JMSSessionMode;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
-import javax.jms.StreamMessage;
-import javax.jms.TemporaryQueue;
-import javax.jms.TemporaryTopic;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.Annotated;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.ConnectionMetaData;
+import jakarta.jms.Destination;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSConnectionFactory;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSPasswordCredential;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.JMSSessionMode;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueBrowser;
+import jakarta.jms.StreamMessage;
+import jakarta.jms.TemporaryQueue;
+import jakarta.jms.TemporaryTopic;
+import jakarta.jms.TextMessage;
+import jakarta.jms.Topic;
 import javax.naming.NamingException;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionScoped;
+import jakarta.transaction.TransactionScoped;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 // this extension adds to CDI a producer a JMSContext,
@@ -98,7 +98,7 @@ public class JMS2CDIExtension implements Extension {
             final OpenEjbConfiguration component = SystemInstance.get().getComponent(OpenEjbConfiguration.class);
             if (component != null && component.facilities != null) {
                 for (final ResourceInfo ri : component.facilities.resources) {
-                    if (!ri.types.contains("javax.jms.ConnectionFactory")) {
+                    if (!ri.types.contains("jakarta.jms.ConnectionFactory")) {
                         continue;
                     }
                     if (ri.id.equals(value)) {
@@ -107,7 +107,7 @@ public class JMS2CDIExtension implements Extension {
                 }
                 // try application ones
                 for (final ResourceInfo ri : component.facilities.resources) {
-                    if (!ri.types.contains("javax.jms.ConnectionFactory")) {
+                    if (!ri.types.contains("jakarta.jms.ConnectionFactory")) {
                         continue;
                     }
                     if (ri.id.endsWith(value)) {
@@ -124,7 +124,7 @@ public class JMS2CDIExtension implements Extension {
             final OpenEjbConfiguration component = SystemInstance.get().getComponent(OpenEjbConfiguration.class);
             if (component != null && component.facilities != null) {
                 for (final ResourceInfo ri : component.facilities.resources) {
-                    if (ri.types.contains("javax.jms.ConnectionFactory")) {
+                    if (ri.types.contains("jakarta.jms.ConnectionFactory")) {
                         return ri.id;
                     }
                 }
@@ -139,6 +139,7 @@ public class JMS2CDIExtension implements Extension {
     }
 
     public abstract static class AutoContextDestruction implements Serializable {
+          private static final long serialVersionUID = 1L;
         private transient Map<Key, JMSContext> contexts = new ConcurrentHashMap<>();
 
         public void push(final Key key, final JMSContext c) {
@@ -169,13 +170,16 @@ public class JMS2CDIExtension implements Extension {
 
     @RequestScoped
     public static class RequestAutoContextDestruction extends AutoContextDestruction {
+        private static final long serialVersionUID = 1L;
     }
 
     @TransactionScoped
     public static class TransactionAutoContextDestruction extends AutoContextDestruction {
+        private static final long serialVersionUID = 1L;
     }
 
     public static class Key implements Serializable {
+        private static final long serialVersionUID = 1L;
         private volatile ConnectionFactory connectionFactoryInstance;
         private final String connectionFactory;
         private final String username;
@@ -238,7 +242,7 @@ public class JMS2CDIExtension implements Extension {
             return connectionFactory != null ? connectionFactory.equals(key.connectionFactory) : key.connectionFactory == null
                 && (username != null ? username.equals(key.username) : key.username == null
                 && (password != null ? password.equals(key.password) : key.password == null
-                && (session != null ? session.equals(key.session) : key.session == null)));
+                && (Objects.equals(session, key.session))));
 
         }
 
@@ -249,6 +253,7 @@ public class JMS2CDIExtension implements Extension {
     }
 
     public static class InternalJMSContext implements JMSContext, Serializable {
+        private static final long serialVersionUID = 1L;
         private final Key key;
         private final RequestAutoContextDestruction requestStorage;
         private final TransactionAutoContextDestruction transactionStorage;
@@ -260,7 +265,7 @@ public class JMS2CDIExtension implements Extension {
         }
 
         private synchronized JMSContext context() {
-            if (inTx()) {
+            if (JMS2.inTx()) {
                 return findOrCreateContext(transactionStorage);
             }
             return findOrCreateContext(requestStorage);
@@ -273,14 +278,6 @@ public class JMS2CDIExtension implements Extension {
                 storage.push(key, jmsContext);
             }
             return jmsContext;
-        }
-
-        private boolean inTx() {
-            try {
-                return OpenEJB.getTransactionManager().getTransaction() != null;
-            } catch (SystemException e) {
-                return false;
-            }
         }
 
         // plain delegation now
@@ -497,8 +494,8 @@ public class JMS2CDIExtension implements Extension {
     }
 
     public void addContextProducer(@Observes final BeforeBeanDiscovery beforeBeanDiscovery, final BeanManager beanManager) {
-        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(ContextProducer.class));
-        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(RequestAutoContextDestruction.class));
-        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(TransactionAutoContextDestruction.class));
+        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(ContextProducer.class), ContextProducer.class.getSimpleName());
+        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(RequestAutoContextDestruction.class), RequestAutoContextDestruction.class.getSimpleName());
+        beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(TransactionAutoContextDestruction.class), TransactionAutoContextDestruction.class.getSimpleName());
     }
 }

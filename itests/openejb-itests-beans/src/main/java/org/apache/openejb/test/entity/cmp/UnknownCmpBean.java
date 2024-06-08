@@ -20,11 +20,11 @@ package org.apache.openejb.test.entity.cmp;
 import org.apache.openejb.test.ApplicationException;
 import org.apache.openejb.test.object.OperationsPolicy;
 
-import javax.ejb.EJBException;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
-import javax.ejb.EntityBean;
-import javax.ejb.CreateException;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.EntityContext;
+import jakarta.ejb.RemoveException;
+import jakarta.ejb.EntityBean;
+import jakarta.ejb.CreateException;
 import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -43,7 +43,7 @@ public class UnknownCmpBean implements EntityBean {
 
     /**
      * Maps to BasicCmpHome.sum
-     * <p/>
+     *
      * Adds x and y and returns the result.
      *
      * @param x
@@ -121,7 +121,7 @@ public class UnknownCmpBean implements EntityBean {
 
     /**
      * Maps to BasicCmpObject.getPermissionsReport
-     * <p/>
+     *
      * Returns a report of the bean's
      * runtime permissions
      *
@@ -135,7 +135,7 @@ public class UnknownCmpBean implements EntityBean {
 
     /**
      * Maps to BasicCmpObject.getAllowedOperationsReport
-     * <p/>
+     *
      * Returns a report of the allowed opperations
      * for one of the bean's methods.
      *

@@ -18,12 +18,13 @@ package org.apache.openejb.server.cxf.rs.johnzon;
 
 import org.apache.johnzon.jaxrs.JsrProvider;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.ext.Provider;
+import jakarta.activation.DataSource;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.ws.rs.ext.Provider;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -40,6 +41,7 @@ public class TomEEJsonpProvider extends JsrProvider {
                 && !OutputStream.class.isAssignableFrom(rawType)
                 && !StreamingOutput.class.isAssignableFrom(rawType)
                 && !Writer.class.isAssignableFrom(rawType)
-                && !Response.class.isAssignableFrom(rawType);
+                && !Response.class.isAssignableFrom(rawType)
+                && !DataSource.class.isAssignableFrom(rawType);
     }
 }

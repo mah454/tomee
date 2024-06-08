@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@ package org.superbiz.enricher.maven;
 import org.jboss.shrinkwrap.api.container.LibraryContainer;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 
-import javax.enterprise.inject.ResolutionException;
+import jakarta.enterprise.inject.ResolutionException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,12 +40,12 @@ public final class Enrichers {
                 CACHE.put(pom, Maven.resolver()
                         .offline(true)
                         .loadPomFromFile(pom)
-                        .importRuntimeAndTestDependencies().resolve().withTransitivity()
+                        .importCompileAndRuntimeDependencies().resolve().withTransitivity()
                         .asFile());
             } catch (ResolutionException re) { // try on central
                 CACHE.put(pom, Maven.resolver()
                         .loadPomFromFile(pom)
-                        .importRuntimeAndTestDependencies().resolve().withTransitivity()
+                        .importCompileAndRuntimeDependencies().resolve().withTransitivity()
                         .asFile());
             }
         }

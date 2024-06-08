@@ -22,14 +22,13 @@ import org.metatype.sxc.jaxb.JAXBObject;
 import org.metatype.sxc.jaxb.RuntimeContext;
 import org.metatype.sxc.util.PrettyPrintXMLStreamWriter;
 import org.metatype.sxc.util.RuntimeXMLStreamException;
-import org.metatype.sxc.util.XmlFactories;
 import org.metatype.sxc.util.XoXMLStreamReader;
 import org.metatype.sxc.util.XoXMLStreamReaderImpl;
 import org.metatype.sxc.util.XoXMLStreamWriter;
 import org.metatype.sxc.util.XoXMLStreamWriterImpl;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.MarshalException;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.MarshalException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -41,7 +40,6 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -128,14 +126,8 @@ public class Sxc {
     }
 
     public static <T> T unmarshalJavaee(final URL resource, final JAXBObject<T> jaxbType) throws Exception {
-        final InputStream inputStream = resource.openStream();
-        try {
+        try (InputStream inputStream = resource.openStream()) {
             return unmarshalJavaee(jaxbType, inputStream);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e1) {
-            }
         }
     }
 

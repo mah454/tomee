@@ -20,8 +20,8 @@ import junit.framework.TestCase;
 import org.apache.openejb.jee.EjbJar;
 import org.apache.openejb.jee.SingletonBean;
 
-import javax.ejb.EJB;
-import javax.ejb.embeddable.EJBContainer;
+import jakarta.ejb.EJB;
+import jakarta.ejb.embeddable.EJBContainer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,9 +75,7 @@ public class OpenEjbContainerTest extends TestCase {
             ejbJar.addEnterpriseBean(new SingletonBean(Widget.class));
             map.put(EJBContainer.MODULES, ejbJar);
 
-            final OpenEjbContainer openEjbContainer = (OpenEjbContainer) EJBContainer.createEJBContainer(map);
-
-            try {
+            try (OpenEjbContainer openEjbContainer = (OpenEjbContainer) EJBContainer.createEJBContainer(map)) {
                 Injector.inject(this);
 
                 assertNotNull(widget);
@@ -85,8 +83,6 @@ public class OpenEjbContainerTest extends TestCase {
                 widget = null;
 
                 openEjbContainer.getContext().bind("inject", this);
-            } finally {
-                openEjbContainer.close();
             }
 
         }

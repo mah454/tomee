@@ -20,9 +20,9 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
+import jakarta.ejb.CreateException;
+import jakarta.ejb.EntityBean;
+import jakarta.ejb.EntityContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -57,7 +57,7 @@ public abstract class AllowedOperationsCmp2Bean implements EntityBean {
 
     /**
      * Maps to BasicCmpHome.sum
-     * <p/>
+     *
      * Adds x and y and returns the result.
      */
     public int ejbHomeSum(final int x, final int y) {
@@ -123,7 +123,7 @@ public abstract class AllowedOperationsCmp2Bean implements EntityBean {
 
     /**
      * Maps to BasicCmpObject.getPermissionsReport
-     * <p/>
+     *
      * Returns a report of the bean's
      * runtime permissions
      */
@@ -134,7 +134,7 @@ public abstract class AllowedOperationsCmp2Bean implements EntityBean {
 
     /**
      * Maps to BasicCmpObject.getAllowedOperationsReport
-     * <p/>
+     *
      * Returns a report of the allowed opperations
      * for one of the bean's methods.
      *

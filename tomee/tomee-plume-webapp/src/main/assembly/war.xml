@@ -66,11 +66,12 @@
         <include>**/*.html</include>
         <include>**/*.css</include>
         <include>**/*.js</include>
+        <!-- libs are handled with dependencies because exclude don't work too well bellow -->
+        <!-- if some deps are missing, they should be added as project dependencies -->
         <include>lib/*.jar</include>
       </includes>
       <excludes>
-        <exclude>lib/myfaces*.jar</exclude>
-        <exclude>lib/tomee-myfaces*.jar</exclude>
+        <exclude>%regex[(WEB-INF/)?lib/(tomee-)?myfaces(-api|-impl)?-.*.jar]</exclude>
       </excludes>
     </fileSet>
   </fileSets>
@@ -78,6 +79,8 @@
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
       <scope>runtime</scope>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <!-- provided -->
         <exclude>org.apache.tomcat:*</exclude>
@@ -86,17 +89,76 @@
         <!-- should be in a pom exclusion but it does perfectly the trick -->
         <exclude>org.springframework:*</exclude>
 
+        <exclude>*:jakarta.jws-api:*</exclude>
+        <exclude>*:jakarta.xml.bind-api:*</exclude>
+        <exclude>*:jakarta.xml.ws-api:*</exclude>
+
         <!-- wars and pom -->
         <exclude>*:war</exclude>
         <exclude>*:pom</exclude>
+        <exclude>org.apache.geronimo.specs:geronimo-javamail_1.5_spec</exclude>
+        <exclude>org.apache.geronimo.javamail:geronimo-javamail_1.5_mail</exclude>
+        <exclude>org.apache.geronimo.specs:geronimo-javamail_1.4_spec</exclude>
+        <exclude>org.apache.geronimo.javamail:geronimo-javamail_1.4_mail</exclude>
+
+        <!--
+        list bellow should not be required because Maven should exclude them but looks like sometimes
+        it picks up transitive dependencies from shaded libraries
+        -->
+        <!-- exclude shaded artifacts because they are under our own groupId -->
+        <exclude>org.apache.commons.dbcp2:*</exclude>
+        <exclude>org.metatype.sxc:*</exclude>
+        <exclude>org.apache.taglibs:*</exclude>
+
+        <!-- jakartaee-api -->
+        <exclude>com.sun.mail:*</exclude>
+        <exclude>jakarta.activation:*</exclude>
+        <exclude>jakarta.annotation:*</exclude>
+        <exclude>jakarta.authentication:*</exclude>
+        <exclude>jakarta.authorization:*</exclude>
+        <exclude>jakarta.batch:*</exclude>
+        <exclude>jakarta.ejb:*</exclude>
+        <exclude>jakarta.el:*</exclude>
+        <exclude>jakarta.enterprise:*</exclude>
+        <exclude>jakarta.enterprise.concurrent:*</exclude>
+        <exclude>jakarta.faces:*</exclude>
+        <exclude>jakarta.inject:*</exclude>
+        <exclude>jakarta.interceptor:*</exclude>
+        <exclude>jakarta.jms:*</exclude>
+        <exclude>jakarta.json:*</exclude>
+        <exclude>jakarta.json.bind:*</exclude>
+        <exclude>jakarta.jws:*</exclude>
+        <exclude>jakarta.mail:*</exclude>
+        <exclude>jakarta.persistence:*</exclude>
+        <exclude>jakarta.platform:*</exclude>
+        <exclude>jakarta.resource:*</exclude>
+        <exclude>jakarta.security.enterprise:*</exclude>
+        <exclude>jakarta.servlet:*</exclude>
+        <exclude>jakarta.servlet.jsp:*</exclude>
+        <exclude>jakarta.servlet.jsp.jstl:*</exclude>
+        <exclude>jakarta.transaction:*</exclude>
+        <exclude>jakarta.validation:*</exclude>
+        <exclude>jakarta.websocket:*</exclude>
+        <exclude>jakarta.ws.rs:*</exclude>
+        <exclude>jakarta.xml.bind:*</exclude>
+        <exclude>jakarta.xml.soap:*</exclude>
       </excludes>
     </dependencySet>
     <dependencySet>
       <outputDirectory>WEB-INF/lib</outputDirectory>
       <scope>runtime</scope>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
       <includes>
         <include>org.apache.tomee:tomee-loader</include>
         <include>org.codehaus.swizzle:swizzle-stream</include>
+      </includes>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>WEB-INF/lib</outputDirectory>
+      <scope>compile</scope>
+      <includes>
+        <include>org.apache.tomee:tomee-common</include>
       </includes>
     </dependencySet>
   </dependencySets>

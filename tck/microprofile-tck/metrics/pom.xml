@@ -15,37 +15,47 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.tomee</groupId>
     <artifactId>microprofile-tck</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
 
   <artifactId>microprofile-metrics-tck</artifactId>
-  <name>OpenEJB :: TCK :: MicroProfile Metrics TCK</name>
+  <name>TomEE :: TCK :: MicroProfile Metrics TCK</name>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
+        <version>3.2.5</version>
         <configuration>
           <reuseForks>false</reuseForks>
           <dependenciesToScan>
             <dependency>org.eclipse.microprofile.metrics:microprofile-metrics-api-tck</dependency>
             <dependency>org.eclipse.microprofile.metrics:microprofile-metrics-rest-tck</dependency>
+            <dependency>org.eclipse.microprofile.metrics:microprofile-metrics-optional-tck</dependency>
           </dependenciesToScan>
+          <excludes>
+            <!-- Exclude some of the OPTIONAL tests because they aren't supported in TomEE and result in failures atm -->
+            <!-- MPMetricBaseMetricsTest.testGcTimeMetrics -->
+            <exclude>**/MPMetricBaseMetricsTest.java</exclude>
+            <!--
+             org.eclipse.microprofile.metrics.test.optional.MpMetricOptionalTest.testGetUnmappedArithException
+             org.eclipse.microprofile.metrics.test.optional.MpMetricOptionalTest.testPostUnmappedArithException
+            -->
+            <exclude>**/MpMetricOptionalTest.java</exclude>
+          </excludes>
           <environmentVariables>
             <MP_METRICS_TAGS>tier=integration</MP_METRICS_TAGS>
           </environmentVariables>
           <systemPropertyVariables>
-            <test.url>http://localhost:50290</test.url>
+            <java.io.tmpdir>./target</java.io.tmpdir>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -67,8 +77,10 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
+                  <reuseForks>false</reuseForks>
                   <systemPropertyVariables>
                     <arquillian.launch>tomee-plus</arquillian.launch>
+                    <java.io.tmpdir>./target</java.io.tmpdir>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -78,8 +90,10 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
+                  <reuseForks>false</reuseForks>
                   <systemPropertyVariables>
                     <arquillian.launch>tomee-plume</arquillian.launch>
+                    <java.io.tmpdir>./target</java.io.tmpdir>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -94,14 +108,12 @@
     <dependency>
       <groupId>org.eclipse.microprofile.metrics</groupId>
       <artifactId>microprofile-metrics-api</artifactId>
-      <version>${microprofile.metrics.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.eclipse.microprofile.metrics</groupId>
       <artifactId>microprofile-metrics-api-tck</artifactId>
-      <version>${microprofile.metrics.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.jboss.arquillian.container</groupId>
@@ -114,7 +126,13 @@
     <dependency>
       <groupId>org.eclipse.microprofile.metrics</groupId>
       <artifactId>microprofile-metrics-rest-tck</artifactId>
-      <version>${microprofile.metrics.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.microprofile.metrics</groupId>
+      <artifactId>microprofile-metrics-optional-tck</artifactId>
+      <version>${version.microprofile.metrics}</version>
       <scope>test</scope>
     </dependency>
 

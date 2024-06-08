@@ -20,22 +20,22 @@ package org.apache.openejb.core.transaction;
 import org.apache.openejb.ApplicationException;
 import org.apache.openejb.SystemException;
 
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
 import java.rmi.RemoteException;
 
 /**
  * 17.6.2.6 Never
- * <p/>
+ *
  * The Container invokes an enterprise Bean method whose transaction attribute
  * is set to Never without a transaction context defined by the EJB spec.
- * <p/>
+ *
  * The client is required to call without a transaction context.
- * <p/>
+ *
  * If the client calls with a transaction context, the Container throws:<ul>
  * <li>java.rmi.RemoteException exception if the client is a remote client</li>
- * <li>javax.ejb.EJBException if the client is a local client</li> </ul>
- * <p/>
+ * <li>jakarta.ejb.EJBException if the client is a local client</li> </ul>
+ *
  * If the client calls without a transaction context, the Container performs the
  * same steps as described in the NotSupported case.
  */

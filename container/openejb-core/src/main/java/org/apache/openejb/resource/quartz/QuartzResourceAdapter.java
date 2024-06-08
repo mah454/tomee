@@ -30,13 +30,13 @@ import org.apache.openejb.util.JavaSecurityManagers;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 
-import javax.resource.ResourceException;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ResourceAdapterInternalException;
-import javax.resource.spi.endpoint.MessageEndpoint;
-import javax.resource.spi.endpoint.MessageEndpointFactory;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ActivationSpec;
+import jakarta.resource.spi.BootstrapContext;
+import jakarta.resource.spi.ResourceAdapter;
+import jakarta.resource.spi.ResourceAdapterInternalException;
+import jakarta.resource.spi.endpoint.MessageEndpoint;
+import jakarta.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
@@ -82,8 +82,6 @@ public class QuartzResourceAdapter implements ResourceAdapter {
             , JavaSecurityManagers.getSystemProperty(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN_WITH_WAIT, "true"));
 
         //Let the user enable this if they really want it
-        JavaSecurityManagers.setSystemProperty(StdSchedulerFactory.PROP_SCHED_SKIP_UPDATE_CHECK
-            , JavaSecurityManagers.getSystemProperty(StdSchedulerFactory.PROP_SCHED_SKIP_UPDATE_CHECK, "true"));
         JavaSecurityManagers.setSystemProperty("org.terracotta.quartz.skipUpdateCheck"
             , JavaSecurityManagers.getSystemProperty("org.terracotta.quartz.skipUpdateCheck", "true"));
 

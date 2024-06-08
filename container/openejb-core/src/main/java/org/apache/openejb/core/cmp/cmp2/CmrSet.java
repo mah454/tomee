@@ -20,11 +20,11 @@ package org.apache.openejb.core.cmp.cmp2;
 import org.apache.openejb.BeanContext;
 import org.apache.openejb.loader.SystemInstance;
 
-import javax.ejb.EJBException;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EntityBean;
-import javax.transaction.Synchronization;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.EJBLocalObject;
+import jakarta.ejb.EntityBean;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -90,8 +90,7 @@ public class CmrSet<Bean extends EntityBean, Proxy extends EJBLocalObject> exten
     public boolean addAll(final Collection c) {
         final Set<Bean> entityBeans = getEntityBeans(c, relatedLocal);
         boolean changed = false;
-        for (final Iterator<Bean> iterator = entityBeans.iterator(); iterator.hasNext(); ) {
-            final Bean bean = iterator.next();
+        for (final Bean bean : entityBeans) {
             changed = add(bean) || changed;
         }
         return changed;

@@ -23,15 +23,15 @@ import org.apache.openejb.server.cxf.rs.CxfRsHttpListener;
 import org.apache.openejb.server.httpd.ServletRequestAdapter;
 import org.apache.openejb.server.httpd.ServletResponseAdapter;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -77,6 +77,11 @@ public class CXFJAXRSFilter implements Filter {
 
         final HttpServletRequest httpServletRequest = HttpServletRequest.class.cast(request);
         final HttpServletResponse httpServletResponse = HttpServletResponse.class.cast(response);
+
+        if (!this.delegate.isCXFResource(httpServletRequest)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         if (CxfRsHttpListener.TRY_STATIC_RESOURCES) { // else 100% JAXRS
             if (servletMappingIsUnderRestPath(httpServletRequest)) {

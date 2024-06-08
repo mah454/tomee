@@ -16,14 +16,14 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +31,7 @@ import java.util.List;
  * The service-endpoint-method-mapping element defines the mapping of
  * Java methods to operations (which are not uniquely qualified by
  * qnames).
- * <p/>
+ *
  * The wsdl-operation should be interpreted with respect to the
  * portType and binding in which this definition is embedded within.
  * See the definitions for service-endpoint-interface-mapping and
@@ -39,7 +39,7 @@ import java.util.List;
  * wrapped-element indicator should only be specified when a WSDL
  * message wraps an element type.  The wsdl-return-value-mapping is
  * not specified for one-way operations.
- * <p/>
+ *
  * Used in: service-endpoint-interface-mapping
  */
 @XmlAccessorType(XmlAccessType.FIELD)

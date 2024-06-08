@@ -18,14 +18,14 @@
 package org.apache.openejb.core.cmp.cmp2;
 
 import org.apache.openejb.OpenEJBRuntimeException;
-import org.apache.xbean.asm7.ClassWriter;
-import org.apache.xbean.asm7.FieldVisitor;
-import org.apache.xbean.asm7.Label;
-import org.apache.xbean.asm7.MethodVisitor;
-import org.apache.xbean.asm7.Opcodes;
-import org.apache.xbean.asm7.Type;
+import org.apache.xbean.asm9.ClassWriter;
+import org.apache.xbean.asm9.FieldVisitor;
+import org.apache.xbean.asm9.Label;
+import org.apache.xbean.asm9.MethodVisitor;
+import org.apache.xbean.asm9.Opcodes;
+import org.apache.xbean.asm9.Type;
 
-import javax.ejb.EntityContext;
+import jakarta.ejb.EntityContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -180,7 +180,7 @@ public class Cmp2Generator implements Opcodes {
     public byte[] generate() {
         // generate the class as super class of the base bean class.  This class will also implment 
         // EntityBean and Cmp2Entity. 
-        cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, implClassName, null, beanClassName, new String[]{"org/apache/openejb/core/cmp/cmp2/Cmp2Entity", "javax/ejb/EntityBean"});
+        cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, implClassName, null, beanClassName, new String[]{"org/apache/openejb/core/cmp/cmp2/Cmp2Entity", "jakarta/ejb/EntityBean"});
 
         // public static Object deploymentInfo;
         {
@@ -558,15 +558,15 @@ public class Cmp2Generator implements Opcodes {
      * Create a simple internal method for obtaining the
      * primary key.  There are 2 possibilities for handling
      * the primary key here:
-     * <p/>
+     *
      * 1)  There is a defined primary key field.  The
      * contents of that field are returned.
-     * <p/>
+     *
      * 2)  The primary key is provided by the container.
      * This is a long value stored in a private, generated
      * field.  This field is returned as a generated
      * wrappered Long.
-     * <p/>
+     *
      * 3)  A primary key class has been provided.  An instance
      * of this class is instantiated, and code is generated
      * that will copy all of the CMP fields from the EJB
@@ -716,7 +716,7 @@ public class Cmp2Generator implements Opcodes {
         mv.visitMethodInsn(INVOKESPECIAL,
             cmrField.getAccessorInternalName(),
             "<init>",
-            "(Ljavax/ejb/EntityBean;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)V", false);
+            "(Ljakarta/ejb/EntityBean;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)V", false);
 
         // bCmr = result
         mv.visitFieldInsn(PUTFIELD,
@@ -751,7 +751,7 @@ public class Cmp2Generator implements Opcodes {
 
         // return this.${cmrField.name}Cmr.get(this.${cmdField.name});  
         // this takes the value stored in the CMR field (which might be a single value or 
-        // a Set or Collection), and hands it to the appropriate accessor. 
+        // a Set or Collection), and hands it to the appropriate accessor.
         mv.visitMethodInsn(INVOKEVIRTUAL, cmrField.getAccessorInternalName(), "get", cmrField.getCmrStyle().getGetterDescriptor(), false);
         // if the style is a single value, then we're going to need to cast this 
         // to the target class before returning.  
@@ -1130,7 +1130,7 @@ public class Cmp2Generator implements Opcodes {
         /**
          * Handle a conversion from one object type to another.  If
          * There are 3 possible conversions:
-         * <p/>
+         *
          * 1)  The to class is Object.  This can be handled
          * without conversion.  This option is a NOP.
          * 2)  The to class is a reference type (non-primitive).  This conversion
@@ -1244,7 +1244,7 @@ public class Cmp2Generator implements Opcodes {
     }
 
     public void createSetEntityContext() {
-        final MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "setEntityContext", "(Ljavax/ejb/EntityContext;)V", null, null);
+        final MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "setEntityContext", "(Ljakarta/ejb/EntityContext;)V", null, null);
         mv.visitCode();
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 2);

@@ -19,27 +19,22 @@
 
 <!-- $Rev: 600338 $ $Date: 2007-12-02 09:08:04 -0800 (Sun, 02 Dec 2007) $ -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <parent>
     <artifactId>tomee</artifactId>
     <groupId>org.apache.tomee</groupId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>tomee-embedded</artifactId>
   <packaging>jar</packaging>
-  <name>OpenEJB :: TomEE :: TomEE Embedded</name>
-  <version>8.0.0-SNAPSHOT</version>
+  <name>TomEE :: TomEE :: TomEE Embedded</name>
+  <version>10.0.0-M2-SNAPSHOT</version>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -47,7 +42,15 @@
           <archive combine.children="append">
             <manifest>
               <Main-Class>org.apache.tomee.embedded.Main</Main-Class>
+              <!-- the following is not really required if we shade everything together
+              Moreover, it generates a lot of stacktraces because Tomcat reads the class-path
+              attribute from the manifest and tries to resolve entries based on tomee-embedded
+              https://github.com/apache/tomcat/blob/main/java/org/apache/tomcat/util/scan/StandardJarScanner.java#L467
+
+              We end up with things like
+              file:/....../.m2/repository/org/apache/tomee/tomee-embedded/10.0.0-M2-SNAPSHOT/tomee-config-10.0.0-M2-SNAPSHOT.jar
               <addClasspath>true</addClasspath>
+              -->
             </manifest>
             <manifestEntries>
               <Automatic-Module-Name>${tomee.build.name}</Automatic-Module-Name>
@@ -70,8 +73,10 @@
               <artifactSet>
                 <excludes>
                   <exclude>junit:junit</exclude>
+                  <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
                   <exclude>*:jaxb-api</exclude>
                   <exclude>*:jaxb-impl</exclude>
+                  <exclude>*:jaxb-runtime</exclude>
                 </excludes>
               </artifactSet>
             </configuration>
@@ -86,9 +91,10 @@
               <shadedClassifierName>jaxrs</shadedClassifierName>
               <artifactSet>
                 <excludes>
-                  <exclude>junit:junit</exclude>
+                  <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
                   <exclude>*:jaxb-api</exclude>
                   <exclude>*:jaxb-impl</exclude>
+                  <exclude>*:jaxb-runtime</exclude>
                   <exclude>org.apache.activemq:*</exclude>
                   <exclude>org.apache.activemq.protobuf:*</exclude>
                   <exclude>org.fusesource.hawtbuf:hawtbuf</exclude>
@@ -105,7 +111,7 @@
                   <exclude>org.jasypt:*</exclude>
                   <exclude>net.shibboleth.utilities:java-support</exclude>
                   <exclude>org.cryptacular:cryptacular</exclude>
-                  <exclude>org.bouncycastle:bcprov-jdk15on</exclude>
+                  <exclude>org.bouncycastle:bcprov-jdk15to18</exclude>
                   <exclude>org.apache.neethi:neethi</exclude>
                   <exclude>org.apache.cxf:cxf-rt-frontend-jaxws</exclude>
                   <exclude>org.apache.cxf:cxf-rt-bindings-soap</exclude>
@@ -137,8 +143,10 @@
               <artifactSet>
                 <excludes>
                   <exclude>junit:junit</exclude>
+                  <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
                   <exclude>*:jaxb-api</exclude>
                   <exclude>*:jaxb-impl</exclude>
+                  <exclude>*:jaxb-runtime</exclude>
                   <exclude>org.apache.activemq:*</exclude>
                   <exclude>org.apache.activemq.protobuf:*</exclude>
                   <exclude>org.fusesource.hawtbuf:hawtbuf</exclude>
@@ -215,7 +223,9 @@
             <configuration>
               <excludes>
                 <exclude>**/SingleInstanceRunnerTest*</exclude>
+                <exclude>**/SingleInstanceRunnerExtensionTest*</exclude>
                 <exclude>**/NoScannerSingleRunnerTest*</exclude>
+                <exclude>**/NoScannerSingleRunnerExtensionTest*</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -259,7 +269,7 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <artifactId>javaee-api</artifactId>
+          <artifactId>jakartaee-api</artifactId>
           <groupId>${project.groupId}</groupId>
         </exclusion>
         <exclusion>
@@ -274,8 +284,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.myfaces.core</groupId>
+      <artifactId>myfaces-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>javaee-api</artifactId>
+      <artifactId>jakartaee-api</artifactId>
       <scope>compile</scope>
       <classifier>tomcat</classifier>
     </dependency>
@@ -285,18 +299,14 @@
       <version>${tomcat.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-websocket-client-api</artifactId>
+      <version>${tomcat.version}</version>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tomee-myfaces</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.openwebbeans</groupId>
-      <artifactId>openwebbeans-jsf</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.myfaces.core</groupId>
-      <artifactId>myfaces-api</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -308,12 +318,20 @@
           <groupId>commons-beautils</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>javaee-api</artifactId>
+          <artifactId>jakartaee-api</artifactId>
           <groupId>${project.groupId}</groupId>
         </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.openwebbeans</groupId>
+      <artifactId>openwebbeans-jsf</artifactId>
+      <scope>compile</scope>
+      <!-- we already have jakarta version coming from core. We don't want non jakarta version transitively -->
+      <exclusions>
         <exclusion>
-          <artifactId>geronimo-j2ee-connector_1.6_spec</artifactId>
-          <groupId>org.apache.geronimo.specs</groupId>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -333,12 +351,15 @@
       <groupId>commons-beanutils</groupId>
     </dependency>
     <dependency>
-      <groupId>org.apache.taglibs</groupId>
-      <artifactId>taglibs-standard-jstlel</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>xalan</groupId>
-      <artifactId>xalan</artifactId>
+      <groupId>org.apache.tomee</groupId>
+      <artifactId>taglibs-shade</artifactId>
+      <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
@@ -405,7 +426,7 @@
       <scope>compile</scope>
       <exclusions>
         <exclusion>
-          <groupId>org.eclipse.jdt.core.compiler</groupId>
+          <groupId>org.eclipse.jdt</groupId>
           <artifactId>ecj</artifactId>
         </exclusion>
         <exclusion>
@@ -425,21 +446,37 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jdt.core.compiler</groupId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Required for running JUnit 4 via JUnit 5 environment -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
       <artifactId>ecj</artifactId>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.velocity</groupId>
-      <artifactId>velocity</artifactId>
+      <artifactId>velocity-engine-core</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>openejb-client</artifactId>
       <exclusions>
         <exclusion>
-          <artifactId>javaee-api</artifactId>
+          <artifactId>jakartaee-api</artifactId>
           <groupId>${project.groupId}</groupId>
         </exclusion>
       </exclusions>
@@ -478,9 +515,10 @@
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcmail-jdk15on</artifactId>
-      <version>1.57</version>
+      <artifactId>bcmail-jdk15to18</artifactId>
+      <version>1.73</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 </project>

@@ -22,13 +22,13 @@ import org.apache.openejb.util.Geronimo;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.SynchronizationType;
-import javax.persistence.TransactionRequiredException;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.TransactionRequiredException;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class JtaEntityManagerRegistry {
     /**
      * Gets an entity manager instance from the transaction registry, extended registry or for a transaction scoped
      * entity manager, creates a new one when an existing instance is not found.
-     * </p>
+     *
      * It is important that a component adds extended scoped entity managers to this registry when the component is
      * entered and removes them when exited.  If this registration is not performed, an IllegalStateException will
      * be thrown when entity manger is fetched.

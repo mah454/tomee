@@ -43,21 +43,21 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.naming.NamingException;
-import javax.persistence.Cache;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.Query;
-import javax.persistence.SharedCacheMode;
-import javax.persistence.SynchronizationType;
-import javax.persistence.ValidationMode;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.metamodel.Metamodel;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnitUtil;
+import jakarta.persistence.Query;
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.metamodel.Metamodel;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -77,9 +77,9 @@ import static org.apache.openejb.monitoring.LocalMBeanServer.tabularData;
 public class ReloadableEntityManagerFactory implements EntityManagerFactory, Serializable {
     private static final Logger LOGGER = Logger.getInstance(LogCategory.OPENEJB, ReloadableEntityManagerFactory.class);
 
-    public static final String JAVAX_PERSISTENCE_SHARED_CACHE_MODE = "javax.persistence.sharedCache.mode";
-    public static final String JAVAX_PERSISTENCE_VALIDATION_MODE = "javax.persistence.validation.mode";
-    public static final String JAVAX_PERSISTENCE_TRANSACTION_TYPE = "javax.persistence.transactionType";
+    public static final String JAKARTA_PERSISTENCE_SHARED_CACHE_MODE = "jakarta.persistence.sharedCache.mode";
+    public static final String JAKARTA_PERSISTENCE_VALIDATION_MODE = "jakarta.persistence.validation.mode";
+    public static final String JAKARTA_PERSISTENCE_TRANSACTION_TYPE = "jakarta.persistence.transactionType";
 
     public static final String OPENEJB_JPA_CRITERIA_LOG_JPQL = "openejb.jpa.criteria.log.jpql";
     public static final String OPENEJB_JPA_CRITERIA_LOG_JPQL_LEVEL = "openejb.jpa.criteria.log.jpql.level";
@@ -162,6 +162,10 @@ public class ReloadableEntityManagerFactory implements EntityManagerFactory, Ser
         try {
             em = delegate().createEntityManager();
         } catch (final LinkageError le) {
+            if (delegate == null) {
+                LOGGER.error("Could not initialize EntityManagerFactory delegate", le);
+                throw le; // it's already a OpenEJBRuntimeException
+            }
             em = delegate.createEntityManager();
         }
 
@@ -350,8 +354,8 @@ public class ReloadableEntityManagerFactory implements EntityManagerFactory, Ser
         info.setSharedCacheMode(mode);
 
         final Properties properties = entityManagerFactoryCallable.getUnitInfo().getProperties();
-        if (properties.containsKey(JAVAX_PERSISTENCE_SHARED_CACHE_MODE)) {
-            properties.setProperty(JAVAX_PERSISTENCE_SHARED_CACHE_MODE, mode.name());
+        if (properties.containsKey(JAKARTA_PERSISTENCE_SHARED_CACHE_MODE)) {
+            properties.setProperty(JAKARTA_PERSISTENCE_SHARED_CACHE_MODE, mode.name());
         }
     }
 
@@ -360,24 +364,30 @@ public class ReloadableEntityManagerFactory implements EntityManagerFactory, Ser
         info.setValidationMode(mode);
 
         final Properties properties = entityManagerFactoryCallable.getUnitInfo().getProperties();
-        if (properties.containsKey(JAVAX_PERSISTENCE_VALIDATION_MODE)) {
-            properties.setProperty(JAVAX_PERSISTENCE_VALIDATION_MODE, mode.name());
+        if (properties.containsKey(JAKARTA_PERSISTENCE_VALIDATION_MODE)) {
+            properties.setProperty(JAKARTA_PERSISTENCE_VALIDATION_MODE, mode.name());
         }
     }
 
     public synchronized void setProvider(final String providerRaw) {
         final String provider = providerRaw.trim();
         final String newProvider;
-        if ("hibernate".equals(provider)) {
-            newProvider = "org.hibernate.ejb.HibernatePersistence";
-        } else if ("openjpa".equals(provider)) {
-            newProvider = "org.apache.openjpa.persistence.PersistenceProviderImpl";
-        } else if ("eclipselink".equals(provider)) {
-            newProvider = "org.eclipse.persistence.jpa.PersistenceProvider";
-        } else if ("toplink".equals(provider)) {
-            newProvider = "oracle.toplink.essentials.PersistenceProvider";
-        } else {
-            newProvider = provider;
+        switch (provider) {
+            case "hibernate":
+                newProvider = "org.hibernate.ejb.HibernatePersistence";
+                break;
+            case "openjpa":
+                newProvider = "org.apache.openjpa.persistence.PersistenceProviderImpl";
+                break;
+            case "eclipselink":
+                newProvider = "org.eclipse.persistence.jpa.PersistenceProvider";
+                break;
+            case "toplink":
+                newProvider = "oracle.toplink.essentials.PersistenceProvider";
+                break;
+            default:
+                newProvider = provider;
+                break;
         }
 
         try {
@@ -393,8 +403,8 @@ public class ReloadableEntityManagerFactory implements EntityManagerFactory, Ser
         info.setTransactionType(type);
 
         final Properties properties = entityManagerFactoryCallable.getUnitInfo().getProperties();
-        if (properties.containsKey(JAVAX_PERSISTENCE_TRANSACTION_TYPE)) {
-            properties.setProperty(JAVAX_PERSISTENCE_TRANSACTION_TYPE, type.name());
+        if (properties.containsKey(JAKARTA_PERSISTENCE_TRANSACTION_TYPE)) {
+            properties.setProperty(JAKARTA_PERSISTENCE_TRANSACTION_TYPE, type.name());
         }
     }
 
@@ -596,7 +606,7 @@ public class ReloadableEntityManagerFactory implements EntityManagerFactory, Ser
                 reloadableEntityManagerFactory.setValidationMode(mode);
             } catch (final Exception iae) {
                 LOGGER.warning("Can't set validation mode " + value, iae);
-                reloadableEntityManagerFactory.setProperty(JAVAX_PERSISTENCE_VALIDATION_MODE, value);
+                reloadableEntityManagerFactory.setProperty(JAKARTA_PERSISTENCE_VALIDATION_MODE, value);
             }
         }
 

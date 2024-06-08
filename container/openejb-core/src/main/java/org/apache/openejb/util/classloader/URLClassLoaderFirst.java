@@ -65,11 +65,13 @@ public class URLClassLoaderFirst extends URLClassLoader {
         list(FORCED_SKIP, "openejb.classloader.forced-skip", null);
         list(FORCED_LOAD, "openejb.classloader.forced-load", null);
         list(FILTERABLE_RESOURCES, "openejb.classloader.filterable-resources",
-                "META-INF/services/javax.validation.spi.ValidationProvider," +
-                "META-INF/services/javax.ws.rs.client.ClientBuilder," +
-                "META-INF/services/javax.json.spi.JsonProvider," +
+                "META-INF/services/jakarta.validation.spi.ValidationProvider," +
+                "META-INF/services/jakarta.ws.rs.client.ClientBuilder," +
+                "META-INF/services/jakarta.json.spi.JsonProvider," +
                 "META-INF/services/javax.cache.spi.CachingProvider," +
-                "META-INF/javamail.default.providers,META-INF/javamail.default.address.map," +
+                "META-INF/services/jakarta.persistence.spi.PersistenceProvider," +
+                "META-INF/javamail.default.providers," +
+                "META-INF/javamail.default.address.map," +
                 "META-INF/javamail.charset.map,META-INF/mailcap," +
                 SLF4J_BINDER_CLASS);
     }
@@ -153,7 +155,8 @@ public class URLClassLoaderFirst extends URLClassLoader {
     }
 
     public static boolean shouldDelegateToTheContainer(final ClassLoader loader, final String name) {
-        return shouldSkipJsf(loader, name) || shouldSkipSlf4j(loader, name);
+        if (shouldSkipJsf(loader, name)) return true;
+        return false;
     }
 
     private Class<?> loadFromParent(final String name, final boolean resolve) {
@@ -204,7 +207,10 @@ public class URLClassLoaderFirst extends URLClassLoader {
     //
     // /!\ please check org.apache.openejb.persistence.PersistenceUnitInfoImpl.isServerClass() too
     // when updating this method
-    public static boolean shouldSkip(final String name) {
+    public static boolean shouldSkip(final String input) {
+
+        String name = input;
+
         if (name == null) { // can happen with rest servlet definition or errors
             return false;
         }
@@ -220,16 +226,20 @@ public class URLClassLoaderFirst extends URLClassLoader {
             }
         }
 
+        if (name.startsWith("openejb.shade.")) {
+            name = name.substring("openejb.shade.".length());
+        }
+
         if (name.startsWith("java.")) {
             return true;
         }
-        if (name.startsWith("javax.faces.")) {
+        if (name.startsWith("jakarta.faces.")) {
             return false;
         }
-        if (name.startsWith("javax.mail.")) {
+        if (name.startsWith("jakarta.mail.")) {
             return false;
         }
-        if (name.startsWith("javax.")) {
+        if (name.startsWith("javax.") || name.startsWith("jakarta.")) {
             return isInServer(name);
         }
         if (name.startsWith("sun.")) {
@@ -237,7 +247,7 @@ public class URLClassLoaderFirst extends URLClassLoader {
         }
 
         // can be provided in the webapp
-        if (name.startsWith("javax.servlet.jsp.jstl")) {
+        if (name.startsWith("jakarta.servlet.jsp.jstl")) {
             return false;
         }
 
@@ -533,21 +543,30 @@ public class URLClassLoaderFirst extends URLClassLoader {
                 return SKIP_JMS || EMBEDDED;
             }
         }
+        if (name.startsWith("jakarta.")) {
+            final String sub = name.substring("jakarta.".length());
+            if (sub.startsWith("jws.")) {
+                return SKIP_JAXWS || EMBEDDED;
+            }
+            if (sub.startsWith("jms.")) {
+                return SKIP_JMS || EMBEDDED;
+            }
+        }
         return ParentClassLoaderFinder.Helper.get().getResource(name.replace('.', '/') + ".class") != null;
     }
 
     public static boolean shouldSkipJsf(final ClassLoader loader, final String name) {
-        if (!name.startsWith("javax.faces.")) {
+        if (!name.startsWith("jakarta.faces.")) {
             return false;
         }
 
         // using annotation to test to avoid to load more classes with deps
         final String testClass;
         // these test classes have to be jsf 2.x AND 1.x otherwise we force JSF 2
-        if ("javax.faces.webapp.FacesServlet".equals(name)) {
-            testClass = "javax.faces.FactoryFinder";
+        if ("jakarta.faces.webapp.FacesServlet".equals(name)) {
+            testClass = "jakarta.faces.FactoryFinder";
         } else {
-            testClass = "javax.faces.webapp.FacesServlet";
+            testClass = "jakarta.faces.webapp.FacesServlet";
         }
 
         final String classname = testClass.replace('.', '/') + ".class";
@@ -577,27 +596,6 @@ public class URLClassLoaderFirst extends URLClassLoader {
         // currently bean validation, Slf4j, myfaces (because of enrichment)
         return name != null
             && (FILTERABLE_RESOURCES.contains(name) || name.startsWith("META-INF/services/org.apache.myfaces.spi"));
-    }
-
-    public static boolean shouldSkipSlf4j(final ClassLoader loader, final String name) {
-        if (name == null || !name.startsWith("org.slf4j.")) {
-            return false;
-        }
-
-        try { // using getResource here just returns randomly the container one so we need getResources
-            final Enumeration<URL> resources = loader.getResources(SLF4J_BINDER_CLASS);
-            while (resources.hasMoreElements()) {
-                final URL resource = resources.nextElement();
-                if (!resource.equals(SLF4J_CONTAINER)) {
-                    // applicative slf4j
-                    return false;
-                }
-            }
-        } catch (final Throwable e) {
-            // no-op
-        }
-
-        return true;
     }
 
     // useful method for SPI

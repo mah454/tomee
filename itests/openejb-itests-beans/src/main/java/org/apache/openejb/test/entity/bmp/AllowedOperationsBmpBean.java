@@ -21,16 +21,16 @@ import java.util.Properties;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.ejb.EJBException;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
-import javax.ejb.CreateException;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.EntityContext;
+import jakarta.ejb.RemoveException;
+import jakarta.ejb.CreateException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.openejb.test.object.OperationsPolicy;
 
-public class AllowedOperationsBmpBean implements javax.ejb.EntityBean {
+public class AllowedOperationsBmpBean implements jakarta.ejb.EntityBean {
 
     protected int primaryKey;
     protected String firstName;
@@ -45,7 +45,7 @@ public class AllowedOperationsBmpBean implements javax.ejb.EntityBean {
 
     /**
      * Maps to BasicBmpHome.sum
-     * <p/>
+     *
      * Adds x and y and returns the result.
      *
      * @return x + y
@@ -76,7 +76,7 @@ public class AllowedOperationsBmpBean implements javax.ejb.EntityBean {
      *
      * @param primaryKey
      * @return Integer
-     * @throws javax.ejb.FinderException
+     * @throws jakarta.ejb.FinderException
      */
     public Integer ejbFindByPrimaryKey(final Integer primaryKey) {
         testAllowedOperations("ejbFind");
@@ -136,7 +136,7 @@ public class AllowedOperationsBmpBean implements javax.ejb.EntityBean {
 
     /**
      * Maps to BasicBmpObject.getPermissionsReport
-     * <p/>
+     *
      * Returns a report of the bean's
      * runtime permissions
      *
@@ -149,7 +149,7 @@ public class AllowedOperationsBmpBean implements javax.ejb.EntityBean {
 
     /**
      * Maps to BasicBmpObject.getAllowedOperationsReport
-     * <p/>
+     *
      * Returns a report of the allowed opperations
      * for one of the bean's methods.
      *

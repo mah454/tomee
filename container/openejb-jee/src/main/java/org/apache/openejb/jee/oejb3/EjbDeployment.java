@@ -18,15 +18,15 @@ package org.apache.openejb.jee.oejb3;
 
 import org.apache.openejb.jee.EnterpriseBean;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -165,12 +165,7 @@ public class EjbDeployment {
     }
 
     public void removeResourceLink(final String resRefName) {
-        for (final Iterator<ResourceLink> iterator = resourceLink.iterator(); iterator.hasNext(); ) {
-            final ResourceLink link = iterator.next();
-            if (resRefName.equals(link.getResRefName())) {
-                iterator.remove();
-            }
-        }
+        resourceLink.removeIf(link -> resRefName.equals(link.getResRefName()));
     }
 
     public void addEjbLink(final EjbLink ejbLink) {

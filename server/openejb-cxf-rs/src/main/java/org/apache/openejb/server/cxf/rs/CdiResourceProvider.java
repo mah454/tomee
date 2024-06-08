@@ -32,16 +32,16 @@ import org.apache.webbeans.inject.OWBInjector;
 import org.apache.webbeans.intercept.InterceptorResolutionService;
 import org.apache.webbeans.portable.InjectionTargetImpl;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Decorator;
-import javax.enterprise.inject.spi.Interceptor;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.InjectionException;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.Decorator;
+import jakarta.enterprise.inject.spi.Interceptor;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -53,6 +53,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class CdiResourceProvider implements ResourceProvider {
+
+    private static final Logger LOGGER = Logger.getInstance(LogCategory.OPENEJB_RS, CdiResourceProvider.class);
+
     public static final String INSTANCE_KEY = CdiResourceProvider.class.getName() + ".instance";
 
     protected final Collection<Injection> injections;
@@ -87,6 +90,7 @@ public abstract class CdiResourceProvider implements ResourceProvider {
                 bean = bm.resolve(beans);
             } catch (final InjectionException ie) {
                 final String msg = "Resource class " + clazz.getName() + " can not be instantiated";
+                LOGGER.warning(msg, ie);
                 throw new WebApplicationException(Response.serverError().entity(msg).build());
             }
 
@@ -138,7 +142,9 @@ public abstract class CdiResourceProvider implements ResourceProvider {
         // only validate it here otherwise we'll fail for CDI injections
         constructor = ResourceUtils.findResourceConstructor(clazz, true);
         if (constructor == null) {
-            throw new RuntimeException("Resource class " + clazz + " has no valid constructor");
+            final String message = "Resource class " + clazz + " has no valid constructor";
+            LOGGER.warning(message);
+            throw new RuntimeException(message);
         }
     }
 
@@ -322,18 +328,22 @@ public abstract class CdiResourceProvider implements ResourceProvider {
                 return instance;
             } catch (final InstantiationException ex) {
                 final String msg = "Resource class " + constructor.getDeclaringClass().getName() + " can not be instantiated";
+                LOGGER.warning(msg, ex);
                 throw new WebApplicationException(Response.serverError().entity(msg).build());
             } catch (final IllegalAccessException ex) {
                 final String msg = "Resource class " + constructor.getDeclaringClass().getName() + " can not be instantiated"
                         + " due to IllegalAccessException";
+                LOGGER.warning(msg, ex);
                 throw new WebApplicationException(Response.serverError().entity(msg).build());
             } catch (final InvocationTargetException ex) {
                 final String msg = "Resource class "
                         + constructor.getDeclaringClass().getName() + " can not be instantiated"
                         + " due to InvocationTargetException";
+                LOGGER.warning(msg, ex);
                 throw new WebApplicationException(Response.serverError().entity(msg).build());
-            } catch (final OpenEJBException e) {
+            } catch (final OpenEJBException ex) {
                 final String msg = "An error occured injecting in class " + constructor.getDeclaringClass().getName();
+                LOGGER.warning(msg, ex);
                 throw new WebApplicationException(Response.serverError().entity(msg).build());
             }
         }

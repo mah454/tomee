@@ -29,7 +29,7 @@ import org.apache.xbean.finder.ClassLoaders;
 import org.apache.xbean.finder.filter.Filter;
 import org.apache.xbean.finder.filter.Filters;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -73,10 +73,12 @@ public class TomEEJarScanner extends StandardJarScanner {
             final String cp = System.getProperty("java.class.path");
             final Collection<URL> urls = new HashSet<>();
             for (final String jar : cp.split(File.pathSeparator)) {
-                try {
-                    urls.add(new File(jar).toURI().toURL());
-                } catch (MalformedURLException e) {
-                    // no-op
+                if(!jar.isEmpty()){
+                    try {
+                        urls.add(new File(jar).toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        // no-op
+                    }
                 }
             }
             doScan(scanType, callback, new LinkedList<>(urls));
@@ -122,7 +124,8 @@ public class TomEEJarScanner extends StandardJarScanner {
     }
 
     public /*context.xml*/ static class TomEEFilter implements JarScanFilter {
-        private static final Filter INCLUDE = Filters.tokens("javax.faces-2.", "spring-security-taglibs", "spring-webmvc");
+        private static final Filter INCLUDE = Filters.tokens("jakarta.faces-2.", "jakarta.faces-2.",
+                "jakarta.faces-3.", "jakarta.faces-4.", "spring-security-taglibs", "spring-webmvc");
         private final JarScanFilter delegate;
 
         public TomEEFilter() {

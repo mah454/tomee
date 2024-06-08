@@ -32,13 +32,13 @@ import java.util.TreeSet;
 import java.util.Locale;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.ValidationEvent;
+import jakarta.xml.bind.ValidationEventHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -351,8 +351,11 @@ public class JaxbJavaee {
         }
 
         protected String eeUri(final String uri) {
-            // if ee 7 then switch back on ee 6 to not break compatibility - to rework surely when we'll be fully ee 7
-            return "http://xmlns.jcp.org/xml/ns/javaee".equals(uri) ? "http://java.sun.com/xml/ns/javaee" : uri;
+            // if ee 7 or jakarta ee then switch back on ee 6 to not break compatibility - to rework surely when we'll be fully ee 7 or jakarta ee
+            if ("http://xmlns.jcp.org/xml/ns/javaee".equals(uri) || "https://jakarta.ee/xml/ns/jakartaee".equals(uri) || "http://jakarta.ee/xml/ns/jakartaee".equals(uri)){
+                return "http://java.sun.com/xml/ns/javaee";
+            }
+            return uri;
         }
 
         @Override
@@ -450,22 +453,28 @@ public class JaxbJavaee {
         }
 
         private String fixLocalName(String localName) {
-            if (localName.equals("tlibversion")) {
-                localName = "tlib-version";
-            } else if (localName.equals("jspversion")) {
-                localName = "jsp-version";
-            } else if (localName.equals("shortname")) {
-                localName = "short-name";
-            } else if (localName.equals("tagclass")) {
-                localName = "tag-class";
-            } else if (localName.equals("teiclass")) {
-                localName = "tei-class";
-            } else if (localName.equals("bodycontent")) {
-                localName = "body-content";
-            } else if (localName.equals("jspversion")) {
-                localName = "jsp-version";
-            } else if (localName.equals("info")) {
-                localName = "description";
+            switch (localName) {
+                case "tlibversion":
+                    localName = "tlib-version";
+                    break;
+                case "jspversion":
+                    localName = "jsp-version";
+                    break;
+                case "shortname":
+                    localName = "short-name";
+                    break;
+                case "tagclass":
+                    localName = "tag-class";
+                    break;
+                case "teiclass":
+                    localName = "tei-class";
+                    break;
+                case "bodycontent":
+                    localName = "body-content";
+                    break;
+                case "info":
+                    localName = "description";
+                    break;
             }
             return localName;
         }

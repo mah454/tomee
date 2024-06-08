@@ -27,7 +27,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import javax.ejb.EJBAccessException;
+import jakarta.ejb.EJBAccessException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +89,7 @@ public class JUnit4Runner extends BlockJUnit4ClassRunner {
     /**
      * Create a method statement that executes the test for each of the specified
      * roles, both doing authorized and unauthorized tests.
-     * <p/>
+     *
      * Unauthorized roles are configured to fail with EJBAccessExceptions.
      *
      * @param method

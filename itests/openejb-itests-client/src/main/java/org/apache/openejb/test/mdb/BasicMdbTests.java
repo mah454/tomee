@@ -17,7 +17,7 @@
  */
 package org.apache.openejb.test.mdb;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 /**
  * [5] Should be run as the fifth test suite of the BasicStatelessTestClients
@@ -104,7 +104,7 @@ public class BasicMdbTests extends MdbTestClient {
     /**
      * After a system exception the intance should be garbage collected
      * and the remote reference should be invalidated.
-     * <p/>
+     *
      * This one seems to fail. we should double-check the spec on this.
      */
     public void TODO_test05_invokeAfterSystemException() {

@@ -16,10 +16,10 @@
  */
 package org.apache.openejb.arquillian.tests.jaxrs.webxmloverride;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 
-@Path("/")
+@Path("")
 public class TheResource {
     @GET
     @Path("touch")

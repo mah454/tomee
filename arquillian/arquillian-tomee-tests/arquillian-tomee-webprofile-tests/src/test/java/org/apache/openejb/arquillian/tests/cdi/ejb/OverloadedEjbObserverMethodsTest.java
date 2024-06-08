@@ -27,11 +27,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeanManager;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Singleton;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.BeanManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,10 +60,10 @@ public class OverloadedEjbObserverMethodsTest {
     @Test
     public void test() throws Exception {
         final Orange orange = new Orange();
-        beanManager.fireEvent(orange);
+        beanManager.getEvent().fire(orange);
 
         final Green green = new Green();
-        beanManager.fireEvent(green);
+        beanManager.getEvent().fire(green);
 
         Assert.assertEquals(2, painter.getObserved().size());
         Assert.assertSame(orange, painter.getObserved().get(0));

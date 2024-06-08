@@ -25,13 +25,12 @@ import org.apache.openejb.config.WebModule;
 import org.apache.openejb.jee.EnterpriseBean;
 import org.apache.openejb.jee.SessionBean;
 
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Application;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 public class CheckRestMethodArePublic implements ValidationRule {
     @Override
@@ -93,13 +92,7 @@ public class CheckRestMethodArePublic implements ValidationRule {
                 }
 
                 // try to avoid to valid twice the same classes
-                final Iterator<String> it = classes.iterator();
-                while (it.hasNext()) {
-                    final String current = it.next();
-                    if (standAloneClasses.contains(current)) {
-                        it.remove();
-                    }
-                }
+                classes.removeIf(standAloneClasses::contains);
 
                 // valid
                 for (final String classname : classes) {

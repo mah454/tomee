@@ -26,7 +26,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.openejb.maven.util.MavenLogStreamFactory;
 
-import javax.ejb.embeddable.EJBContainer;
+import jakarta.ejb.embeddable.EJBContainer;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -93,7 +93,7 @@ public class OpenEJBEmbeddedMojo extends AbstractMojo {
     }
 
     private ClassLoader createClassLoader(final ClassLoader parent) {
-        final List<URL> urls = new ArrayList<URL>();
+        final List<URL> urls = new ArrayList<>();
         for (final Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
             try {
                 urls.add(artifact.getFile().toURI().toURL());
@@ -117,7 +117,7 @@ public class OpenEJBEmbeddedMojo extends AbstractMojo {
     }
 
     private Map<?, ?> map() {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         map.put(EJBContainer.APP_NAME, id);
         map.put(EJBContainer.PROVIDER, provider);
         map.put(EJBContainer.MODULES, modules.split(","));

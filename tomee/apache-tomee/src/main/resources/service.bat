@@ -88,10 +88,11 @@ goto okJavaHome
 :gotJreHome
 if not exist "%JRE_HOME%\bin\java.exe" goto noJavaHome
 if not exist "%JRE_HOME%\bin\javaw.exe" goto noJavaHome
+for /f tokens^=2^ delims^=.-_^" %%j in ('"%JRE_HOME%\bin\java.exe" -fullversion 2^>^&1') do set "JAVA_MAJOR_VERSION=%%j"
 goto okJavaHome
 :gotJdkHome
-for /f tokens^=2-5^ delims^=.-_^" %%j in ('%JAVA_HOME%\bin\java.exe -fullversion 2^>^&1') do set "JAVA_MAJOR_VERSION=%%j"
-if JAVA_MAJOR_VERSION lss 11 (
+for /f tokens^=2^ delims^=.-_^" %%j in ('"%JAVA_HOME%\bin\java.exe" -fullversion 2^>^&1') do set "JAVA_MAJOR_VERSION=%%j"
+if %JAVA_MAJOR_VERSION% lss 11 (
     if not exist "%JAVA_HOME%\jre\bin\java.exe" goto noJavaHome
     if not exist "%JAVA_HOME%\jre\bin\javaw.exe" goto noJavaHome
 )
@@ -118,6 +119,8 @@ set "EXECUTABLE=%proc%"
 rem Set default Service name (If you change this then rename also TomEE.exe to the same name)
 set SERVICE_NAME=TomEE
 set PR_DISPLAYNAME=Apache TomEE
+set OLD_SERVICEUSER=%PR_SERVICEUSER%
+set OLD_SERVICEPASSWORD=%PR_SERVICEPASSWORD%
 
 if "x%1x" == "xx" goto displayUsage
 set SERVICE_CMD=%1
@@ -126,10 +129,17 @@ if "x%1x" == "xx" goto checkServiceCmd
 :checkUser
 if "x%1x" == "x/userx" goto runAsUser
 if "x%1x" == "x--userx" goto runAsUser
+
+if "x%1x" == "x/service-userx" goto serviceUser
+if "x%1x" == "x--service-userx" goto serviceUser
+if "x%1x" == "x/service-passwordx" goto servicePassword
+if "x%1x" == "x--service-passwordx" goto servicePassword
+
+if "x%1x" == "xx" goto checkServiceCmd
+
 set SERVICE_NAME=%1
 set PR_DISPLAYNAME=Apache TomEE (%1)
 shift
-if "x%1x" == "xx" goto checkServiceCmd
 goto checkUser
 :runAsUser
 shift
@@ -138,6 +148,21 @@ set SERVICE_USER=%1
 shift
 runas /env /savecred /user:%SERVICE_USER% "%COMSPEC% /K \"%SELF%\" %SERVICE_CMD% %SERVICE_NAME%"
 goto end
+
+:serviceUser
+shift
+if "x%1x" == "xx" goto displayUsage
+set PR_SERVICEUSER=%1
+shift
+goto checkUser
+
+:servicePassword
+shift
+if "x%1x" == "xx" goto displayUsage
+set PR_SERVICEPASSWORD=%1
+shift
+goto checkUser
+
 :checkServiceCmd
 if /i %SERVICE_CMD% == install goto doInstall
 if /i %SERVICE_CMD% == remove goto doRemove
@@ -182,6 +207,7 @@ if exist "%PR_JVM%" goto foundJvm
 set PR_JVM=auto
 :foundJvm
 echo Using JVM:              "%PR_JVM%"
+echo Using Service User:     "%PR_SERVICEUSER%"
 
 "%EXECUTABLE%" //IS//%SERVICE_NAME% ^
     --DisplayName=%SERVICE_NAME% ^
@@ -230,9 +256,16 @@ set PR_STDERROR=auto
 rem before this option was added: "++JvmOptions=-Djava.library.path="%CATALINA_BASE%\bin" ^"
 rem the drawback was it was preventing custom native lib to be loaded even if added to Path
 "%EXECUTABLE%" //US//%SERVICE_NAME% ^
-	++JvmOptions "-Djava.io.tmpdir=%CATALINA_BASE%\temp;-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager;-Djava.util.logging.config.file=%CATALINA_BASE%\conf\logging.properties;-Djava.awt.headless=true;-XX:+UseParallelGC;-XX:MaxPermSize=256M"
+	++JvmOptions "-Djava.io.tmpdir=%CATALINA_BASE%\temp;-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager;-Djava.util.logging.config.file=%CATALINA_BASE%\conf\logging.properties;-Djava.awt.headless=true;-XX:+UseParallelGC"
 
+rem the JVM option "-XX:MaxPermSize=256M" was removed in Java 17+
+if %JAVA_MAJOR_VERSION% lss 17 (
+    "%EXECUTABLE%" //US//%SERVICE_NAME% ^
+    	++JvmOptions "-XX:MaxPermSize=256M"
+)
 echo The service '%SERVICE_NAME%' has been installed.
 
 :end
+set PR_SERVICE_USER=%OLD_SERVICEUSER%
+set PR_SERVICE_PASSWORD=%OLD_SERVICEPASSWORD%
 cd "%CURRENT_DIR%"

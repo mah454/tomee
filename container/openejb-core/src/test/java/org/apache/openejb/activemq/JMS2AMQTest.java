@@ -27,36 +27,44 @@ import org.apache.openejb.testing.SimpleLog;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.webbeans.config.WebBeansContext;
 import org.apache.webbeans.spi.ContextsService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSConnectionFactory;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.TextMessage;
-import javax.jms.XAConnectionFactory;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionScoped;
-import javax.transaction.UserTransaction;
+import jakarta.annotation.Resource;
+import jakarta.ejb.ActivationConfigProperty;
+import jakarta.ejb.EJB;
+import jakarta.ejb.MessageDriven;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSConnectionFactory;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
+import jakarta.jms.XAConnectionFactory;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionScoped;
+import jakarta.transaction.UserTransaction;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -96,7 +104,7 @@ public class JMS2AMQTest {
     }
 
     @Module
-    @Classes(cdi = true, value = JustHereToCheckDeploymentIsOk.class)
+    @Classes(cdi = true, value = { JustHereToCheckDeploymentIsOk.class, ProducerBean.class })
     public MessageDrivenBean jar() {
         return new MessageDrivenBean(Listener.class);
     }
@@ -128,6 +136,9 @@ public class JMS2AMQTest {
 
     @Resource
     private UserTransaction ut;
+
+    @EJB
+    private ProducerBean pb;
 
     @Before
     public void resetLatch() {
@@ -286,6 +297,20 @@ public class JMS2AMQTest {
     }
 
     @Test
+    public void sendToMdbWithTxAndCheckLeaks() throws Exception {
+        for (int i = 0; i < 50; i++) {
+            pb.sendInNewTx();
+        }
+
+        assertTrue(Listener.sync());
+        sleep(150); // just to ensure we called send already
+
+        final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        Set<ObjectName> objs = mBeanServer.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=localhost,endpoint=dynamicProducer,*"), null);
+        Assert.assertEquals(0, objs.size());
+    }
+
+    @Test
     public void receive() throws InterruptedException {
         final String text = TEXT + "2";
         final AtomicReference<Throwable> error = new AtomicReference<>();
@@ -379,7 +404,7 @@ public class JMS2AMQTest {
     }
 
     @MessageDriven(activationConfig = {
-            @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+            @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Queue"),
             @ActivationConfigProperty(propertyName = "destination", propertyValue = "target")
     })
     public static class Listener implements MessageListener {
@@ -420,6 +445,21 @@ public class JMS2AMQTest {
 
         public void ok() {
             assertNotNull(context);
+        }
+    }
+
+    @Singleton
+    public static class ProducerBean {
+        @Inject
+        @JMSConnectionFactory("cf")
+        private JMSContext context;
+
+        @Resource(name = "target")
+        private Queue destination;
+
+        @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+        public void sendInNewTx() {
+            context.createProducer().send(destination, TEXT);
         }
     }
 }

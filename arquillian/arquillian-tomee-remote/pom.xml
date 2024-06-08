@@ -16,18 +16,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>arquillian</artifactId>
     <groupId>org.apache.tomee</groupId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
   <artifactId>arquillian-tomee-remote</artifactId>
   <packaging>jar</packaging>
 
-  <name>OpenEJB :: Arquillian Adaptors Parent :: Remote</name>
+  <name>TomEE :: Arquillian Adaptors Parent :: Remote</name>
 
   <properties>
     <tomee.build.name>${project.groupId}.arquillian.tomee.remote</tomee.build.name>
@@ -58,8 +57,8 @@
 
     <dependency>
       <groupId>org.jboss.arquillian.protocol</groupId>
-      <artifactId>arquillian-protocol-servlet</artifactId>
-      <version>${version.arquillian}</version>
+      <artifactId>arquillian-protocol-servlet-jakarta</artifactId>
+      <version>${version.arquillian-protocol-servlet-jakarta}</version>
       <exclusions>
         <exclusion>
           <artifactId>shrinkwrap-descriptors-api-base</artifactId>
@@ -96,7 +95,7 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>apache-tomee</artifactId>
       <type>zip</type>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
       <classifier>webprofile</classifier>
       <scope>provided</scope>
     </dependency>
@@ -125,7 +124,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>arquillian-tomee-common</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
@@ -152,13 +151,13 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>arquillian-common</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>10.0.0-M2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.openwebbeans</groupId>
       <artifactId>openwebbeans-impl</artifactId>
-      <version>${openwebbeans.version}</version>
+      <version>${version.openwebbeans}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -183,7 +182,13 @@
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-      <version>10.10.1.1</version>
+      <version>${version.derby}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbytools</artifactId>
+      <version>${version.derby}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

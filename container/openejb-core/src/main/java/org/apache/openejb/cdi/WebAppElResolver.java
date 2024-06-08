@@ -17,13 +17,11 @@
 
 package org.apache.openejb.cdi;
 
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
-import javax.el.PropertyNotFoundException;
-import javax.el.PropertyNotWritableException;
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
+import jakarta.el.ELContext;
+import jakarta.el.ELException;
+import jakarta.el.ELResolver;
+import jakarta.el.PropertyNotFoundException;
+import jakarta.el.PropertyNotWritableException;
 
 public class WebAppElResolver extends ELResolver {
     private final ELResolver parent;
@@ -63,12 +61,7 @@ public class WebAppElResolver extends ELResolver {
     }
 
     @Override
-    public Iterator<FeatureDescriptor> getFeatureDescriptors(final ELContext context, final Object base) {
-        return null;
-    }
-
-    @Override
-    public Class<?> getCommonPropertyType(final ELContext context, final Object base) {
+    public Class<?> getCommonPropertyType(ELContext context, Object base) {
         return null;
     }
 }

@@ -40,10 +40,10 @@ import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.spi.annotation.SuiteScoped;
 import org.jboss.shrinkwrap.api.Archive;
 
-import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.servlet.http.HttpSession;
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,7 +136,7 @@ public class EmbeddedTomEEContainer extends TomEEContainer<EmbeddedTomEEConfigur
             this.container.start();
             SystemInstance.get().setComponent(AdditionalBeanDiscoverer.class, new TestClassDiscoverer());
             // this property is not mandatory by default but depending the protocol it can be relevant so adding it by default
-            SystemInstance.get().setProperty("org.apache.openejb.servlet.filters", ArquillianFilterRunner.class.getName() + "=/ArquillianServletRunner");
+            SystemInstance.get().setProperty("org.apache.openejb.servlet.filters", ArquillianFilterRunner.class.getName() + "=/ArquillianServletRunnerEE9");
         } catch (final Exception e) {
             throw new LifecycleException("Something went wrong", e);
         }
@@ -180,7 +180,7 @@ public class EmbeddedTomEEContainer extends TomEEContainer<EmbeddedTomEEConfigur
             final String context = this.getArchiveNameWithoutExtension(archive);
 
             final HTTPContext httpContext = new HTTPContext(this.configuration.getHost(), this.configuration.getHttpPort());
-            httpContext.add(new Servlet("ArquillianServletRunner", "/" + context));
+            httpContext.add(new Servlet("ArquillianServletRunnerEE9", "/" + context));
             this.addServlets(httpContext, info);
 
             startCdiContexts(name); // ensure tests can use request/session scopes even if we don't have a request

@@ -17,16 +17,16 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,24 +34,24 @@ import java.util.Map;
 
 /**
  * web-common_3_0.xsd
- * <p/>
+ *
  * <p>Java class for web-fragmentType complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="web-fragmentType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element name="name" type="{http://java.sun.com/xml/ns/javaee}java-identifierType"/>
- *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}web-commonType"/>
- *         &lt;element name="ordering" type="{http://java.sun.com/xml/ns/javaee}orderingType"/>
- *       &lt;/choice>
- *       &lt;attGroup ref="{http://java.sun.com/xml/ns/javaee}web-common-attributes"/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="web-fragmentType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element name="name" type="{http://java.sun.com/xml/ns/javaee}java-identifierType"/&gt;
+ *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}web-commonType"/&gt;
+ *         &lt;element name="ordering" type="{http://java.sun.com/xml/ns/javaee}orderingType"/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attGroup ref="{http://java.sun.com/xml/ns/javaee}web-common-attributes"/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 
@@ -95,7 +95,8 @@ import java.util.Map;
     "dataSource",
     "jmsConnectionFactories",
     "jmsDestinations",
-    "name"
+    "name",
+    "contextService"
 
 })
 public class WebFragment implements WebCommon {
@@ -188,6 +189,8 @@ public class WebFragment implements WebCommon {
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String version;
+    @XmlElement(name="context-service")
+    private KeyedCollection<String, ContextService> contextService;
 
 
     @Override
@@ -634,5 +637,13 @@ public class WebFragment implements WebCommon {
     @Override
     public Map<String, JMSDestination> getJMSDestinationMap() {
         return KeyedCollection.class.cast(getJMSDestination()).toMap();
+    }
+
+    @Override
+    public Map<String, ContextService> getContextServiceMap() {
+        if (contextService == null) {
+            contextService = new KeyedCollection<String, ContextService>();
+        }
+        return this.contextService.toMap();
     }
 }

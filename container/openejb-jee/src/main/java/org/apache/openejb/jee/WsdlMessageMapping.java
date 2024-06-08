@@ -16,14 +16,14 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 
 /**
@@ -32,14 +32,14 @@ import javax.xml.namespace.QName;
  * specific message and its part. Together they define uniquely
  * the mapping for a specific parameter. Parts within a message
  * context are uniquely identified with their names.
- * <p/>
+ *
  * The parameter-mode is defined by the mapping to indicate
  * whether the mapping will be IN, OUT, or INOUT..  The presence
  * of the soap-header element indicates that the parameter is
  * mapped to a soap header only.  When absent, it means that the
  * wsdl-message is mapped to a Java parameter. The soap headers
  * are interpreted in the order they are provided in the mapping.
- * <p/>
+ *
  * Used in: method-param-parts-mapping
  */
 @XmlAccessorType(XmlAccessType.FIELD)

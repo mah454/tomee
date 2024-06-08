@@ -22,12 +22,12 @@ import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
-import javax.annotation.sql.DataSourceDefinition;
-import javax.annotation.sql.DataSourceDefinitions;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.Stateless;
+import jakarta.annotation.Resource;
+import jakarta.annotation.sql.DataSourceDefinition;
+import jakarta.annotation.sql.DataSourceDefinitions;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Stateless;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -184,38 +184,31 @@ public class DataSourceDefinitionTest {
         }
 
         public void addMovie(final Movie movie) throws Exception {
-            final Connection conn = movieDatabase.getConnection();
-            try {
+            try (Connection conn = movieDatabase.getConnection()) {
                 final PreparedStatement sql = conn.prepareStatement("INSERT into movie (director, title, year) values (?, ?, ?)");
                 sql.setString(1, movie.getDirector());
                 sql.setString(2, movie.getTitle());
                 sql.setInt(3, movie.getYear());
                 sql.execute();
                 sql.close();
-            } finally {
-                conn.close();
             }
         }
 
 
         public void deleteMovie(final Movie movie) throws Exception {
-            final Connection conn = movieDatabase.getConnection();
-            try {
+            try (Connection conn = movieDatabase.getConnection()) {
                 final PreparedStatement sql = conn.prepareStatement("DELETE from movie where director = ? AND title = ? AND year = ?");
                 sql.setString(1, movie.getDirector());
                 sql.setString(2, movie.getTitle());
                 sql.setInt(3, movie.getYear());
                 sql.execute();
                 sql.close();
-            } finally {
-                conn.close();
             }
         }
 
         public List<Movie> getMovies() throws Exception {
             final ArrayList<Movie> movies = new ArrayList<>();
-            final Connection conn = movieDatabase.getConnection();
-            try {
+            try (Connection conn = movieDatabase.getConnection()) {
                 final PreparedStatement sql = conn.prepareStatement("SELECT director, title, year from movie");
                 final ResultSet set = sql.executeQuery();
                 while (set.next()) {
@@ -226,8 +219,6 @@ public class DataSourceDefinitionTest {
                     movies.add(movie);
                 }
 
-            } finally {
-                conn.close();
             }
             return movies;
         }

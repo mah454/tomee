@@ -18,12 +18,12 @@ package org.apache.tomee.microprofile.jwt;
 
 import org.eclipse.microprofile.auth.LoginConfig;
 
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
-import javax.ws.rs.core.Application;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
+import jakarta.ws.rs.core.Application;
 import java.util.Set;
 
 /**
@@ -36,7 +36,7 @@ public class MPJWTInitializer implements ServletContainerInitializer {
     public void onStartup(final Set<Class<?>> classes, final ServletContext ctx) throws ServletException {
 
         if (classes == null || classes.isEmpty()) {
-            return; // no classe having @LoginConfig on it
+            return; // no class having @LoginConfig on it
         }
 
         for (Class<?> clazz : classes) {

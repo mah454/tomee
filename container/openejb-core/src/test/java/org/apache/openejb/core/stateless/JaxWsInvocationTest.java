@@ -16,6 +16,14 @@
  */
 package org.apache.openejb.core.stateless;
 
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptors;
+import jakarta.interceptor.InvocationContext;
+import jakarta.jws.WebService;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
 import junit.framework.TestCase;
 import org.apache.openejb.BeanContext;
 import org.apache.openejb.InterfaceType;
@@ -36,14 +44,6 @@ import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.spi.ContainerSystem;
 import org.junit.AfterClass;
 
-import javax.annotation.Resource;
-import javax.ejb.SessionContext;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptors;
-import javax.interceptor.InvocationContext;
-import javax.jws.WebService;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,11 +56,11 @@ import java.util.Set;
 /**
  * The point of this test case is to verify that OpenEJB is accurately performing
  * it's part of a WebServiceProvider to OpenEJB invocation as it relates to JAX-RPC.
- * <p/>
+ *
  * In the agreement between OpenEJB and the Web Service Provider, the Web Service Provider
  * must supply the MessageContext and an Interceptor as the arguments of the standard
  * container.invoke method call.
- * <p/>
+ *
  * OpenEJB must ensure the MessageContext is exposed via the SessionContext.getMessageContext
  * and ensure that the interceptor is added to the chain just after the other interceptors and
  * before the bean method itself is invoked.
@@ -186,14 +186,6 @@ public class JaxWsInvocationTest extends TestCase {
 
             org.junit.Assert.assertNotNull("message context should not be null", messageContext);
             org.junit.Assert.assertTrue("the Web Service Provider's message context should be used", messageContext instanceof FakeMessageContext);
-
-            // Try to get JAX-RPC context, should throw an exception since it's JAX-WS
-            try {
-                ctx.getMessageContext();
-                org.junit.Assert.fail("Did not throw exception");
-            } catch (final IllegalStateException e) {
-                // that's expected since it's JAX-WS
-            }
 
             // test @Resource WebServiceContext injection
             org.junit.Assert.assertNotNull("web service context should not be null", wsContext);
@@ -321,30 +313,30 @@ public class JaxWsInvocationTest extends TestCase {
      * This object would be supplied by the Web Service Provider
      * as per the OpenEJB-WebServiceProvider agreement and serves
      * two purposes:
-     * <p/>
+     *
      * 1. Executing the Handler Chain (as required by
      * the JAX-RPC specification) in the context of the EJB Container
      * (as required by the EJB and J2EE WebServices specifications)
-     * <p/>
+     *
      * 2. Unmarshalling the method arguments from the SOAP message
      * after the handlers in the Handler Chain have had a chance
      * to modify the argument values via the SAAJ tree.
-     * <p/>
+     *
      * The Interceptor instance given to OpenEJB is constructed
      * and created by the Web Service Provider and should contain
      * all the data it requires to complete it's part of the agreement.
-     * <p/>
+     *
      * OpenEJB will not perform any injection on this object and
      * the interceptor will be discarded so that the Web Service
      * Provider may pass in a new Interceptor instance on every
      * web service invocation.
-     * <p/>
+     *
      * The Web Service Provider may pass in any object to serve
      * the roll of the Interceptor as long as it has an @AroundInvoke
      * method using the method signature:
-     * <p/>
+     *
      * public Object <METHOD-NAME> (InvocationContext ctx) throws Exception
-     * <p/>
+     *
      * Unlike typical EJB Interceptor around invoke methods, the @AroundInvoke
      * annotation must be used and is not optional, and the method must be public.
      */

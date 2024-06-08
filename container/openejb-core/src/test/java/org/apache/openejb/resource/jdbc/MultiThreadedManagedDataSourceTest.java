@@ -37,11 +37,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.EJBContext;
-import javax.ejb.LocalBean;
-import javax.ejb.Singleton;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBContext;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Singleton;
 import javax.sql.DataSource;
 
 import static org.junit.Assert.assertEquals;
@@ -226,12 +226,7 @@ public class MultiThreadedManagedDataSourceTest {
     private void run(final Runnable runnable) {
         final ExecutorService es = Executors.newFixedThreadPool(20);
         for (int i = 0; i < INSERTS_NB; i++) {
-            es.submit(new Runnable() {
-                @Override
-                public void run() {
-                    runnable.run();
-                }
-            });
+            es.submit(runnable::run);
         }
         es.shutdown();
         try {

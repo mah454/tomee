@@ -22,19 +22,18 @@ import static org.apache.openejb.InjectionProcessor.unwrap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.InjectionException;
+import jakarta.enterprise.inject.spi.Bean;
 import javax.naming.Context;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.HandlerResolver;
-import javax.xml.ws.handler.LogicalHandler;
-import javax.xml.ws.handler.PortInfo;
+import jakarta.xml.ws.WebServiceException;
+import jakarta.xml.ws.handler.Handler;
+import jakarta.xml.ws.handler.HandlerResolver;
+import jakarta.xml.ws.handler.LogicalHandler;
+import jakarta.xml.ws.handler.PortInfo;
 
 import org.apache.openejb.Injection;
 import org.apache.openejb.InjectionProcessor;
@@ -158,9 +157,8 @@ public class HandlerResolverImpl implements HandlerResolver {
                 return true;
             } else {
                 final String actualBindingURI = JaxWsUtils.getBindingURI(binding);
-                final Iterator iter = bindings.iterator();
-                while (iter.hasNext()) {
-                    final String bindingToken = (String) iter.next();
+                for (Object binding1 : bindings) {
+                    final String bindingToken = (String) binding1;
                     final String bindingURI = JaxWsUtils.getBindingURI(bindingToken);
                     if (actualBindingURI.equals(bindingURI)) {
                         return true;

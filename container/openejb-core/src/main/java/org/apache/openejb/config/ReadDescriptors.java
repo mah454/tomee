@@ -70,8 +70,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -81,7 +81,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -185,7 +184,7 @@ public class ReadDescriptors implements DynamicDeployer {
                     }
                     appModule.addPersistenceModule(persistenceModule);
                 } catch (final Exception e1) {
-                    DeploymentLoader.logger.error("Unable to load Persistence Unit from EAR: " + appModule.getJarLocation() + ", module: " + moduleName + ". Exception: " + e1.getMessage(), e1);
+                    DeploymentLoader.LOGGER.error("Unable to load Persistence Unit from EAR: " + appModule.getJarLocation() + ", module: " + moduleName + ". Exception: " + e1.getMessage(), e1);
                 }
             }
         }
@@ -239,7 +238,7 @@ public class ReadDescriptors implements DynamicDeployer {
                         }
                     }
                 } catch (final Exception e1) {
-                    DeploymentLoader.logger.error("Unable to load Persistence Unit Fragment from EAR: " + appModule.getJarLocation() + ", fragment: " + persistenceFragmentUrl.toString() + ". Exception: " + e1.getMessage(), e1);
+                    DeploymentLoader.LOGGER.error("Unable to load Persistence Unit Fragment from EAR: " + appModule.getJarLocation() + ", fragment: " + persistenceFragmentUrl.toString() + ". Exception: " + e1.getMessage(), e1);
                 }
             }
         }
@@ -312,7 +311,9 @@ public class ReadDescriptors implements DynamicDeployer {
                 final ValidationConfigType validationConfigType = JaxbOpenejb.unmarshal(
                         ValidationConfigType.class, value.get(), false,
                         "http://xmlns.jcp.org/xml/ns/validation/configuration",
-                        "http://jboss.org/xml/ns/javax/validation/configuration");
+                        "http://jboss.org/xml/ns/javax/validation/configuration",
+                        "https://jakarta.ee/xml/ns/validation/configuration");
+
                 module.setValidationConfig(validationConfigType);
             } catch (final Exception e) {
                 logger.warning("can't read validation.xml to construct a validation factory, it will be ignored");
@@ -448,7 +449,7 @@ public class ReadDescriptors implements DynamicDeployer {
             clientModule.setApplicationClient(applicationClient);
         } else {
             if (!clientModule.isEjbModuleGenerated()) {
-                DeploymentLoader.logger.debug("No application-client.xml found assuming annotations present: " + appModule.getJarLocation() + ", module: " + clientModule.getModuleId());
+                DeploymentLoader.LOGGER.debug("No application-client.xml found assuming annotations present: " + appModule.getJarLocation() + ", module: " + clientModule.getModuleId());
                 clientModule.setApplicationClient(new ApplicationClient());
             }
         }
@@ -468,15 +469,13 @@ public class ReadDescriptors implements DynamicDeployer {
                 throw new OpenEJBException(e);
             }
         } else {
-            DeploymentLoader.logger.debug("No ejb-jar.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + ejbModule.getModuleId());
+            DeploymentLoader.LOGGER.debug("No ejb-jar.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + ejbModule.getModuleId());
             ejbModule.setEjbJar(new EjbJar());
         }
     }
 
     private static void checkDuplicatedByBeansXml(final List<String> list, final List<String> duplicated) {
-        final Iterator<String> it = list.iterator();
-        while (it.hasNext()) {
-            final String str = it.next();
+        for (String str : list) {
             if (list.indexOf(str) != list.lastIndexOf(str)) {
                 duplicated.add(str);
             }
@@ -583,7 +582,7 @@ public class ReadDescriptors implements DynamicDeployer {
             final Connector connector = readConnector(url);
             connectorModule.setConnector(connector);
         } else {
-            DeploymentLoader.logger.debug("No ra.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + connectorModule.getModuleId());
+            DeploymentLoader.LOGGER.debug("No ra.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + connectorModule.getModuleId());
             connectorModule.setConnector(new Connector());
         }
     }
@@ -602,7 +601,7 @@ public class ReadDescriptors implements DynamicDeployer {
             final WebApp webApp = readWebApp(url);
             webModule.setWebApp(webApp);
         } else {
-            DeploymentLoader.logger.debug("No web.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + webModule.getModuleId());
+            DeploymentLoader.LOGGER.debug("No web.xml found assuming annotated beans present: " + appModule.getJarLocation() + ", module: " + webModule.getModuleId());
             webModule.setWebApp(new WebApp());
         }
 
@@ -836,6 +835,8 @@ public class ReadDescriptors implements DynamicDeployer {
     public static WebApp readWebApp(final URL url) throws OpenEJBException {
         final WebApp webApp;
         try {
+            // webApp = (WebApp) JaxbJavaee.unmarshalJavaee(WebApp.class, IO.read(url));
+            // don't use the SXC version with the accessors as it's not up to date
             webApp = WebXml.unmarshal(url);
         } catch (final SAXException e) {
             throw new OpenEJBException("Cannot parse the web.xml file: " + url.toExternalForm(), e);
@@ -851,7 +852,7 @@ public class ReadDescriptors implements DynamicDeployer {
 
     public static TldTaglib readTldTaglib(final URL url) throws OpenEJBException {
         // TOMEE-164 Optimization on reading built-in tld files
-        if (url.getPath().contains("jstl-1.2.jar") || (url.getPath().contains("taglibs-standard-") && url.getPath().contains(".jar!"))) {
+        if (url.getPath().contains("jstl-1.2.jar") || ((url.getPath().contains("taglibs-standard-") || url.getPath().contains("taglibs-shade-") && url.getPath().contains(".jar!")))) {
             return SKIP_TAGLIB;
         }
         if (url.getPath().contains("myfaces-impl")) { // we should return SKIP_TAGLIB too

@@ -102,12 +102,12 @@ import org.apache.xbean.finder.filter.Filter;
 import org.apache.xbean.finder.filter.Filters;
 import org.xml.sax.InputSource;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.spi.Extension;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.inject.Inject;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -940,6 +940,11 @@ public class ApplicationComposers {
         }
     }
 
+    public void enrich(final Object inputTestInstance) throws org.apache.openejb.OpenEJBException {
+        final BeanContext context = SystemInstance.get().getComponent(ContainerSystem.class).getBeanContext(inputTestInstance.getClass());
+        enrich(inputTestInstance, context);
+    }
+
     private void enrich(final Object inputTestInstance, final BeanContext context) throws org.apache.openejb.OpenEJBException {
         if (context == null) {
             return;
@@ -1100,6 +1105,8 @@ public class ApplicationComposers {
             }
 
             OpenEJB.destroy();
+            SystemInstance.reset();
+
         } finally {
             runAll(afterRunnables);
             if (originalLoader != null) {
@@ -1146,6 +1153,15 @@ public class ApplicationComposers {
                 // no-op
             }
         }
+        
+        /*
+        * Clear additional references
+        */
+        if (appContext != null) {
+            appContext.getWebContexts().clear();
+            appContext.getInjections().clear();
+            appContext.getSystemInstance().removeComponent(TestInstance.class);
+        }        
     }
 
     private void runAll(final Collection<Runnable> runnables) {

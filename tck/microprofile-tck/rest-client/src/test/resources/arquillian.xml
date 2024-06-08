@@ -27,12 +27,15 @@
       <property name="ajpPort">-1</property>
       <property name="stopPort">-1</property>
       <property name="classifier">microprofile</property>
+      <property name="debug">false</property>
       <property name="conf">src/test/conf</property>
       <property name="dir">target/tomee</property>
       <property name="appWorkingDir">target/workdir</property>
       <property name="cleanOnStartUp">true</property>
       <property name="additionalLibs">
         mvn:com.github.tomakehurst:wiremock-standalone:2.10.1
+        mvn:org.apache.httpcomponents:httpcore:4.4.6
+        mvn:junit:junit:4.12
       </property>
     </configuration>
   </container>
@@ -48,6 +51,11 @@
       <property name="cleanOnStartUp">true</property>
       <property name="additionalLibs">
         mvn:com.github.tomakehurst:wiremock-standalone:2.10.1
+        mvn:org.apache.httpcomponents:httpcore:4.4.6
+        mvn:junit:junit:4.12
+      </property>
+      <property name="properties">
+        tomee.mp.scan = all
       </property>
     </configuration>
   </container>
@@ -63,6 +71,11 @@
       <property name="cleanOnStartUp">true</property>
       <property name="additionalLibs">
         mvn:com.github.tomakehurst:wiremock-standalone:2.10.1
+        mvn:org.apache.httpcomponents:httpcore:4.4.6
+        mvn:junit:junit:4.12
+      </property>
+      <property name="properties">
+        tomee.mp.scan = all
       </property>
     </configuration>
   </container>

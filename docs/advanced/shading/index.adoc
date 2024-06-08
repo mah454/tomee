@@ -111,7 +111,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.16.10'
-    compile 'org.apache.tomee:tomee-embedded:7.0.2-SNAPSHOT'
+    compile 'org.apache.tomee:tomee-embedded:10.0.0-M1-SNAPSHOT'
 }
 
 // customize exclusions depending your app
@@ -121,8 +121,8 @@ def excludedDependenciesGroups = [
         // gradle is buggy with poms, scope provided and optional I think
         'com.google.code.findbugs',
         'com.google.guava',
-        'javax.annotation',
-        'javax.ws.rs',
+        'jakarta.annotation',
+        'jakarta.ws.rs',
         'net.sf.ehcache',
         'org.apache.httpcomponents',
         'org.ow2.asm',
@@ -166,7 +166,7 @@ def excludedDependenciesArtifacts = [
         'openejb-webservices',
         'tomee-webservices',
         'geronimo-connector',
-        'geronimo-javamail_1.4_mail'
+        'geronimo-javamail_1.6_mail'
 ]
 shadowJar {
     classifier = 'bundle'

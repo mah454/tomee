@@ -24,24 +24,22 @@ import org.apache.webbeans.component.OwbBean;
 import org.apache.webbeans.config.WebBeansContext;
 import org.apache.webbeans.container.BeanManagerImpl;
 import org.apache.webbeans.context.creational.CreationalContextImpl;
-import org.apache.webbeans.event.EventMetadataImpl;
 import org.apache.webbeans.util.Asserts;
 import org.apache.webbeans.util.WebBeansUtil;
 
-import javax.el.ELResolver;
-import javax.el.ExpressionFactory;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.InterceptionType;
-import javax.enterprise.inject.spi.Interceptor;
-import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.PassivationCapable;
+import jakarta.el.ELResolver;
+import jakarta.el.ExpressionFactory;
+import jakarta.enterprise.context.spi.Context;
+import jakarta.enterprise.context.spi.Contextual;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.UnsatisfiedResolutionException;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.InterceptionType;
+import jakarta.enterprise.inject.spi.Interceptor;
+import jakarta.enterprise.inject.spi.PassivationCapable;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,17 +64,6 @@ public class WebappBeanManager extends BeanManagerImpl {
     }
 
     @Override
-    public void fireEvent(final Object event, final EventMetadataImpl metadata, final boolean isLifecycleEvent) {
-        super.fireEvent(event, metadata, isLifecycleEvent);
-        if (isEvent(event)) {
-            final BeanManagerImpl parentBm = getParentBm();
-            if (parentBm != null) {
-                parentBm.fireEvent(event, metadata, isLifecycleEvent);
-            }
-        }
-    }
-
-    @Override
     public List<Interceptor<?>> resolveInterceptors(InterceptionType type, Annotation... interceptorBindings) {
         final List<Interceptor<?>> interceptors = super.resolveInterceptors(type, interceptorBindings);
         final List<Interceptor<?>> parentInterceptors = getParentBm().resolveInterceptors(type, interceptorBindings);
@@ -86,20 +73,6 @@ public class WebappBeanManager extends BeanManagerImpl {
             }
         }
         return interceptors;
-    }
-
-    @Override
-    public <T> Set<ObserverMethod<? super T>> resolveObserverMethods(final T event, final EventMetadataImpl metadata) {
-        final Set<ObserverMethod<? super T>> set = new HashSet<>(super.resolveObserverMethods(event, metadata));
-
-        if (isEvent(event)) {
-            final BeanManagerImpl parentBm = getParentBm();
-            if (parentBm != null) {
-                set.addAll(parentBm.resolveObserverMethods(event, metadata));
-            }
-        } // else nothing since extensions are loaded by classloader so we already have it
-
-        return set;
     }
 
     @Override

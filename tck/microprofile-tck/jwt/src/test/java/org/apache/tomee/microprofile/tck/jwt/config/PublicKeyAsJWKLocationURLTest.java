@@ -27,14 +27,14 @@ import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Properties;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.jwt.config.Names;
 import org.eclipse.microprofile.jwt.tck.TCKConstants;
@@ -56,7 +56,7 @@ import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.annotations.Test;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.microprofile.jwt.tck.TCKConstants.TEST_GROUP_CONFIG;
 
 public class PublicKeyAsJWKLocationURLTest extends Arquillian {
@@ -97,9 +97,9 @@ public class PublicKeyAsJWKLocationURLTest extends Arquillian {
         // Read in the base URL of deployment since it cannot be injected for use by this method
         String jwksBaseURL = System.getProperty("mp.jwt.tck.jwks.baseURL", "http://localhost:8080/");
         // Location points to the JWKS endpoint of the deployment
-        System.out.printf("baseURL=%s\n", jwksBaseURL);
+        //System.out.printf("baseURL=%s\n", jwksBaseURL);
         URL jwksURL = new URL(new URL(jwksBaseURL), "key/endp/publicKey4kAsJWKS?kid=publicKey4k");
-        System.out.printf("jwksURL=%s\n", jwksURL);
+        //System.out.printf("jwksURL=%s\n", jwksURL);
         configProps.setProperty(Names.VERIFIER_PUBLIC_KEY_LOCATION, jwksURL.toExternalForm());
         configProps.setProperty(Names.ISSUER, TCKConstants.TEST_ISSUER);
         StringWriter configSW = new StringWriter();
@@ -116,7 +116,7 @@ public class PublicKeyAsJWKLocationURLTest extends Arquillian {
             .addAsWebInfResource("beans.xml", "beans.xml")
             .addAsManifestResource(configAsset, "microprofile-config.properties")
             ;
-        System.out.printf("WebArchive: %s\n", webArchive.toString(true));
+        //System.out.printf("WebArchive: %s\n", webArchive.toString(true));
         return webArchive;
     }
 

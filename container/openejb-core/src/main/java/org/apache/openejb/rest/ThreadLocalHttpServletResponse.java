@@ -17,9 +17,9 @@
 
 package org.apache.openejb.rest;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -63,16 +63,6 @@ public class ThreadLocalHttpServletResponse extends AbstractRestThreadLocalProxy
     @Override
     public String encodeRedirectURL(final String url) {
         return get().encodeRedirectURL(url);
-    }
-
-    @Override
-    public String encodeUrl(final String url) {
-        return get().encodeUrl(url);
-    }
-
-    @Override
-    public String encodeRedirectUrl(final String url) {
-        return get().encodeRedirectUrl(url);
     }
 
     @Override
@@ -128,11 +118,6 @@ public class ThreadLocalHttpServletResponse extends AbstractRestThreadLocalProxy
     @Override
     public void setStatus(final int sc) {
         get().setStatus(sc);
-    }
-
-    @Override
-    public void setStatus(final int sc, final String sm) {
-        get().setStatus(sc, sm);
     }
 
     @Override

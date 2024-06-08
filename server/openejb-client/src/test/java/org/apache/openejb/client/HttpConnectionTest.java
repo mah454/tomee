@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -164,6 +164,38 @@ public class HttpConnectionTest {
             }
 
             Assert.assertTrue("should contain", sb.toString().contains("secure pagealtBasic dGVzdDpwd2Q="));
+        }
+    }
+
+    @Test
+    public void httpBasicSpecificConfigAmpersand() throws URISyntaxException, IOException {
+        final HttpConnectionFactory factory = new HttpConnectionFactory();
+        final String url = "http://localhost:" + server.getAddress().getPort() + "/e?basic.password=pwd&basic.username=te%26st&authorizationHeader=AltAuthorization";
+        for (int i = 0; i < 3; i++) {
+            final Connection connection = factory.getConnection(new URI(url));
+
+            BufferedReader br = null;
+            final StringBuilder sb = new StringBuilder();
+            String line;
+            try {
+                br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                connection.close();
+            }
+
+            Assert.assertTrue("should contain", sb.toString().contains("secure pagealtBasic dGUmc3Q6cHdk"));
         }
     }
 

@@ -15,39 +15,39 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>tck</artifactId>
     <groupId>org.apache.tomee</groupId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cdi-embedded</artifactId>
   <packaging>jar</packaging>
-  <name>OpenEJB :: TCK :: CDI Embedded</name>
-  <version>8.0.0-SNAPSHOT</version>
+  <name>TomEE :: TCK :: CDI Embedded</name>
+  <version>10.0.0-M2-SNAPSHOT</version>
 
   <properties>
     <testngSuiteXml>src/test/resources/passing.xml</testngSuiteXml>
+    <surefire.argline>-Xmx4g</surefire.argline>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>javaee-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.myfaces.core</groupId>
       <artifactId>myfaces-api</artifactId>
-      <version>${myfaces.version}</version>
-      <scope>provided</scope>
+      <version>${version.myfaces}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.myfaces.core</groupId>
       <artifactId>myfaces-impl</artifactId>
-      <version>${myfaces.version}</version>
+      <version>${version.myfaces}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>jakartaee-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
@@ -68,16 +68,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.taglibs</groupId>
-      <artifactId>taglibs-standard-jstlel</artifactId>
+      <groupId>org.apache.tomee</groupId>
+      <artifactId>taglibs-shade</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <dependency>
-      <groupId>xalan</groupId>
-      <artifactId>xalan</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -100,39 +101,94 @@
     <dependency>
       <groupId>org.apache.openwebbeans</groupId>
       <artifactId>openwebbeans-porting</artifactId>
-      <version>${openwebbeans.version}</version>
+      <version>${version.openwebbeans}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
           <groupId>org.apache.openejb</groupId>
           <artifactId>openejb-core</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.apache.tomcat</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.jboss.cdi.tck</groupId>
-      <artifactId>cdi-tck-impl</artifactId>
-      <version>${cdi.tck.20.version}</version>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>cdi-tck-core-impl</artifactId>
+      <version>${cdi-tck.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>javax.enterprise</groupId>
+          <groupId>jakarta.xml.soap</groupId>
+          <artifactId>jakarta.xml.soap-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>javax.faces</groupId>
+          <groupId>jakarta.faces</groupId>
           <artifactId>jsf-api</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>javax.servlet-api</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>javax.servlet.jsp</groupId>
+          <groupId>jakarta.servlet.jsp</groupId>
           <artifactId>jsp-api</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>javax.transaction</groupId>
+          <groupId>jakarta.transaction</groupId>
           <artifactId>jta</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.annotation</groupId>
+          <artifactId>jakarta.annotation-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>cdi-tck-web-impl</artifactId>
+      <version>${cdi-tck.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>jakarta.xml.soap</groupId>
+          <artifactId>jakarta.xml.soap-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.faces</groupId>
+          <artifactId>jsf-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.servlet.jsp</groupId>
+          <artifactId>jsp-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.transaction</groupId>
+          <artifactId>jta</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.annotation</groupId>
+          <artifactId>jakarta.annotation-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -157,7 +213,7 @@
     <dependency>
       <groupId>org.apache.openwebbeans</groupId>
       <artifactId>openwebbeans-jsf</artifactId>
-      <version>${openwebbeans.version}</version>
+      <version>${version.openwebbeans}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -172,67 +228,102 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <!-- ActiveMQ is optional in openejb-core (embedded needs openejb-core + all deps)-->
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-ra</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-broker</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-jdbc-store</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.activemq</groupId>
+          <artifactId>activemq-broker</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
+
+
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
-        <configuration>
-          <reuseForks>true</reuseForks>
-          <forkCount>1</forkCount>
-          <argLine>-Xmx1536m -XX:PermSize=512m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled</argLine>
-          <useFile>false</useFile>
-          <disableXmlReport>true</disableXmlReport>
-          <suiteXmlFiles>
-            <suiteXmlFile>${testngSuiteXml}</suiteXmlFile>
-          </suiteXmlFiles>
-          <properties>
-            <property> <!-- broken cause @RequestScoped beans are parameters and testng logs parameters -->
-              <name>usedefaultlisteners</name>
-              <value>false</value>
-            </property>
-          </properties>
-          <systemPropertyVariables>
-            <cdiTckExcludeDummy>true</cdiTckExcludeDummy>
+  <profiles>
+    <profile>
+      <id>tck-cdi</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${surefire.version}</version>
+            <configuration>
+              <reuseForks>false</reuseForks>
+              <forkCount>1</forkCount>
+              <argLine>${surefire.argline}</argLine>
+              <useFile>false</useFile>
+              <disableXmlReport>false</disableXmlReport>
+              <excludedGroups>javaee-full,se</excludedGroups>
+              <dependenciesToScan>
+                <dependency>jakarta.enterprise:cdi-tck-core-impl</dependency>
+                <dependency>jakarta.enterprise:cdi-tck-web-impl</dependency>
+              </dependenciesToScan>
+              <!-- easier to debug
+              <suiteXmlFiles>
+                <suiteXmlFile>${testngSuiteXml}</suiteXmlFile>
+              </suiteXmlFiles>
+              -->
+              <properties>
+                <property> <!-- broken cause @RequestScoped beans are parameters and testng logs parameters -->
+                  <name>usedefaultlisteners</name>
+                  <value>false</value>
+                </property>
+              </properties>
+              <systemPropertyVariables>
+                <cdiTckExcludeDummy>true</cdiTckExcludeDummy>
 
-            <queue>new://Resource?type=Queue</queue>
-            <topic>new://Resource?type=Topic</topic>
-            <jdbc>new://Resource?type=DataSource</jdbc>
-            <jms>new://Resource?type=javax.jms.ConnectionFactory</jms>
+                <queue>new://Resource?type=Queue</queue>
+                <topic>new://Resource?type=Topic</topic>
+                <jdbc>new://Resource?type=DataSource</jdbc>
+                <jms>new://Resource?type=jakarta.jms.ConnectionFactory</jms>
 
-            <admin.disabled>true</admin.disabled>
-            <ejbd.disabled>true</ejbd.disabled>
-            <ejbds.disabled>true</ejbds.disabled>
-            <httpejbd.port>0</httpejbd.port>
-            <!-- random port for http one -> CI friendly -->
+                <admin.disabled>true</admin.disabled>
+                <ejbd.disabled>true</ejbd.disabled>
+                <ejbds.disabled>true</ejbds.disabled>
+                <httpejbd.port>0</httpejbd.port>
+                <!-- random port for http one -> CI friendly -->
 
-            <openejb.cdi.applicationScope.cached>false</openejb.cdi.applicationScope.cached>
-            <openejb.cdi.producer.interception>false</openejb.cdi.producer.interception>
-            <openejb.cdi.filter.classloader>false</openejb.cdi.filter.classloader>
-            <openejb.cdi.conversation.http.use-get-parameter>true</openejb.cdi.conversation.http.use-get-parameter>
+                <openejb.cdi.applicationScope.cached>false</openejb.cdi.applicationScope.cached>
+                <openejb.cdi.producer.interception>false</openejb.cdi.producer.interception>
+                <openejb.cdi.filter.classloader>false</openejb.cdi.filter.classloader>
+                <openejb.cdi.conversation.http.use-get-parameter>true</openejb.cdi.conversation.http.use-get-parameter>
 
-            <openejb.jul.forceReload>true</openejb.jul.forceReload>
-            <openejb.strict.interface.declaration>true</openejb.strict.interface.declaration>
-            <openejb.http.mock-request>true</openejb.http.mock-request>
-            <openejb.http.default-content-type>text/plain</openejb.http.default-content-type>
-            <!-- TODO: remove it -->
-            <openejb.http.eviction.duration>1 second</openejb.http.eviction.duration>
-            <openejb.embedded.try-jsp>true</openejb.embedded.try-jsp>
-            <openejb.deploymentId.format>{appId}/{ejbJarId}/{ejbName}</openejb.deploymentId.format>
-            <org.apache.openejb.assembler.classic.WebAppBuilder>org.apache.openejb.web.LightweightWebAppBuilder</org.apache.openejb.assembler.classic.WebAppBuilder>
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+                <openejb.jul.forceReload>true</openejb.jul.forceReload>
+                <openejb.strict.interface.declaration>true</openejb.strict.interface.declaration>
+                <openejb.http.mock-request>true</openejb.http.mock-request>
+                <openejb.http.default-content-type>text/plain</openejb.http.default-content-type>
+                <!-- TODO: remove it -->
+                <openejb.http.eviction.duration>1 second</openejb.http.eviction.duration>
+                <openejb.embedded.try-jsp>true</openejb.embedded.try-jsp>
+                <openejb.deploymentId.format>{appId}/{ejbJarId}/{ejbName}</openejb.deploymentId.format>
+                <org.apache.openejb.assembler.classic.WebAppBuilder>org.apache.openejb.web.LightweightWebAppBuilder</org.apache.openejb.assembler.classic.WebAppBuilder>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

@@ -18,21 +18,40 @@
 package org.apache.openejb.core.security.jacc;
 
 import org.apache.openejb.core.security.JaccProvider;
+import org.apache.openejb.loader.SystemInstance;
+import org.apache.openejb.spi.SecurityService;
 
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyContext;
-import javax.security.jacc.PolicyContextException;
+import jakarta.security.jacc.EJBMethodPermission;
+import jakarta.security.jacc.EJBRoleRefPermission;
+import jakarta.security.jacc.PolicyConfiguration;
+import jakarta.security.jacc.PolicyContext;
+import jakarta.security.jacc.PolicyContextException;
+import jakarta.security.jacc.WebResourcePermission;
+import jakarta.security.jacc.WebRoleRefPermission;
+import jakarta.security.jacc.WebUserDataPermission;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @version $Rev$ $Date$
  */
 public class BasicJaccProvider extends JaccProvider {
+
+    private static final Set<Class> JACC_PERMISSIONS = new HashSet<Class>() {
+        {
+            add(EJBMethodPermission.class);
+            add(EJBRoleRefPermission.class);
+            add(WebResourcePermission.class);
+            add(WebRoleRefPermission.class);
+            add(WebUserDataPermission.class);
+        }
+    };
     static {
         // force preloading to avoid to loop under SecurityManager
         try {
@@ -51,6 +70,9 @@ public class BasicJaccProvider extends JaccProvider {
     }
 
     public PolicyConfiguration getPolicyConfiguration(final String contextID, final boolean remove) throws PolicyContextException {
+        if (contextID == null) {
+            throw new IllegalArgumentException("contextID can't be null;");
+        }
         BasicPolicyConfiguration configuration = configurations.get(contextID);
 
         if (configuration == null) {
@@ -61,6 +83,21 @@ public class BasicJaccProvider extends JaccProvider {
         }
 
         return configuration;
+    }
+
+    public PolicyConfiguration getPolicyConfiguration(final String contextID) {
+        if (contextID == null) {
+            throw new IllegalArgumentException("contextID can't be null;");
+        }
+        return configurations.get(contextID);
+    }
+
+    public PolicyConfiguration getPolicyConfiguration() {
+        final String contextID = PolicyContext.getContextID();
+        if (contextID == null) {
+            return null;
+        }
+        return getPolicyConfiguration(contextID);
     }
 
     protected BasicPolicyConfiguration createPolicyConfiguration(final String contextID) {
@@ -82,7 +119,7 @@ public class BasicJaccProvider extends JaccProvider {
     public boolean implies(final ProtectionDomain domain, final Permission permission) {
         final String contextID = PolicyContext.getContextID();
 
-        if (contextID != null) {
+        if (contextID != null && JACC_PERMISSIONS.contains(permission.getClass())) {
             try {
                 final BasicPolicyConfiguration configuration = configurations.get(contextID);
 
@@ -96,6 +133,16 @@ public class BasicJaccProvider extends JaccProvider {
             }
         }
 
-        return systemPolicy != null ? systemPolicy.implies(domain, permission) : false;
+        return systemPolicy != null && systemPolicy.implies(domain, permission);
     }
+
+    public boolean hasAccessToWebResource(final String resource, final String... methods) {
+        final SecurityService securityService = SystemInstance.get().getComponent(SecurityService.class);
+        if (securityService != null) {
+            return implies(securityService.getProtectionDomain(), new WebResourcePermission(resource, methods));
+        }
+        return false;
+
+    }
+
 }

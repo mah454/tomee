@@ -255,7 +255,7 @@ public class Paths implements PathsInterface {
 
     @Override
     public File getJavaEEAPIJar() {
-        return findOpenEJBJar("javaee-api");
+        return findOpenEJBJar("jakartaee-api");
     }
 
     /**
@@ -526,5 +526,14 @@ public class Paths implements PathsInterface {
             return null;
         }
         return new File(binDir, "setclasspath.bat");
+    }
+
+    @Override
+    public File getCatalinaPolicy() {
+        final File confDir = getCatalinaConfDir();
+        if (confDir == null) {
+            return null;
+        }
+        return new File(confDir, "catalina.policy");
     }
 }

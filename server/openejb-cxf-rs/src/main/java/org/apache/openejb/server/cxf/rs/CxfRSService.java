@@ -19,6 +19,8 @@ package org.apache.openejb.server.cxf.rs;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.BindingFactoryManager;
 import org.apache.cxf.jaxrs.JAXRSBindingFactory;
+import org.apache.cxf.jaxrs.sse.SseContextProvider;
+import org.apache.cxf.jaxrs.sse.SseEventSinkContextProvider;
 import org.apache.cxf.transport.DestinationFactory;
 import org.apache.cxf.transport.http.HTTPTransportFactory;
 import org.apache.openejb.cdi.WebBeansContextBeforeDeploy;
@@ -37,26 +39,26 @@ import org.apache.webbeans.annotation.EmptyAnnotationLiteral;
 import org.apache.webbeans.config.WebBeansContext;
 import org.apache.webbeans.container.BeanManagerImpl;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.PassivationCapable;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.container.ResourceContext;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Providers;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.PassivationCapable;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Providers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -209,7 +211,6 @@ public class CxfRSService extends RESTService {
                     // no-op
                 }
             }
-            hacksOn();
             initCxfProviders(bus);
         } finally {
             if (oldLoader != null) {
@@ -219,7 +220,7 @@ public class CxfRSService extends RESTService {
     }
 
     private void initCxfProviders(final Bus bus) {
-        if (bus.getProperty("org.apache.cxf.jaxrs.bus.providers") == null) {
+        if (noProvidersExplicitlyAdded(bus)) {
             bus.setProperty("skip.default.json.provider.registration", "true"); // client jaxrs, we want johnzon not jettison
 
             final Collection<Object> defaults = new ArrayList<>();
@@ -269,8 +270,23 @@ public class CxfRSService extends RESTService {
         }
     }
 
-    private void hacksOn() {
-        CxfHacks.initCxfClassHelper();
+    private boolean noProvidersExplicitlyAdded(final Bus bus) {
+        final Object property = bus.getProperty("org.apache.cxf.jaxrs.bus.providers");
+
+        final Set<Class> currentProviders = new HashSet<>();
+
+        if (property instanceof List) {
+            for (final Object item : List.class.cast(property)) {
+                if (item != null) {
+                    currentProviders.add(item.getClass());
+                }
+            }
+        }
+
+        currentProviders.remove(SseContextProvider.class);
+        currentProviders.remove(SseEventSinkContextProvider.class);
+
+        return currentProviders.isEmpty();
     }
 
     @Override
@@ -353,11 +369,6 @@ public class CxfRSService extends RESTService {
         @Override
         public String getName() {
             return null;
-        }
-
-        @Override
-        public boolean isNullable() {
-            return false;
         }
 
         @Override

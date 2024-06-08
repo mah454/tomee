@@ -16,19 +16,14 @@
  */
 package org.apache.openejb.util;
 
-import javax.security.jacc.PolicyContext;
+import jakarta.security.jacc.PolicyContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Properties;
 
 // WARN: don't add any logger or container dependency, it should stay self contained
 public final class JavaSecurityManagers {
-    private static final PrivilegedAction<Properties> GET_SYSTEM_PROPERTIES = new PrivilegedAction<Properties>() {
-        @Override
-        public Properties run() {
-            return System.getProperties();
-        }
-    };
+    private static final PrivilegedAction<Properties> GET_SYSTEM_PROPERTIES = System::getProperties;
 
     private JavaSecurityManagers() {
         // no-op

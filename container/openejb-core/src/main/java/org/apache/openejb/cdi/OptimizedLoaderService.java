@@ -26,7 +26,7 @@ import org.apache.webbeans.service.DefaultLoaderService;
 import org.apache.webbeans.spi.LoaderService;
 import org.apache.webbeans.spi.plugins.OpenWebBeansPlugin;
 
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.Extension;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,7 +54,7 @@ public class OptimizedLoaderService implements LoaderService {
 
     public OptimizedLoaderService(final Properties appConfig) {
         this(
-                is("openejb.cdi.ignore-not-loadable-extensions", appConfig, SystemInstance.get().getProperties(), "false") ?
+                is("openejb.cdi.ignore-not-loadable-extensions", appConfig, SystemInstance.get().getProperties(), "true") ?
                         new FilterableServiceLoader() : new DefaultLoaderService(),
                 appConfig);
     }
@@ -113,7 +113,7 @@ public class OptimizedLoaderService implements LoaderService {
 
         if ("true".equals(OptimizedLoaderService.this.config.getProperty("openejb.cdi.extensions.sorted",
                 SystemInstance.get().getProperty("openejb.cdi.extensions.sorted")))) {
-            Collections.sort(list, new Comparator<Extension>() {
+            list.sort(new Comparator<Extension>() {
                 @Override
                 public int compare(final Extension o1, final Extension o2) {
                     final int val1 = getVal(o1);
@@ -156,11 +156,9 @@ public class OptimizedLoaderService implements LoaderService {
             return true;
         }
 
-        if (extClass.getClassLoader() != containerLoader) {
-            return false;
-        }
-
         switch (name) {
+            case "org.apache.geronimo.microprofile.openapi.cdi.GeronimoOpenAPIExtension":
+                return true;
             case "org.apache.bval.cdi.BValExtension":
                 for (final Extension e : extensions) {
                     final String en = e.getClass().getName();

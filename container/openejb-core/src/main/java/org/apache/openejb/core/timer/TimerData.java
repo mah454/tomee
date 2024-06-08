@@ -29,12 +29,12 @@ import org.apache.openejb.quartz.Trigger;
 import org.apache.openejb.quartz.TriggerKey;
 import org.apache.openejb.quartz.impl.triggers.AbstractTrigger;
 
-import javax.ejb.EJBException;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.Transaction;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerConfig;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.Transaction;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -219,13 +219,19 @@ public abstract class TimerData implements Serializable {
 
     public void newTimer() {
         //Initialize the Quartz Trigger
-        trigger = initializeTrigger();
-        trigger.computeFirstFireTime(null);
-        trigger.setGroup(OPEN_EJB_TIMEOUT_TRIGGER_GROUP_NAME);
-        trigger.setName(OPEN_EJB_TIMEOUT_TRIGGER_NAME_PREFIX + deploymentId + "_" + id);
-        newTimer = true;
         try {
+            trigger = initializeTrigger();
+            trigger.computeFirstFireTime(null);
+            trigger.setGroup(OPEN_EJB_TIMEOUT_TRIGGER_GROUP_NAME);
+            trigger.setName(OPEN_EJB_TIMEOUT_TRIGGER_NAME_PREFIX + deploymentId + "_" + id);
+            newTimer = true;
+
             registerTimerDataSynchronization();
+
+        } catch (final TimerExpiredException e) {
+            setExpired(true);
+            log.warning("Timer " + trigger + " is expired and will never trigger.");
+
         } catch (final TimerStoreException e) {
             throw new EJBException("Failed to register new timer data synchronization", e);
         }
@@ -344,6 +350,7 @@ public abstract class TimerData implements Serializable {
                     return scheduler.getTrigger(key);
                 }
             } catch (final SchedulerException e) {
+                log.warning(e.getLocalizedMessage(), e);
                 return null;
             }
         }

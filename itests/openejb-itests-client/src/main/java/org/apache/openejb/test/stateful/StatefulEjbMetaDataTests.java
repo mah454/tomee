@@ -16,7 +16,7 @@
  */
 package org.apache.openejb.test.stateful;
 
-import javax.ejb.EJBHome;
+import jakarta.ejb.EJBHome;
 
 /**
  * [8] Should be run as the eigth test suite of the BasicStatefulTestClients
@@ -58,7 +58,7 @@ public class StatefulEjbMetaDataTests extends BasicStatefulTestClient {
 
     /**
      * 5.5 Session object identity
-     * <p/>
+     *
      * Session objects are intended to be private resources used only by the
      * client that created them. For this reason, session objects, from the
      * client's perspective, appear anonymous. In contrast to entity objects,

@@ -24,15 +24,15 @@ import org.apache.openejb.core.transaction.TransactionPolicy;
 import org.apache.openejb.core.transaction.TransactionRolledbackException;
 import org.apache.openejb.loader.SystemInstance;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.CDI;
-import javax.interceptor.InvocationContext;
-import javax.transaction.RollbackException;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionRequiredException;
-import javax.transaction.Transactional;
-import javax.transaction.TransactionalException;
+import jakarta.enterprise.inject.spi.AnnotatedMethod;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.interceptor.InvocationContext;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionRequiredException;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.TransactionalException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 import static java.util.Arrays.asList;
 
 public abstract class InterceptorBase implements Serializable {
-    private static final IllegalStateException ILLEGAL_STATE_EXCEPTION = new IllegalStateException("Can't use UserTransaction from @Transaction call");
+    private static final IllegalStateException ILLEGAL_STATE_EXCEPTION = new IllegalStateException("Can't use UserTransaction from @Transactional call");
     private static final boolean HANDLE_EXCEPTION_ONLY_FOR_CLIENT = SystemInstance.get().getOptions().get("openejb.cdi.jta.exception.client-only", false);
 
     private transient volatile ConcurrentMap<Method, Boolean> rollback = new ConcurrentHashMap<>();

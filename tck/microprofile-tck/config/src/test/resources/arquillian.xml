@@ -26,6 +26,7 @@
       <property name="httpPort">-1</property>
       <property name="ajpPort">-1</property>
       <property name="stopPort">-1</property>
+      <property name="debug">false</property>
       <property name="classifier">microprofile</property>
       <property name="conf">src/test/conf</property>
       <property name="dir">target/tomee</property>
@@ -34,6 +35,10 @@
       <property name="properties">
         config.test = SUCCESS
         org.apache.geronimo.config.configsource.SystemPropertyConfigSource.copy = false
+
+        mp.tck.prop.dummy = dummy
+        customer.hobby = Tennis
+        config_ordinal = 120
       </property>
     </configuration>
   </container>
@@ -48,8 +53,13 @@
       <property name="appWorkingDir">target/workdir</property>
       <property name="cleanOnStartUp">true</property>
       <property name="properties">
+        tomee.mp.scan = all
         config.test = SUCCESS
         org.apache.geronimo.config.configsource.SystemPropertyConfigSource.copy = false
+
+        mp.tck.prop.dummy = dummy
+        customer.hobby = Tennis
+        config_ordinal = 120
       </property>
     </configuration>
   </container>
@@ -64,8 +74,13 @@
       <property name="appWorkingDir">target/workdir</property>
       <property name="cleanOnStartUp">true</property>
       <property name="properties">
+        tomee.mp.scan = all
         config.test = SUCCESS
         org.apache.geronimo.config.configsource.SystemPropertyConfigSource.copy = false
+
+        mp.tck.prop.dummy = dummy
+        customer.hobby = Tennis
+        config_ordinal = 120
       </property>
     </configuration>
   </container>

@@ -22,8 +22,10 @@ import org.apache.openejb.util.AppFinder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -42,14 +44,31 @@ public class TomEEConfigSource implements ConfigSource {
                                          .split(","));
 
             if (mpIgnoredApps.stream().anyMatch(s -> s.equalsIgnoreCase(appContextOrWeb.getId()))) {
-                configuration.put("geronimo.opentracing.filter.active", "false");
+                openTracingFilterActive(false);
+                metricsJaxRsActive(false);
             }
+        }
+
+        final String mpScan = SystemInstance.get().getOptions().get("tomee.mp.scan", "none");
+        if (mpScan.equals("none")) {
+            openTracingFilterActive(false);
+            metricsJaxRsActive(false);
         }
     }
 
     @Override
     public Map<String, String> getProperties() {
         return configuration;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+        return new HashSet<>(getProperties().keySet());
+    }
+
+    @Override
+    public int getOrdinal() {
+        return 150;
     }
 
     @Override
@@ -60,5 +79,13 @@ public class TomEEConfigSource implements ConfigSource {
     @Override
     public String getName() {
         return TomEEConfigSource.class.getSimpleName();
+    }
+
+    public void openTracingFilterActive(final boolean active) {
+        configuration.put("geronimo.opentracing.filter.active", Boolean.toString(active));
+    }
+
+    public void metricsJaxRsActive(final boolean active) {
+        configuration.put("geronimo.metrics.jaxrs.activated", Boolean.toString(active));
     }
 }

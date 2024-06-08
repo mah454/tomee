@@ -20,9 +20,9 @@ import org.apache.activemq.ActiveMQXAConnection;
 import org.apache.activemq.ActiveMQXASession;
 import org.apache.activemq.command.SessionId;
 
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Topic;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Topic;
 
 // Note: not shared in the code
 public class TomEEXASession extends ActiveMQXASession {
@@ -59,5 +59,10 @@ public class TomEEXASession extends ActiveMQXASession {
     @Override
     public MessageConsumer createSharedDurableConsumer(final Topic topic, final String name, final String messageSelector) throws JMSException {
         return createDurableSubscriber(topic, name, messageSelector, false);
+    }
+
+    protected void doStartTransaction() throws JMSException {
+        // allow non transactional auto ack work on an XASession
+        // Seems ok by the spec that an XAConnection can be used without an XA tx
     }
 }

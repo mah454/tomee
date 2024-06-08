@@ -21,7 +21,12 @@ import org.apache.openejb.AppContext;
 import org.apache.openejb.assembler.classic.AppInfo;
 import org.apache.openejb.assembler.classic.EjbJarInfo;
 import org.apache.openejb.cdi.transactional.TransactionContext;
+import org.apache.openejb.core.ThreadContext;
 import org.apache.openejb.loader.SystemInstance;
+import org.apache.openejb.loader.event.ComponentAdded;
+import org.apache.openejb.loader.event.ComponentRemoved;
+import org.apache.openejb.observer.Observes;
+import org.apache.openejb.threads.impl.ContextServiceImplFactory;
 import org.apache.openejb.threads.impl.ManagedExecutorServiceImpl;
 import org.apache.openejb.threads.impl.ManagedThreadFactoryImpl;
 import org.apache.openejb.util.AppFinder;
@@ -29,6 +34,7 @@ import org.apache.openejb.util.ExecutorBuilder;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.classloader.MultipleClassLoader;
+import org.apache.openejb.util.proxy.ClassDefiner;
 import org.apache.webbeans.config.OpenWebBeansConfiguration;
 import org.apache.webbeans.config.WebBeansContext;
 import org.apache.webbeans.container.BeanManagerImpl;
@@ -42,6 +48,7 @@ import org.apache.webbeans.spi.BeanArchiveService;
 import org.apache.webbeans.spi.ContainerLifecycle;
 import org.apache.webbeans.spi.ContextsService;
 import org.apache.webbeans.spi.ConversationService;
+import org.apache.webbeans.spi.DefiningClassService;
 import org.apache.webbeans.spi.JNDIService;
 import org.apache.webbeans.spi.LoaderService;
 import org.apache.webbeans.spi.ResourceInjectionService;
@@ -50,8 +57,8 @@ import org.apache.webbeans.spi.SecurityService;
 import org.apache.webbeans.spi.TransactionService;
 import org.apache.webbeans.spi.adaptor.ELAdaptor;
 
-import javax.enterprise.inject.spi.DeploymentException;
-import javax.transaction.Transactional;
+import jakarta.enterprise.inject.spi.DeploymentException;
+import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -74,6 +81,25 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
     //this needs to be static because OWB won't tell us what the existing SingletonService is and you can't set it twice.
     private static final ThreadLocal<WebBeansContext> contexts = new ThreadLocal<WebBeansContext>();
     private static final Map<ClassLoader, WebBeansContext> contextByClassLoader = new ConcurrentHashMap<ClassLoader, WebBeansContext>();
+
+    private OWBContextThreadListener contextThreadListener;
+
+    public void threadSingletonServiceAdded(@Observes ComponentAdded<ThreadSingletonService> componentAdded) {
+        if (componentAdded.getComponent() != this) {
+            return;
+        }
+
+        contextThreadListener = new OWBContextThreadListener();
+        ThreadContext.addThreadContextListener(contextThreadListener);
+    }
+
+    public void threadSingletonServiceRemoved(@Observes ComponentRemoved componentRemoved) {
+        if (componentRemoved.getComponent() != this) {
+            return;
+        }
+
+        ThreadContext.removeThreadContextListener(contextThreadListener);
+    }
 
     @Override
     public void initialize(final StartupObject startupObject) {
@@ -100,20 +126,19 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
         //from CDI builder
         properties.setProperty(OpenWebBeansConfiguration.INTERCEPTOR_FORCE_NO_CHECKED_EXCEPTIONS, "false");
         properties.setProperty(SecurityService.class.getName(), ManagedSecurityService.class.getName());
-        properties.setProperty(OpenWebBeansConfiguration.CONVERSATION_PERIODIC_DELAY, "1800000");
         properties.setProperty(OpenWebBeansConfiguration.APPLICATION_SUPPORTS_CONVERSATION, "true");
         properties.setProperty(OpenWebBeansConfiguration.IGNORED_INTERFACES, "org.apache.aries.proxy.weaving.WovenProxy");
 
         final boolean tomee = SystemInstance.get().getProperty("openejb.loader", "foo").startsWith("tomcat");
 
         final String defaultNormalScopeHandlerClass = NormalScopedBeanInterceptorHandler.class.getName();
-        properties.setProperty("org.apache.webbeans.proxy.mapping.javax.enterprise.context.ApplicationScoped",
+        properties.setProperty("org.apache.webbeans.proxy.mapping.jakarta.enterprise.context.ApplicationScoped",
                 cachedApplicationScoped ? ApplicationScopedBeanInterceptorHandler.class.getName() : defaultNormalScopeHandlerClass);
 
-        properties.setProperty("org.apache.webbeans.proxy.mapping.javax.enterprise.context.RequestScoped",
+        properties.setProperty("org.apache.webbeans.proxy.mapping.jakarta.enterprise.context.RequestScoped",
             tomee && cachedRequestScoped ? RequestScopedBeanInterceptorHandler.class.getName() : defaultNormalScopeHandlerClass);
 
-        properties.setProperty("org.apache.webbeans.proxy.mapping.javax.enterprise.context.SessionScoped",
+        properties.setProperty("org.apache.webbeans.proxy.mapping.jakarta.enterprise.context.SessionScoped",
             tomee && cachedSessionScoped ? SessionScopedBeanInterceptorHandler.class.getName() : defaultNormalScopeHandlerClass);
 
         properties.put(OpenWebBeansConfiguration.PRODUCER_INTERCEPTION_SUPPORT, SystemInstance.get().getProperty("openejb.cdi.producer.interception", "true"));
@@ -125,6 +150,13 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
         properties.put(ResourceInjectionService.class.getName(), CdiResourceInjectionService.class.getName());
         properties.put(TransactionService.class.getName(), OpenEJBTransactionService.class.getName());
         properties.put("org.apache.webbeans.component.PrincipalBean.proxy", "false");
+
+        // for Java 9 and above, using Unsafe does not work well to create proxies
+        // OWB has support for classloader defineClass but this isn't done automagically
+        // like in ClassDefiner. We need to explicitly set the Proxy service
+        if (ClassDefiner.isClassLoaderDefineClass()) {
+            properties.setProperty(DefiningClassService.class.getName(), ClassDefiner.class.getName());
+        }
 
 
         // NOTE: ensure user can extend/override all the services = set it only if not present in properties, see WebBeansContext#getService()
@@ -147,7 +179,7 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
                                                 .size(3)
                                                 .threadFactory(new ManagedThreadFactoryImpl(appContext.getId() + "-cdi-fireasync-"))
                                                 .prefix("CDIAsyncPool")
-                                                .build(appContext.getOptions()));
+                                                .build(appContext.getOptions()), ContextServiceImplFactory.newPropagateEverythingContextService());
                                 delegate.compareAndSet(null, executor);
                             } else {
                                 executor = alreadyUpdated;
@@ -179,7 +211,7 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
             try {
                 services.put(ELAdaptor.class, new CustomELAdapter(appContext));
             } catch (final NoClassDefFoundError noClassDefFoundError) {
-                // no-op: no javax.el
+                // no-op: no jakarta.el
             }
         }
         if (!properties.containsKey(LoaderService.class.getName())) {
@@ -204,7 +236,15 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
         Object old = null;
         try {
             if (startupObject.getWebContext() == null) {
-                webBeansContext = new WebBeansContext(services, properties);
+                final boolean cacheResolutionFailure = Boolean.parseBoolean(
+                        SystemInstance.get().getProperty("openejb.cache.cdi-type-resolution-failure", "false"));
+
+                if (cacheResolutionFailure) {
+                    webBeansContext = new AppWebBeansContext(services, properties);
+                } else {
+                    webBeansContext = new WebBeansContext(services, properties);
+                }
+
                 appContext.set(WebBeansContext.class, webBeansContext);
             } else {
                 webBeansContext = new WebappWebBeansContext(services, properties, appContext.getWebBeansContext());
@@ -323,7 +363,7 @@ public class ThreadSingletonServiceImpl implements ThreadSingletonService {
         context = AppFinder.findAppContextOrWeb(cl, AppFinder.WebBeansContextTransformer.INSTANCE);
         if (context == null) {
             context = contexts.get();
-            if (context == null) { // any "guess" algortithm there would break prod apps cause AppFinder failed already, let's try to not try to be more clever than we can
+            if (context == null) { // any "guess" algorithm there would break prod apps cause AppFinder failed already, let's try to not try to be more clever than we can
                 throw new IllegalStateException("On a thread without an initialized context nor a classloader mapping a deployed app");
             }
         } else { // some cache to avoid to browse each app each time

@@ -31,8 +31,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -337,12 +337,16 @@ public class PersistenceBootstrap {
             }
 
             public void endElement(final String uri, final String localName, final String qName) {
-                if (localName.equals("persistence-unit")) {
-                    endPersistenceUnit(uri, localName, qName);
-                } else if (localName.equals("provider")) {
-                    endProvider(uri, localName, qName);
-                } else if (localName.equals("class")) {
-                    endClass(uri, localName, qName);
+                switch (localName) {
+                    case "persistence-unit":
+                        endPersistenceUnit(uri, localName, qName);
+                        break;
+                    case "provider":
+                        endProvider(uri, localName, qName);
+                        break;
+                    case "class":
+                        endClass(uri, localName, qName);
+                        break;
                 }
             }
 

@@ -20,10 +20,10 @@ import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import javax.ejb.EJBException;
-import javax.ejb.SessionContext;
-import javax.ejb.Remove;
-import javax.annotation.Resource;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Remove;
+import jakarta.annotation.Resource;
 
 import org.apache.openejb.test.ApplicationException;
 import org.apache.openejb.test.object.OperationsPolicy;
@@ -71,7 +71,7 @@ public class BasicStatefulPojoBean implements BasicStatefulBusinessLocal, BasicS
 
     /**
      * Maps to BasicStatelessObject.getPermissionsReport
-     * <p/>
+     *
      * Returns a report of the bean's
      * runtime permissions
      *
@@ -85,7 +85,7 @@ public class BasicStatefulPojoBean implements BasicStatefulBusinessLocal, BasicS
 
     /**
      * Maps to BasicStatelessObject.getAllowedOperationsReport
-     * <p/>
+     *
      * Returns a report of the allowed opperations
      * for one of the bean's methods.
      *

@@ -22,13 +22,13 @@ import org.apache.openejb.Container;
 import org.apache.openejb.OpenEJBRuntimeException;
 import org.apache.openejb.core.cmp.CmpContainer;
 
-import javax.ejb.FinderException;
+import jakarta.ejb.FinderException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
  * DO NOT REFACTOR THIS CLASS.  This class is referenced directly by generated code.
- * <p/>
+ *
  * The execute_xxxx() methods below are used for executing the meat of the generated
  * ejbSelectxxxx methods.  Primitive types convert and return the return type directly and the
  * generated method will give the correct return instruction.  Reference types are resolved using

@@ -23,37 +23,41 @@ import org.apache.openejb.testing.ContainerProperties;
 import org.apache.openejb.testing.EnableServices;
 import org.apache.openejb.testing.JaxrsProviders;
 import org.apache.openejb.testing.RandomPort;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyWriter;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URL;
 
-import static javax.ws.rs.client.Entity.entity;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static jakarta.ws.rs.client.Entity.entity;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.junit.Assert.assertEquals;
 
 @EnableServices("jax-rs")
 @Classes(DisableTomEEJohnzonTest.Endpoint.class)
 @JaxrsProviders(DisableTomEEJohnzonTest.TestWriter.class)
 @ContainerProperties({
-        @ContainerProperties.Property(name = "org.apache.openejb.server.cxf.rs.johnzon.TomEEJohnzonProvider.activated", value = "false")
+        @ContainerProperties.Property(name = "org.apache.openejb.server.cxf.rs.johnzon.TomEEJsonbProvider.activated", value = "false"),
+        @ContainerProperties.Property(name = "org.apache.openejb.server.cxf.rs.johnzon.TomEEJsonpProvider.activated", value = "false")
 })
 @RunWith(ApplicationComposer.class)
+@Ignore("Not sure this is used - we can implement it back if needed as discussed in mailing list and slack. " +
+        "This is partially implemented in the server side but not quite happy with the hack")
 public class DisableTomEEJohnzonTest {
 
     private static final String PAYLOAD = "{\"not\": \"johnzon\"}";

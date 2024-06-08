@@ -20,7 +20,7 @@ import org.jboss.arquillian.container.spi.client.deployment.TargetDescription;
 import org.jboss.arquillian.container.spi.client.protocol.ProtocolDescription;
 import org.jboss.arquillian.container.test.spi.TestDeployment;
 import org.jboss.arquillian.container.test.spi.client.deployment.ProtocolArchiveProcessor;
-import org.jboss.arquillian.protocol.servlet.v_2_5.ServletProtocolDeploymentPackager;
+import org.jboss.arquillian.protocol.servlet5.v_5.ServletProtocolDeploymentPackager;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -37,13 +37,16 @@ public class MicroProfileMetricsTCKDeploymentPackager extends ServletProtocolDep
     public Archive<?> generateDeployment(final TestDeployment testDeployment,
                                          final Collection<ProtocolArchiveProcessor> processors) {
         final Archive<?> applicationArchive = testDeployment.getApplicationArchive();
+        final WebArchive wrapperWar = ShrinkWrap.create(WebArchive.class, "microprofile-metrics.war");
         if (applicationArchive instanceof JavaArchive) {
-            final WebArchive wrapperWar =
-                    ShrinkWrap.create(WebArchive.class, "microprofile-metrics.war").addAsLibrary(applicationArchive);
+            wrapperWar.addAsLibrary(applicationArchive);
             return super.generateDeployment(new TestDeploymentDelegate(testDeployment, wrapperWar), processors);
         }
 
-        return super.generateDeployment(testDeployment, processors);
+        wrapperWar.merge(applicationArchive);
+        return super.generateDeployment(new TestDeploymentDelegate(testDeployment, wrapperWar), processors);
+
+        // return super.generateDeployment(testDeployment, processors);
     }
 
     private static class TestDeploymentDelegate extends TestDeployment {

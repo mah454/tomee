@@ -26,10 +26,10 @@ import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotSame;
 
 @RunWith(ApplicationComposer.class)
 public class ReloadableEntityManagerFactoryTest {
-    @javax.persistence.PersistenceUnit
+    @jakarta.persistence.PersistenceUnit
     private EntityManagerFactory emf;
 
     @Module
@@ -46,7 +46,7 @@ public class ReloadableEntityManagerFactoryTest {
         unit.addClass(MyEntity.class);
         unit.setProperty("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
         unit.getProperties().setProperty("openjpa.RuntimeUnenhancedClasses", "supported");
-        unit.getProperties().setProperty("openjpa.DatCache", "false");
+        unit.getProperties().setProperty("openjpa.DataCache", "false");
         unit.setExcludeUnlistedClasses(true);
 
         final Persistence persistence = new org.apache.openejb.jee.jpa.unit.Persistence(unit);
@@ -67,6 +67,14 @@ public class ReloadableEntityManagerFactoryTest {
     public void reload() {
         final ReloadableEntityManagerFactory remft = (ReloadableEntityManagerFactory) emf;
         final EntityManagerFactory originalEmf = remft.getDelegate();
+
+        /*
+         * XXX Remove / update this call if OPENJPA-2844 is resolved
+         * Workaround: Initialize the underlying Broker by calling createEntityManager() first
+         * before calling getProperties()
+         */
+        remft.createEntityManager();
+
         assertEquals("false", emf.getProperties().get("openjpa.DataCache"));
         select();
 

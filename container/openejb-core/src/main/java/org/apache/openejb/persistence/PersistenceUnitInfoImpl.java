@@ -18,21 +18,22 @@
 package org.apache.openejb.persistence;
 
 
+import jakarta.persistence.spi.TransformerException;
 import org.apache.openejb.OpenEJB;
 import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.resource.jdbc.managed.xa.DataSourceXADataSource;
 import org.apache.openejb.util.URLs;
 import org.apache.openejb.util.classloader.URLClassLoaderFirst;
 
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.spi.ClassTransformer;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -362,7 +363,8 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
             this.classTransformer = classTransformer;
         }
 
-        public byte[] transform(final ClassLoader classLoader, final String className, final Class<?> classBeingRedefined, final ProtectionDomain protectionDomain, final byte[] classfileBuffer) throws IllegalClassFormatException {
+        public byte[] transform(final ClassLoader classLoader, final String className, final Class<?> classBeingRedefined,
+                                final ProtectionDomain protectionDomain, final byte[] classfileBuffer) throws IllegalClassFormatException {
             // Example code to easily debug transformation of a specific class
             // if ("org/apache/openejb/test/entity/cmp/BasicCmpBean".equals(className) ||
             //        "org/apache/openejb/test/entity/cmp/BasicCmp2Bean_BasicCmp2Bean".equals(className)) {
@@ -375,16 +377,28 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
             if (isServerClass(replace)) {
                 return classfileBuffer;
             }
-            return classTransformer.transform(classLoader, replace, classBeingRedefined, protectionDomain, classfileBuffer);
+            try {
+                return classTransformer.transform(classLoader, replace, classBeingRedefined, protectionDomain, classfileBuffer);
+            } catch (final TransformerException e) {
+                // TODO log stack trace here because we can not pass the exception received to the one forwarded
+                throw new IllegalClassFormatException(e.getMessage());
+            }
         }
     }
 
     // not the shouldSkip() method from UrlClassLoaderFirst since we skip more here
     // we just need JPA stuff so all the tricks we have for the server part are useless
     @SuppressWarnings("RedundantIfStatement")
-    public static boolean isServerClass(final String name) {
+    public static boolean isServerClass(final String input) {
+
+        String name = input;
+
         if (name == null) {
             return false;
+        }
+
+        if (name.startsWith("openejb.shade.")) {
+            name = name.substring("openejb.shade.".length());
         }
 
         for (final String prefix : URLClassLoaderFirst.FORCED_SKIP) {
@@ -402,6 +416,9 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
             return true;
         }
         if (name.startsWith("javax.")) {
+            return true;
+        }
+        if (name.startsWith("jakarta.")) {
             return true;
         }
         if (name.startsWith("sun.")) {
@@ -576,7 +593,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     // JPA 2.0
     /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceXMLSchemaVersion()
+     * @see jakarta.persistence.spi.PersistenceUnitInfo#getPersistenceXMLSchemaVersion()
      */
     public String getPersistenceXMLSchemaVersion() {
         return this.persistenceXMLSchemaVersion;
@@ -590,7 +607,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
     }
 
     /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+     * @see jakarta.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
      */
     public SharedCacheMode getSharedCacheMode() {
         return this.sharedCacheMode;
@@ -604,7 +621,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
     }
 
     /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+     * @see jakarta.persistence.spi.PersistenceUnitInfo#getValidationMode()
      */
     public ValidationMode getValidationMode() {
         return this.validationMode;

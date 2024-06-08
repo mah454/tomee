@@ -16,22 +16,68 @@
  */
 package org.apache.openejb.server.cxf.rs.johnzon;
 
+import jakarta.activation.DataSource;
+import jakarta.annotation.Priority;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.Provider;
 import org.apache.johnzon.jaxrs.jsonb.jaxrs.JsonbJaxrsProvider;
 import org.apache.johnzon.mapper.access.AccessMode;
 
-import javax.json.bind.JsonbConfig;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
+import java.io.File;
+import java.io.Reader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Locale;
 
 @Provider
 // This will sort the Provider to be after CXF defaults. Check org.apache.cxf.jaxrs.provider.ProviderFactory.sortReaders()
 @Produces({"application/json", "application/*+json"})
 @Consumes({"application/json", "application/*+json"})
+@Priority(value = 5000)
 public class TomEEJsonbProvider<T> extends JsonbJaxrsProvider<T> {
+
     public TomEEJsonbProvider() {
         config.withPropertyVisibilityStrategy(new TomEEJsonbPropertyVisibilityStrategy());
+        setThrowNoContentExceptionOnEmptyStreams(true); // this is to make TCK tests happy
+        config.setProperty("johnzon.use-big-decimal-for-object", true);
+    }
+
+    @Override
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        if (!isJson(mediaType)) return false;
+
+        // let the CXF built-in writer handle this one
+        // TODO: add a setting?
+        if (DataSource.class.isAssignableFrom(type)) return false;
+        if (byte[].class.isAssignableFrom(type)) return false;
+        if (File.class.isAssignableFrom(type)) return false;
+        if (Reader.class.isAssignableFrom(type)) return false;
+
+        return super.isWriteable(type, genericType, annotations, mediaType);
+    }
+
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        if (!isJson(mediaType)) return false;
+
+        // let the CXF built-in writer handle this one
+        // TODO: add a setting?
+        if (DataSource.class.isAssignableFrom(type)) return false;
+        if (byte[].class.isAssignableFrom(type)) return false;
+        if (File.class.isAssignableFrom(type)) return false;
+        if (Reader.class.isAssignableFrom(type)) return false;
+
+        return super.isReadable(type, genericType, annotations, mediaType);
+    }
+
+    public static boolean isJson(final MediaType mediaType) {
+        if (!mediaType.getType().equals("application")) return false;
+        if (mediaType.getSubtype().equals("json")) return true;
+        if (mediaType.getSubtype().endsWith("+json")) return true;
+        return false;
     }
 
     public void setDateFormat(String dateFormat) {

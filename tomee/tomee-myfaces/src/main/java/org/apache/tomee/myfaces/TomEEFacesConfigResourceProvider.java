@@ -17,14 +17,14 @@
 package org.apache.tomee.myfaces;
 
 import org.apache.myfaces.config.DefaultFacesConfigResourceProvider;
-import org.apache.myfaces.shared.util.ClassUtils;
+import org.apache.myfaces.util.lang.ClassUtils;
 import org.apache.openejb.config.NewLoaderLogic;
 import org.apache.openejb.loader.Files;
 import org.apache.openejb.util.AppFinder;
 import org.apache.openejb.util.URLs;
 import org.apache.xbean.finder.UrlSet;
 
-import javax.faces.context.ExternalContext;
+import jakarta.faces.context.ExternalContext;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;

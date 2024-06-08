@@ -17,15 +17,15 @@
  */
 package org.apache.openejb.server.httpd;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSessionContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSessionContext;
 
 import java.util.Enumeration;
 
 public class ServletSessionAdapter implements HttpSession {
-    protected final javax.servlet.http.HttpSession session;
+    protected final jakarta.servlet.http.HttpSession session;
 
-    public ServletSessionAdapter(javax.servlet.http.HttpSession session) {
+    public ServletSessionAdapter(jakarta.servlet.http.HttpSession session) {
         this.session = session;
     }
 
@@ -58,18 +58,8 @@ public class ServletSessionAdapter implements HttpSession {
         return session.getMaxInactiveInterval();
     }
 
-    @Override
-    public HttpSessionContext getSessionContext() {
-        return session.getSessionContext();
-    }
-
     public Object getAttribute(String name) {
         return session.getAttribute(name);
-    }
-
-    @Override
-    public Object getValue(String s) {
-        return session.getValue(s);
     }
 
     @Override
@@ -77,27 +67,12 @@ public class ServletSessionAdapter implements HttpSession {
         return session.getAttributeNames();
     }
 
-    @Override
-    public String[] getValueNames() {
-        return session.getValueNames();
-    }
-
     public void setAttribute(String name, Object value) {
         session.setAttribute(name, value);
     }
 
-    @Override
-    public void putValue(String s, Object o) {
-        session.putValue(s, o);
-    }
-
     public void removeAttribute(String name) {
         session.removeAttribute(name);
-    }
-
-    @Override
-    public void removeValue(String s) {
-        session.removeValue(s);
     }
 
     @Override

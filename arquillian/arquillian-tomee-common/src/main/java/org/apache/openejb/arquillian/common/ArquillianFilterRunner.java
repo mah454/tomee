@@ -16,15 +16,16 @@
  */
 package org.apache.openejb.arquillian.common;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -39,9 +40,9 @@ import static java.util.Collections.emptyEnumeration;
 // We can't rely on scanning (@WebFilter) since we can't enrich the app because we need it for client tests too and
 // we need it to be added first
 //
-// @WebFilter(urlPatterns = "/ArquillianServletRunner", filterName = "org.apache.openejb.arquillian.common.ArquillianFilterRunner")
+// @WebFilter(urlPatterns = "/ArquillianServletRunnerEE9", filterName = "org.apache.openejb.arquillian.common.ArquillianFilterRunner")
 public class ArquillianFilterRunner implements Filter {
-    private static final String ARQUILLIAN_SERVLET_RUNNER = "org.jboss.arquillian.protocol.servlet.runner.ServletTestRunner";
+    private static final String ARQUILLIAN_SERVLET_RUNNER = "org.jboss.arquillian.protocol.servlet5.runner.ServletTestRunner";
 
     private HttpServlet delegate;
 

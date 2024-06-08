@@ -19,17 +19,17 @@ package org.apache.openejb.test.singleton;
 import org.apache.openejb.test.beans.TimerSync;
 import org.apache.openejb.test.object.OperationsPolicy;
 
-import javax.ejb.EJBObject;
+import jakarta.ejb.EJBObject;
 
 /**
  * [9] Should be run as the nineth test suite of the BasicSingletonTestClients
- * <p/>
+ *
  * <PRE>
  * =========================================================================
  * Operations allowed in the methods of a singleton SessionBean with
  * container-managed transaction demarcation
  * =========================================================================
- * <p/>
+ *
  * Bean method           | Bean method can perform the following operations
  * ______________________|__________________________________________________
  * |

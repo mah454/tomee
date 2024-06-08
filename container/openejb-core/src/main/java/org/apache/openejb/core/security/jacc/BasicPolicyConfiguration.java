@@ -20,8 +20,8 @@ package org.apache.openejb.core.security.jacc;
 import org.apache.openejb.assembler.classic.DelegatePermissionCollection;
 import org.apache.openejb.loader.SystemInstance;
 
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyContextException;
+import jakarta.security.jacc.PolicyConfiguration;
+import jakarta.security.jacc.PolicyContextException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Principal;
@@ -151,6 +151,21 @@ public class BasicPolicyConfiguration implements PolicyConfiguration {
         }
 
         excluded.add(permission);
+    }
+
+    @Override
+    public Map<String, PermissionCollection> getPerRolePermissions() {
+        return rolePermissionsMap;
+    }
+
+    @Override
+    public PermissionCollection getUncheckedPermissions() {
+        return unchecked;
+    }
+
+    @Override
+    public PermissionCollection getExcludedPermissions() {
+        return excluded;
     }
 
     public void removeRole(final String roleName) throws PolicyContextException {

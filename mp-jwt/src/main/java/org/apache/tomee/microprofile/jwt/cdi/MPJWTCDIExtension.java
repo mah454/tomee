@@ -16,30 +16,28 @@
  */
 package org.apache.tomee.microprofile.jwt.cdi;
 
-import org.apache.openejb.loader.SystemInstance;
+import org.apache.bval.cdi.BValInterceptor;
 import org.apache.tomee.microprofile.jwt.MPJWTFilter;
 import org.apache.tomee.microprofile.jwt.MPJWTInitializer;
-import org.apache.tomee.microprofile.jwt.config.ConfigurableJWTAuthContextInfo;
-import org.apache.tomee.microprofile.jwt.jaxrs.MPJWPProviderRegistration;
+import org.apache.tomee.microprofile.jwt.config.JWTAuthConfigurationProperties;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ProcessInjectionPoint;
-import javax.inject.Provider;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.ProcessInjectionPoint;
+import jakarta.inject.Provider;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.security.Principal;
@@ -67,12 +65,17 @@ public class MPJWTCDIExtension implements Extension {
 
     private Set<InjectionPoint> injectionPoints = new HashSet<>();
 
-    public void collectConfigProducer(@Observes final ProcessInjectionPoint<?, ?> pip, final BeanManager bm) {
+    public void collectConfigProducer(@Observes final ProcessInjectionPoint<?, ?> pip) {
         final Claim claim = pip.getInjectionPoint().getAnnotated().getAnnotation(Claim.class);
         if (claim != null) {
             injectionPoints.add(pip.getInjectionPoint());
         }
     }
+
+    void pat(@Observes final ProcessAnnotatedType<BValInterceptor> stockBvalInterceptor) {
+        stockBvalInterceptor.veto();
+    }
+
 
     public void registerClaimProducer(@Observes final AfterBeanDiscovery abd, final BeanManager bm) {
 
@@ -97,12 +100,7 @@ public class MPJWTCDIExtension implements Extension {
 
         types.stream()
                 .map(type -> new ClaimBean<>(bm, type))
-                .forEach(new Consumer<ClaimBean>() {
-                    @Override
-                    public void accept(final ClaimBean claimBean) {
-                        abd.addBean(claimBean);
-                    }
-                });
+                .forEach((Consumer<ClaimBean>) abd::addBean);
 
         abd.addBean()
                 .id(MPJWTCDIExtension.class.getName() + "#" + JsonWebToken.class.getName())
@@ -121,10 +119,11 @@ public class MPJWTCDIExtension implements Extension {
     }
 
     public void observeBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd, final BeanManager beanManager) {
-        bbd.addAnnotatedType(beanManager.createAnnotatedType(ConfigurableJWTAuthContextInfo.class));
-        bbd.addAnnotatedType(beanManager.createAnnotatedType(JsonbProducer.class));
-        bbd.addAnnotatedType(beanManager.createAnnotatedType(MPJWTFilter.class));
-        bbd.addAnnotatedType(beanManager.createAnnotatedType(MPJWTInitializer.class));
+        bbd.addAnnotatedType(beanManager.createAnnotatedType(JWTAuthConfigurationProperties.class), "JWTAuthConfigurationProperties");
+        bbd.addAnnotatedType(beanManager.createAnnotatedType(JsonbProducer.class), "JsonbProducer");
+        bbd.addAnnotatedType(beanManager.createAnnotatedType(MPJWTFilter.class), "MPJWTFilter");
+        bbd.addAnnotatedType(beanManager.createAnnotatedType(MPJWTInitializer.class), "MPJWTInitializer");
+        bbd.addAnnotatedType(beanManager.createAnnotatedType(org.apache.tomee.microprofile.jwt.bval.BValInterceptor.class), "BValInterceptor");
     }
 
     public static <T> T getContextualReference(Class<T> type, final BeanManager beanManager) {
@@ -139,7 +138,8 @@ public class MPJWTCDIExtension implements Extension {
         return (T) beanManager.getReference(bean, type, creationalContext);
     }
 
-    static {
-        SystemInstance.get().addObserver(new MPJWPProviderRegistration());
-    }
+//** Scanning now happens automatically
+//    static {
+//        SystemInstance.get().addObserver(new MPJWPProviderRegistration());
+//    }
 }

@@ -17,9 +17,9 @@
  */
 package org.apache.openejb.server.httpd;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.Collection;
@@ -44,11 +44,6 @@ public class ServletResponseAdapter implements HttpResponse {
     @Override
     public void setStatus(int i) {
         response.setStatus(i);
-    }
-
-    @Override
-    public void setStatus(int i, String s) {
-        response.setStatus(i, s);
     }
 
     @Override
@@ -84,16 +79,6 @@ public class ServletResponseAdapter implements HttpResponse {
     @Override
     public String encodeRedirectURL(String s) {
         return response.encodeRedirectURL(s);
-    }
-
-    @Override
-    public String encodeUrl(String s) {
-        return response.encodeUrl(s);
-    }
-
-    @Override
-    public String encodeRedirectUrl(String s) {
-        return response.encodeRedirectUrl(s);
     }
 
     public String getHeader(String name) {
@@ -203,7 +188,7 @@ public class ServletResponseAdapter implements HttpResponse {
 
     @SuppressWarnings({"deprecation"})
     public void setStatusMessage(String responseString) {
-        response.setStatus(getStatus(), responseString);
+        response.setStatus(getStatus());
     }
 
     public void flushBuffer() throws IOException {

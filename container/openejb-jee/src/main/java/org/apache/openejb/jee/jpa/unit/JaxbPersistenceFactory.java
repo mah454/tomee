@@ -26,9 +26,9 @@ import org.xml.sax.XMLReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.UnmarshallerHandler;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
@@ -64,15 +64,11 @@ public class JaxbPersistenceFactory {
     }
 
     public static <T> T getPersistence(final Class<T> clazz, final URL url) throws Exception {
-        InputStream persistenceDescriptor = null;
 
-        try {
+        try (InputStream persistenceDescriptor = url.openStream()) {
 
-            persistenceDescriptor = url.openStream();
             return getPersistence(clazz, persistenceDescriptor);
 
-        } finally {
-            if (persistenceDescriptor != null) persistenceDescriptor.close();
         }
     }
 
@@ -84,7 +80,11 @@ public class JaxbPersistenceFactory {
 
         @Override
         protected String eeUri(final String uri) {
-            return "http://xmlns.jcp.org/xml/ns/persistence".equals(uri) ? "http://java.sun.com/xml/ns/persistence": uri;
+            // there should not be any other namespace, but let's see if we can match all of them
+            // http://java.sun.com/xml/ns/persistence
+            // http://xmlns.jcp.org/xml/ns/persistence
+            // https://jakarta.ee/xml/ns/persistence
+            return uri != null && uri.contains("/persistence") ? PERSISTENCE_SCHEMA: uri;
         }
 
         @Override

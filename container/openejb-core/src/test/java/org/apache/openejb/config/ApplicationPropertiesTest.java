@@ -30,7 +30,7 @@ import org.apache.openejb.loader.SystemInstance;
 import org.apache.openejb.spi.ContainerSystem;
 import org.apache.openejb.util.Archives;
 
-import javax.ejb.Singleton;
+import jakarta.ejb.Singleton;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -77,9 +77,9 @@ public class ApplicationPropertiesTest extends TestCase {
 
     /**
      * A child module META-INF/application.properties sets color to white
-     * <p/>
+     *
      * In the root ear META-INF/application.properties color is set to orange
-     * <p/>
+     *
      * The root ear META-INF/application.properties wins
      *
      * @throws Exception
@@ -232,7 +232,7 @@ public class ApplicationPropertiesTest extends TestCase {
 
     /**
      * Not implemented.  Don't do it if you want deterministic behavior
-     * <p/>
+     *
      * Use one or the other, use both and no guarantee is made
      *
      * @throws Exception

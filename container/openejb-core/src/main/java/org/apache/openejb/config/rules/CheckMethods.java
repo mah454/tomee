@@ -25,10 +25,10 @@ import org.apache.openejb.jee.RemoteBean;
 import org.apache.openejb.jee.SessionBean;
 import org.apache.openejb.jee.SessionType;
 
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
+import jakarta.ejb.EJBHome;
+import jakarta.ejb.EJBLocalHome;
+import jakarta.ejb.EJBLocalObject;
+import jakarta.ejb.EJBObject;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,13 +94,13 @@ public class CheckMethods extends ValidationBase {
 
         final Method[] interfaceMethods = intrface.getMethods();
 
-        for (int i = 0; i < interfaceMethods.length; i++) {
-            if (interfaceMethods[i].getDeclaringClass() == EJBLocalObject.class) {
+        for (Method interfaceMethod : interfaceMethods) {
+            if (interfaceMethod.getDeclaringClass() == EJBLocalObject.class) {
                 continue;
             }
-            final String name = interfaceMethods[i].getName();
+            final String name = interfaceMethod.getName();
             try {
-                final Class[] params = interfaceMethods[i].getParameterTypes();
+                final Class[] params = interfaceMethod.getParameterTypes();
                 beanClass.getMethod(name, params);
             } catch (final NoSuchMethodException nsme) {
                 final List<Method> differentArgs = new ArrayList<>();
@@ -115,13 +115,13 @@ public class CheckMethods extends ValidationBase {
                 }
 
                 if (differentArgs.size() > 0) {
-                    fail(b, "no.busines.method.args", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "local", intrface.getName(), beanClass.getName(), differentArgs.size());
+                    fail(b, "no.busines.method.args", interfaceMethod.getName(), interfaceMethod.toString(), "local", intrface.getName(), beanClass.getName(), differentArgs.size());
                 }
                 if (differentCase.size() > 0) {
-                    fail(b, "no.busines.method.case", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "local", intrface.getName(), beanClass.getName(), differentCase.size());
+                    fail(b, "no.busines.method.case", interfaceMethod.getName(), interfaceMethod.toString(), "local", intrface.getName(), beanClass.getName(), differentCase.size());
                 }
                 if (differentArgs.size() == 0 && differentCase.size() == 0) {
-                    fail(b, "no.busines.method", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "local", intrface.getName(), beanClass.getName());
+                    fail(b, "no.busines.method", interfaceMethod.getName(), interfaceMethod.toString(), "local", intrface.getName(), beanClass.getName());
                 }
             }
         }
@@ -145,13 +145,13 @@ public class CheckMethods extends ValidationBase {
 
         final Method[] interfaceMethods = intrface.getMethods();
 
-        for (int i = 0; i < interfaceMethods.length; i++) {
-            if (interfaceMethods[i].getDeclaringClass() == EJBObject.class) {
+        for (Method interfaceMethod : interfaceMethods) {
+            if (interfaceMethod.getDeclaringClass() == EJBObject.class) {
                 continue;
             }
-            final String name = interfaceMethods[i].getName();
+            final String name = interfaceMethod.getName();
             try {
-                final Class[] params = interfaceMethods[i].getParameterTypes();
+                final Class[] params = interfaceMethod.getParameterTypes();
                 beanClass.getMethod(name, params);
             } catch (final NoSuchMethodException nsme) {
                 final List<Method> differentArgs = new ArrayList<>();
@@ -166,13 +166,13 @@ public class CheckMethods extends ValidationBase {
                 }
 
                 if (differentArgs.size() > 0) {
-                    fail(b, "no.busines.method.args", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "remote", intrface.getName(), beanClass.getName(), differentArgs.size());
+                    fail(b, "no.busines.method.args", interfaceMethod.getName(), interfaceMethod.toString(), "remote", intrface.getName(), beanClass.getName(), differentArgs.size());
                 }
                 if (differentCase.size() > 0) {
-                    fail(b, "no.busines.method.case", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "remote", intrface.getName(), beanClass.getName(), differentCase.size());
+                    fail(b, "no.busines.method.case", interfaceMethod.getName(), interfaceMethod.toString(), "remote", intrface.getName(), beanClass.getName(), differentCase.size());
                 }
                 if (differentArgs.size() == 0 && differentCase.size() == 0) {
-                    fail(b, "no.busines.method", interfaceMethods[i].getName(), interfaceMethods[i].toString(), "remote", intrface.getName(), beanClass.getName());
+                    fail(b, "no.busines.method", interfaceMethod.getName(), interfaceMethod.toString(), "remote", intrface.getName(), beanClass.getName());
                 }
             }
         }
@@ -202,7 +202,7 @@ public class CheckMethods extends ValidationBase {
 
     public boolean check_hasCreateMethod(final RemoteBean b, final Class bean, final Class home) {
 
-        if (b instanceof SessionBean && !javax.ejb.SessionBean.class.isAssignableFrom(bean)) {
+        if (b instanceof SessionBean && !jakarta.ejb.SessionBean.class.isAssignableFrom(bean)) {
             // This is a pojo-style bean
             return false;
         }
@@ -229,18 +229,18 @@ public class CheckMethods extends ValidationBase {
 
         final Method[] homeMethods = home.getMethods();
 
-        for (int i = 0; i < homeMethods.length; i++) {
-            if (!homeMethods[i].getName().startsWith("create")) {
+        for (Method homeMethod : homeMethods) {
+            if (!homeMethod.getName().startsWith("create")) {
                 continue;
             }
 
-            final Method create = homeMethods[i];
+            final Method create = homeMethod;
 
             final StringBuilder ejbCreateName = new StringBuilder(create.getName());
             ejbCreateName.replace(0, 1, "ejbC");
 
             try {
-                if (javax.ejb.EnterpriseBean.class.isAssignableFrom(bean)) {
+                if (jakarta.ejb.EnterpriseBean.class.isAssignableFrom(bean)) {
                     bean.getMethod(ejbCreateName.toString(), create.getParameterTypes());
                 }
                 // TODO: else { /* Check for Init method in pojo session bean class */ }
@@ -279,11 +279,11 @@ public class CheckMethods extends ValidationBase {
         final Method[] homeMethods = home.getMethods();
         final Method[] beanMethods = bean.getMethods();
 
-        for (int i = 0; i < homeMethods.length; i++) {
-            if (!homeMethods[i].getName().startsWith("create")) {
+        for (Method homeMethod : homeMethods) {
+            if (!homeMethod.getName().startsWith("create")) {
                 continue;
             }
-            final Method create = homeMethods[i];
+            final Method create = homeMethod;
             final StringBuilder ejbPostCreateName = new StringBuilder(create.getName());
             ejbPostCreateName.replace(0, 1, "ejbPostC");
             try {

@@ -30,16 +30,16 @@ import org.apache.openejb.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.apache.openejb.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.apache.openejb.quartz.simpl.SimpleThreadPool;
 
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.ScheduleExpression;
-import javax.ejb.Singleton;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.ejb.TimerService;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.ScheduleExpression;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Timeout;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerConfig;
+import jakarta.ejb.TimerService;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Properties;
@@ -53,7 +53,7 @@ public class QuartzPersistenceForEJBTimersTest {
     @EJB
     private MyTimedEjb bean;
 
-    @Test
+    @Test(timeout = 60 * 1000 * 5) /* Timeout the test after 5min - should only require ~5-10sec to succeed */
     public void doTest() {
         assertEquals(1, bean.timers().size());
         bean.newTimer();

@@ -16,10 +16,11 @@
  */
 package org.superbiz.cucumber;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 
-import javax.inject.Inject;
+
+import jakarta.inject.Inject;
 
 import static org.junit.Assert.assertEquals;
 

@@ -24,16 +24,17 @@ import org.apache.openejb.testing.RandomPort;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
@@ -76,6 +77,20 @@ public class AutoBValNoCdiTest {
                         .post(Entity.entity(payload, MediaType.APPLICATION_JSON_TYPE)).getStatus());
     }
 
+    @Test
+    public void checkVoidResponse() {
+        assertEquals(
+                Response.Status.NO_CONTENT.getStatusCode(),
+                ClientBuilder.newClient().target(base.toExternalForm()).path("openejb/test/simple").request().get().getStatus());
+    }
+
+    @Test
+    public void checkResponse() {
+        assertEquals(
+                Response.Status.OK.getStatusCode(),
+                ClientBuilder.newClient().target(base.toExternalForm()).path("openejb/test/simpleResponse").request().get().getStatus());
+    }
+
     @Path("test")
     public static class ValidateMe {
         @POST
@@ -86,6 +101,19 @@ public class AutoBValNoCdiTest {
             final Payload payload = new Payload();
             payload.setName("empty".equals(in.name) ? null : in.name);
             return payload;
+        }
+
+        @GET
+        @Path("simple")
+        public void service() {
+            // no-op; should return a 204 no content
+            System.out.println("Service invoked");
+        }
+
+        @GET
+        @Path("simpleResponse")
+        public Response serviceResponse() {
+            return Response.ok().build();
         }
     }
 

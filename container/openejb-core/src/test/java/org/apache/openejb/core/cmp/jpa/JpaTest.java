@@ -26,22 +26,22 @@ import org.apache.openejb.persistence.PersistenceClassLoaderHandler;
 import org.apache.openejb.persistence.PersistenceUnitInfoImpl;
 import org.apache.openejb.resource.jdbc.dbcp.BasicDataSource;
 import org.apache.openejb.resource.jdbc.dbcp.BasicManagedDataSource;
-import org.apache.xbean.asm7.ClassReader;
-import org.apache.xbean.asm7.ClassVisitor;
-import org.apache.xbean.asm7.ClassWriter;
-import org.apache.xbean.asm7.Opcodes;
+import org.apache.xbean.asm9.ClassReader;
+import org.apache.xbean.asm9.ClassVisitor;
+import org.apache.xbean.asm9.ClassWriter;
+import org.apache.xbean.asm9.Opcodes;
 import org.apache.xbean.naming.context.ImmutableContext;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitTransactionType;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -54,8 +54,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.xbean.asm7.Opcodes.ACC_PRIVATE;
-import static org.apache.xbean.asm7.Opcodes.ACC_TRANSIENT;
+import static org.apache.xbean.asm9.Opcodes.ACC_PRIVATE;
+import static org.apache.xbean.asm9.Opcodes.ACC_TRANSIENT;
 
 public class JpaTest extends TestCase {
     static {
@@ -367,7 +367,7 @@ public class JpaTest extends TestCase {
 
     public static class FieldAdderClassVisitor extends ClassVisitor {
         public FieldAdderClassVisitor(final ClassVisitor classVisitor) {
-            super(Opcodes.ASM7, classVisitor);
+            super(Opcodes.ASM9, classVisitor);
         }
 
         public void visitEnd() {

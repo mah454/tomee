@@ -20,6 +20,9 @@ import com.nimbusds.jose.JWSSigner;
 import org.apache.openejb.loader.JarLocation;
 import org.apache.tomee.arquillian.remote.RemoteTomEEConfiguration;
 import org.apache.tomee.arquillian.remote.RemoteTomEEContainer;
+import org.apache.tomee.microprofile.tck.jwt.validation.ExpClaimAllowMissingExpValidationTest;
+import org.apache.tomee.microprofile.tck.jwt.validation.ExpClaimValidationTest;
+import org.eclipse.microprofile.jwt.tck.arquillian.BaseWarArchiveProcessor;
 import org.eclipse.microprofile.jwt.tck.config.IssValidationTest;
 import org.eclipse.microprofile.jwt.tck.config.PublicKeyAsBase64JWKTest;
 import org.eclipse.microprofile.jwt.tck.config.PublicKeyAsFileLocationURLTest;
@@ -34,7 +37,6 @@ import org.eclipse.microprofile.jwt.tck.util.TokenUtils;
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.container.spi.client.deployment.TargetDescription;
-import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.spi.TestClass;
@@ -51,7 +53,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class MicroProfileJWTTCKArchiveProcessor implements ApplicationArchiveProcessor {
+public class MicroProfileJWTTCKArchiveProcessor extends BaseWarArchiveProcessor {
     @Inject
     private Instance<ContainerRegistry> containerRegistry;
 
@@ -66,28 +68,6 @@ public class MicroProfileJWTTCKArchiveProcessor implements ApplicationArchivePro
         war.addAsLibrary(JarLocation.jarLocation(TokenUtils.class))
            .addAsLibrary(JarLocation.jarLocation(JWSSigner.class))
            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
-
-        // Provide keys required for tests (vendor specific way)
-        war.addClass(JWTAuthContextInfoProvider.class);
-
-        // Spec says that vendor specific ways to load the keys take precedence, so we need to remove it in test
-        // cases that use the Config approach.
-        Stream.of(
-                PublicKeyAsPEMTest.class,
-                PublicKeyAsPEMLocationTest.class,
-                PublicKeyAsFileLocationURLTest.class,
-                PublicKeyAsJWKTest.class,
-                PublicKeyAsBase64JWKTest.class,
-                PublicKeyAsJWKLocationTest.class,
-                PublicKeyAsJWKLocationURLTest.class,
-                PublicKeyAsJWKSTest.class,
-                PublicKeyAsJWKSLocationTest.class,
-                IssValidationTest.class,
-                org.apache.tomee.microprofile.tck.jwt.config.PublicKeyAsPEMLocationTest.class,
-                org.apache.tomee.microprofile.tck.jwt.config.PublicKeyAsJWKLocationURLTest.class)
-              .filter(c -> c.equals(testClass.getJavaClass()))
-              .findAny()
-              .ifPresent(c -> war.deleteClass(JWTAuthContextInfoProvider.class));
 
         // MP Config in wrong place - See https://github.com/eclipse/microprofile/issues/46.
         final Map<ArchivePath, Node> content = war.getContent(object -> object.get().matches(".*META-INF/.*"));
@@ -107,7 +87,7 @@ public class MicroProfileJWTTCKArchiveProcessor implements ApplicationArchivePro
                 try {
                     final Properties properties = new Properties();
                     properties.load(node.getAsset().openStream());
-                    properties.replaceAll((key, value) -> ((String) value).replaceAll("8080", httpPort + "/" + "KeyEndpoint.war".replaceAll("\\.war", "")));
+                    properties.replaceAll((key, value) -> ((String) value).replaceAll("8080", httpPort + "/" + testClass.getJavaClass().getSimpleName()));
                     final StringWriter stringWriter = new StringWriter();
                     properties.store(stringWriter, null);
                     war.delete(archivePath);
@@ -118,6 +98,6 @@ public class MicroProfileJWTTCKArchiveProcessor implements ApplicationArchivePro
             });
         }
 
-        System.out.println(war.toString(true));
+        //System.out.println(war.toString(true));
     }
 }

@@ -17,16 +17,16 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,24 +36,24 @@ import java.util.Map;
 
 /**
  * web-common_3_0.xsd
- * <p/>
+ *
  * <p>Java class for web-appType complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType name="web-appType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element name="module-name" type="{http://java.sun.com/xml/ns/javaee}string" minOccurs="0"/>
- *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}web-commonType"/>
- *         &lt;element name="absolute-ordering" type="{http://java.sun.com/xml/ns/javaee}absoluteOrderingType"/>
- *       &lt;/choice>
- *       &lt;attGroup ref="{http://java.sun.com/xml/ns/javaee}web-common-attributes"/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="web-appType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element name="module-name" type="{http://java.sun.com/xml/ns/javaee}string" minOccurs="0"/&gt;
+ *         &lt;group ref="{http://java.sun.com/xml/ns/javaee}web-commonType"/&gt;
+ *         &lt;element name="absolute-ordering" type="{http://java.sun.com/xml/ns/javaee}absoluteOrderingType"/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attGroup ref="{http://java.sun.com/xml/ns/javaee}web-common-attributes"/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 
@@ -70,6 +70,7 @@ import java.util.Map;
     "listener",
     "servlet",
     "servletMapping",
+    "defaultContextPath",
     "sessionConfig",
     "mimeMapping",
     "welcomeFileList",
@@ -97,7 +98,8 @@ import java.util.Map;
     "dataSource",
     "jmsConnectionFactories",
     "jmsDestinations",
-    "moduleName"
+    "moduleName",
+    "contextService"
 
 })
 public class WebApp implements WebCommon, Lifecycle, NamedModule {
@@ -177,6 +179,8 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
 
     @XmlElement(name = "module-name")
     protected String moduleName;
+    @XmlElement(name = "default-context-path")
+    protected String defaultContextPath;
     @XmlElement(name = "absolute-ordering")
     protected AbsoluteOrdering absoluteOrdering;
 
@@ -190,6 +194,8 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String version = "3.0";
+    @XmlElement(name="context-service")
+    private KeyedCollection<String, ContextService> contextService;
 
     @Override
     public String getJndiConsumerName() {
@@ -236,6 +242,14 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
     @Override
     public String getDisplayName() {
         return displayName.get();
+    }
+
+    public String getDefaultContextPath() {
+        return defaultContextPath;
+    }
+
+    public void setDefaultContextPath(final String defaultContextPath) {
+        this.defaultContextPath = defaultContextPath;
     }
 
     @Override
@@ -645,27 +659,29 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
     }
 
     public List<String> getServletMappings(final String servletName) {
-        if (servletMapping == null || servletName == null) {
+        if (servletName == null || servletMapping == null || servletMapping.isEmpty()) {
             return Collections.emptyList();
         }
+        final List<String> mappings = new ArrayList<>();
         for (final ServletMapping mapping : servletMapping) {
             if (servletName.equals(mapping.getServletName())) {
-                return mapping.getUrlPattern();
+                mappings.addAll(mapping.getUrlPattern());
             }
         }
-        return Collections.emptyList();
+        return mappings;
     }
 
     public List<String> getFilterMappings(final String filterName) {
-        if (filterMapping == null || filterName == null) {
+        if (filterName == null || filterMapping == null || filterMapping.isEmpty()) {
             return Collections.emptyList();
         }
+        final List<String> mappings = new ArrayList<>();
         for (final FilterMapping mapping : filterMapping) {
             if (filterName.equals(mapping.getFilterName())) {
-                return mapping.getUrlPattern();
+                mappings.addAll(mapping.getUrlPattern());
             }
         }
-        return Collections.emptyList();
+        return mappings;
     }
 
     private Servlet findServlet(final String name) {
@@ -774,6 +790,11 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
         return this;
     }
 
+    public WebApp defaultContextPath(final String path) {
+        setDefaultContextPath(path);
+        return this;
+    }
+
     public WebApp addListener(final String classname) {
         final Listener l = new Listener();
         l.setListenerClass(classname);
@@ -799,5 +820,13 @@ public class WebApp implements WebCommon, Lifecycle, NamedModule {
     @Override
     public Map<String, JMSDestination> getJMSDestinationMap() {
         return KeyedCollection.class.cast(getJMSDestination()).toMap();
+    }
+
+    @Override
+    public Map<String, ContextService> getContextServiceMap() {
+        if (contextService == null) {
+            contextService = new KeyedCollection<String, ContextService>();
+        }
+        return this.contextService.toMap();
     }
 }

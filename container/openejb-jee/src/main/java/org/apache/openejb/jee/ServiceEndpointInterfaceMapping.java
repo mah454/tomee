@@ -16,14 +16,14 @@
  */
 package org.apache.openejb.jee;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +32,10 @@ import java.util.List;
  * The service-endpoint-interface-mapping defines a tuple
  * to specify Service Endpoint Interfaces to
  * WSDL port types and WSDL bindings.
- * <p/>
+ *
  * An interface may be mapped to a port-type and binding multiple
  * times. This happens rarely.
- * <p/>
+ *
  * Used in: java-wsdl-mapping
  */
 @XmlAccessorType(XmlAccessType.FIELD)

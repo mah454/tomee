@@ -23,7 +23,7 @@ body are optional.
 Alternatively, a ActiveMQResourceAdapter can be declared via properties
 in the `<tomee-home>/conf/system.properties` file or via Java
 VirtualMachine `-D` properties. The properties can also be used when
-embedding TomEE via the `javax.ejb.embeddable.EJBContainer` API or
+embedding TomEE via the `jakarta.ejb.embeddable.EJBContainer` API or
 `InitialContext`
 
 [source,properties]
@@ -46,45 +46,42 @@ Multiple ActiveMQResourceAdapter declarations are allowed.
 
 == Supported Properties
 
-Property
+[.table.table-bordered,options="header"]
+|===
+|Property|Type|Default|Description
 
-Type
+|brokerXmlConfig
 
-Default
+|String
 
-Description
+|`broker:(tcp://localhost:61616)?useJmx=false`
 
-brokerXmlConfig
-
-String
-
-broker:(tcp://localhost:61616)?useJmx=false
-
-Broker configuration URI as defined by ActiveMQ see
+|Broker configuration URI as defined by ActiveMQ see
 http://activemq.apache.org/broker-configuration-uri.html BrokerXmlConfig
 xbean:file:conf/activemq.xml - Requires xbean-spring.jar and
 dependencies
 
-dataSource
+|dataSource
 
-String
+|String
 
-Default Unmanaged JDBC Database
+|Default Unmanaged JDBC Database
 
-DataSource for persistence messages
+|DataSource for persistence messages
 
-serverUrl
+|serverUrl
 
-java.net.URI
+|java.net.URI
 
-vm://localhost?waitForStart=20000&async=true
+|`vm://localhost?waitForStart=20000&async=true`
 
-Broker address
+|Broker address
 
-startupTimeout
+|startupTimeout
 
-time
+|time
 
-10 seconds
+|10 seconds
 
-How long to wait for broker startup
+|How long to wait for broker startup
+|===

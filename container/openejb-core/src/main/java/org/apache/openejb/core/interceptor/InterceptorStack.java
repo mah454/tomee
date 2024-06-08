@@ -17,11 +17,12 @@
 
 package org.apache.openejb.core.interceptor;
 
+import jakarta.interceptor.InvocationContext;
 import org.apache.openejb.core.Operation;
 import org.apache.openejb.core.ThreadContext;
 import org.apache.openejb.util.proxy.DynamicProxyImplFactory;
 
-import javax.interceptor.InvocationContext;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,32 +33,41 @@ import java.util.Set;
  * @version $Rev$ $Date$
  */
 public class InterceptorStack {
-    private final Object beanInstance;
-    private final List<Interceptor> interceptors;
-    private final Method targetMethod;
-    private final Operation operation;
+    protected final Object beanInstance;
+    protected final List<Interceptor> interceptors;
+    protected final Method targetMethod;
+    protected final Constructor constructor;
+    protected final Operation operation;
+    private final Map<String, Object> interceptorInstances;
 
-    public InterceptorStack(final Object beanInstance, final Method targetMethod, final Operation operation, final List<InterceptorData> interceptorDatas, final Map<String, Object> interceptorInstances) {
-        if (interceptorDatas == null) {
-            throw new NullPointerException("interceptorDatas is null");
+    public InterceptorStack(final Object beanInstance, final Method targetMethod, final Operation operation, final List<InterceptorData> interceptorData, final Map<String, Object> interceptorInstances) {
+        this(beanInstance, targetMethod, null, operation, interceptorData, interceptorInstances);
+    }
+
+    public InterceptorStack(final Object beanInstance, final Method targetMethod, final Constructor constructor,
+                            final Operation operation, final List<InterceptorData> interceptorData, final Map<String, Object> interceptorInstances) {
+        this.interceptorInstances = interceptorInstances;
+        if (interceptorData == null) {
+            throw new NullPointerException("interceptorData is null");
         }
         if (interceptorInstances == null) {
             throw new NullPointerException("interceptorInstances is null");
         }
         this.beanInstance = beanInstance;
         this.targetMethod = targetMethod;
+        this.constructor = constructor;
         this.operation = operation;
 
-        interceptors = new ArrayList<>(interceptorDatas.size());
+        interceptors = new ArrayList<>(interceptorData.size());
 
-        for (final InterceptorData interceptorData : interceptorDatas) {
-            final Class interceptorClass = interceptorData.getInterceptorClass();
+        for (final InterceptorData data : interceptorData) {
+            final Class interceptorClass = data.getInterceptorClass();
             final Object interceptorInstance = interceptorInstances.get(interceptorClass.getName());
             if (interceptorInstance == null) {
                 throw new IllegalArgumentException("No interceptor of type " + interceptorClass.getName());
             }
 
-            final Set<Method> methods = interceptorData.getMethods(operation);
+            final Set<Method> methods = data.getMethods(operation);
             for (final Method method : methods) {
                 final Interceptor interceptor;
                 final Object handler = DynamicProxyImplFactory.realHandler(interceptorInstance);
@@ -73,7 +83,7 @@ public class InterceptorStack {
     }
 
     public InvocationContext createInvocationContext(final Object... parameters) {
-        return new ReflectionInvocationContext(operation, interceptors, beanInstance, targetMethod, parameters);
+        return new ReflectionInvocationContext(operation, interceptors, beanInstance, targetMethod, constructor, parameters);
     }
 
     public Object invoke(final Object... parameters) throws Exception {
@@ -90,7 +100,7 @@ public class InterceptorStack {
         }
     }
 
-    public Object invoke(final javax.xml.ws.handler.MessageContext messageContext, final Object... parameters) throws Exception {
+    public Object invoke(final jakarta.xml.ws.handler.MessageContext messageContext, final Object... parameters) throws Exception {
         try {
             final InvocationContext invocationContext = new JaxWsInvocationContext(operation, interceptors, beanInstance, targetMethod, messageContext, parameters);
             ThreadContext.getThreadContext().set(InvocationContext.class, invocationContext);
@@ -100,13 +110,4 @@ public class InterceptorStack {
         }
     }
 
-    public Object invoke(final javax.xml.rpc.handler.MessageContext messageContext, final Object... parameters) throws Exception {
-        try {
-            final InvocationContext invocationContext = new JaxRpcInvocationContext(operation, interceptors, beanInstance, targetMethod, messageContext, parameters);
-            ThreadContext.getThreadContext().set(InvocationContext.class, invocationContext);
-            return invocationContext.proceed();
-        } finally {
-            ThreadContext.getThreadContext().remove(InvocationContext.class);
-        }
-    }
 }

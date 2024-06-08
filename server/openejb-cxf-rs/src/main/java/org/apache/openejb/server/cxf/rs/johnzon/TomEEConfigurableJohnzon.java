@@ -24,9 +24,9 @@ import org.apache.johnzon.mapper.converter.DateConverter;
 import org.apache.johnzon.mapper.internal.ConverterAdapter;
 import org.apache.openejb.util.reflection.Reflections;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.ext.Provider;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -44,7 +44,7 @@ public class TomEEConfigurableJohnzon<T> extends ConfigurableJohnzonProvider<T> 
     public void setConverters(final Collection<Converter<?>> converters) {
         for (final Converter<?> converter : converters) {
             final Type type = findType(converter, Converter.class);
-            builder().addAdapter(ParameterizedType.class.cast(type).getActualTypeArguments()[0], String.class, new ConverterAdapter(converter));
+            builder().addAdapter(ParameterizedType.class.cast(type).getActualTypeArguments()[0], String.class, new ConverterAdapter(converter, type));
         }
     }
 
@@ -67,7 +67,7 @@ public class TomEEConfigurableJohnzon<T> extends ConfigurableJohnzonProvider<T> 
     }
 
     public void setDatePattern(final String datePattern) {
-        builder().addAdapter(Date.class, String.class, new ConverterAdapter<>(new DateConverter(datePattern)));
+        builder().addAdapter(Date.class, String.class, new ConverterAdapter<>(new DateConverter(datePattern), Date.class));
     }
 
     private Type findType(final Object ref, final Class<?> api) { // need to impl adapters directly

@@ -47,23 +47,23 @@ import org.apache.webbeans.spi.adaptor.ELAdaptor;
 import org.apache.webbeans.util.WebBeansConstants;
 import org.apache.webbeans.util.WebBeansUtil;
 
-import javax.el.ELResolver;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.JspFactory;
+import jakarta.el.ELResolver;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspApplicationContext;
+import jakarta.servlet.jsp.JspFactory;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -226,6 +226,7 @@ public class OpenEJBLifecycle implements ContainerLifecycle {
 
             for (final Class<?> clazz : cdiScanner.getStartupClasses()) {
                 if (ejbs.contains(clazz)) {
+                    logger.debug("Skipping " + clazz.getName() + ", already registered as an EJB.");
                     continue;
                 }
                 starts(beanManager, clazz);
@@ -262,8 +263,13 @@ public class OpenEJBLifecycle implements ContainerLifecycle {
 
     private void starts(final BeanManager beanManager, final Class<?> clazz) {
         final Bean<?> bean = beanManager.resolve(beanManager.getBeans(clazz));
+
+        logger.debug("Starting bean " + clazz.getName());
         if (!beanManager.isNormalScope(bean.getScope())) {
-            throw new IllegalStateException("Only normal scoped beans can use @Startup - likely @ApplicationScoped");
+            throw new IllegalStateException("Unable to start bean " + clazz.getName() +
+                    ", from " + CdiScanner.getLocation(clazz) +
+                    ", with scope " + bean.getScope().getName() +
+                    ". Only normal scoped beans can use @Startup (e.g. @ApplicationScoped)");
         }
 
         final CreationalContext<Object> creationalContext = beanManager.createCreationalContext(null);
@@ -387,7 +393,7 @@ public class OpenEJBLifecycle implements ContainerLifecycle {
             setJspELFactory(servletContext, resolver);
         }
 
-        // Add BeanManager to the 'javax.enterprise.inject.spi.BeanManager' servlet context attribute
+        // Add BeanManager to the 'jakarta.enterprise.inject.spi.BeanManager' servlet context attribute
         servletContext.setAttribute(BeanManager.class.getName(), context.getBeanManagerImpl());
     }
 

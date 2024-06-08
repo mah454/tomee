@@ -97,11 +97,7 @@ public class IvmContextTest extends TestCase {
         final Map<String, Object> map = Debug.contextToMap(context);
 
         // Prune the context entries out
-        final Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<String, Object> entry = iterator.next();
-            if (entry.getValue() instanceof Context) iterator.remove();
-        }
+        map.entrySet().removeIf(entry -> entry.getValue() instanceof Context);
 
         return map;
     }
@@ -346,14 +342,14 @@ public class IvmContextTest extends TestCase {
         }
     }
 
-    public void testCloseThrowsExceptionIfReadOnly() throws NamingException {
+    public void testCloseDoesNotThrowExceptionIfReadOnly() throws NamingException {
         final IvmContext context = new IvmContext();
         context.setReadOnly(true);
         try {
             context.close();
-            fail();
-        } catch (OperationNotSupportedException e) {
             //ok
+        } catch (OperationNotSupportedException e) {
+            fail();
         }
     }
     

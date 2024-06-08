@@ -21,13 +21,13 @@ package org.apache.openejb.util.proxy;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.Debug;
-import org.apache.xbean.asm7.ClassWriter;
-import org.apache.xbean.asm7.Label;
-import org.apache.xbean.asm7.MethodVisitor;
-import org.apache.xbean.asm7.Opcodes;
-import org.apache.xbean.asm7.Type;
+import org.apache.xbean.asm9.ClassWriter;
+import org.apache.xbean.asm9.Label;
+import org.apache.xbean.asm9.MethodVisitor;
+import org.apache.xbean.asm9.Opcodes;
+import org.apache.xbean.asm9.Type;
 
-import javax.ejb.EJBException;
+import jakarta.ejb.EJBException;
 import java.io.Serializable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -139,8 +139,8 @@ public class LocalBeanProxyFactory implements Opcodes {
             }
 
             final byte[] proxyBytes = generateProxy(classToProxy, classFileName, interfaces);
-            return Unsafe.defineClass(cl, classToProxy, proxyName, proxyBytes);
-
+            return ClassDefiner.defineClass(cl, proxyName, proxyBytes, classToProxy, classToProxy.getProtectionDomain());
+            // return Unsafe.defineClass(cl, classToProxy, proxyName, proxyBytes);
         } catch (final Exception e) {
             throw new InternalError("LocalBeanProxyFactory.createProxy: " + Debug.printStackTrace(e));
         } finally {
@@ -825,26 +825,9 @@ public class LocalBeanProxyFactory implements Opcodes {
             if (unsafeDefineClass != null) {
                 return (Class<?>) unsafeDefineClass.invoke(unsafe, proxyName, proxyBytes, 0, proxyBytes.length, loader, clsToProxy.getProtectionDomain());
             } else {
-                return (Class) getClassLoaderDefineClassMethod(loader).invoke(loader, proxyName, proxyBytes, 0, proxyBytes.length, clsToProxy.getProtectionDomain());
+                return ClassDefiner.defineClass(loader, proxyName, proxyBytes, clsToProxy, clsToProxy.getProtectionDomain());
+                // return (Class) getClassLoaderDefineClassMethod(loader).invoke(loader, proxyName, proxyBytes, 0, proxyBytes.length, clsToProxy.getProtectionDomain());
             }
-        }
-
-        private static Method getClassLoaderDefineClassMethod(ClassLoader classLoader) {
-            Class<?> clazz = classLoader.getClass();
-            Method defineClassMethod = null;
-            do {
-                try {
-                    defineClassMethod = clazz.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, ProtectionDomain.class);
-                } catch (NoSuchMethodException e) {
-                    // do nothing, we need to search the superclass
-                }
-                clazz = clazz.getSuperclass();
-            } while (defineClassMethod == null && clazz != Object.class);
-
-            if (defineClassMethod != null && !defineClassMethod.isAccessible()) {
-                defineClassMethod.setAccessible(true);
-            }
-            return defineClassMethod;
         }
 
     }

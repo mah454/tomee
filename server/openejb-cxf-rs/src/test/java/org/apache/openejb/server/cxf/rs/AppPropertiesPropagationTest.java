@@ -25,19 +25,19 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyWriter;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.ext.Provider;
 
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -45,6 +45,7 @@ import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.EnableServices;
 import org.apache.openejb.testing.JaxrsProviders;
 import org.apache.openejb.testing.RandomPort;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +53,7 @@ import org.junit.runner.RunWith;
 @JaxrsProviders(AppPropertiesPropagationTest.Registrator.class)
 @RunWith(ApplicationComposer.class)
 @Classes(innerClassesAsBean = true)
+@Ignore("Not sure this is used - we can implement it back if needed as discussed in mailing list and slack")
 public class AppPropertiesPropagationTest {
     @RandomPort("http")
     private int port;
@@ -100,6 +102,10 @@ public class AppPropertiesPropagationTest {
 
         public Writer(byte[] value) {
             this.value = value;
+        }
+
+        public Writer() {
+            this.value = null;
         }
 
         @Override

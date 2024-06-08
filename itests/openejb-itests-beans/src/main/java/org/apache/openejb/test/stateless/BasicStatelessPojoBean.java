@@ -20,9 +20,9 @@ import org.apache.openejb.test.AnnotatedApplicationException;
 import org.apache.openejb.test.ApplicationException;
 import org.apache.openejb.test.object.OperationsPolicy;
 
-import javax.ejb.SessionContext;
-import javax.ejb.EJBException;
-import javax.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.EJBException;
+import jakarta.annotation.Resource;
 import java.util.Properties;
 import java.rmi.RemoteException;
 
@@ -73,7 +73,7 @@ public class BasicStatelessPojoBean implements BasicStatelessBusinessLocal, Basi
 
     /**
      * Maps to BasicStatelessObject.getPermissionsReport
-     * <p/>
+     *
      * Returns a report of the bean's
      * runtime permissions
      *
@@ -87,7 +87,7 @@ public class BasicStatelessPojoBean implements BasicStatelessBusinessLocal, Basi
 
     /**
      * Maps to BasicStatelessObject.getAllowedOperationsReport
-     * <p/>
+     *
      * Returns a report of the allowed opperations
      * for one of the bean's methods.
      *

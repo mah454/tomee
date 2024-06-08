@@ -65,29 +65,29 @@ import org.apache.openejb.util.SuperProperties;
 import org.apache.openejb.util.URISupport;
 import org.apache.openejb.util.URLs;
 
-import javax.annotation.ManagedBean;
-import javax.ejb.TimerService;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.jms.Queue;
-import javax.jms.Topic;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.ManagedBean;
+import jakarta.ejb.TimerService;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.jms.Queue;
+import jakarta.jms.Topic;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
-import javax.transaction.UserTransaction;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Providers;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
+import jakarta.transaction.UserTransaction;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Providers;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,11 +122,11 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
 
     static {
         // Context objects are automatically handled
-        ignoredReferenceTypes.add("javax.ejb.SessionContext");
-        ignoredReferenceTypes.add("javax.ejb.EntityContext");
-        ignoredReferenceTypes.add("javax.ejb.MessageDrivenContext");
-        ignoredReferenceTypes.add("javax.ejb.EJBContext");
-        ignoredReferenceTypes.add("javax.xml.ws.WebServiceContext");
+        ignoredReferenceTypes.add("jakarta.ejb.SessionContext");
+        ignoredReferenceTypes.add("jakarta.ejb.EntityContext");
+        ignoredReferenceTypes.add("jakarta.ejb.MessageDrivenContext");
+        ignoredReferenceTypes.add("jakarta.ejb.EJBContext");
+        ignoredReferenceTypes.add("jakarta.xml.ws.WebServiceContext");
         // URLs are automatically handled
         ignoredReferenceTypes.add("java.net.URL");
         // User transaction is automatically handled
@@ -457,7 +457,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                 }
 
                 // topics need a clientId and subscriptionName
-                if ("javax.jms.Topic".equals(destinationType)) {
+                if ("jakarta.jms.Topic".equals(destinationType)) {
                     if (Boolean.parseBoolean(
                             SystemInstance.get().getProperty(
                                     "openejb.activemq.deploymentId-as-clientId",
@@ -476,7 +476,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
 
     private boolean isJms(final MessageDrivenBean mdb) {
         final String messagingType = mdb.getMessagingType();
-        return messagingType != null && messagingType.startsWith("javax.jms");
+        return messagingType != null && messagingType.startsWith("jakarta.jms");
     }
 
     /**
@@ -584,7 +584,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                 for (final MessageDestinationRef ref : bean.getMessageDestinationRef()) {
                     // skip destination refs with a resource link already assigned
                     if (ref.getMappedName() == null && ejbDeployment.getResourceLink(ref.getName()) == null) {
-                        final String destinationId = resolveDestinationId(ref, moduleUri, destinationResolver, destinationTypes);
+                        final String destinationId = resolveDestinationId(ref, appModule, moduleUri, destinationResolver, destinationTypes);
                         if (destinationId != null) {
                             // build the link and add it
                             final ResourceLink resourceLink = new ResourceLink();
@@ -601,7 +601,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
         for (final ClientModule clientModule : appModule.getClientModules()) {
             final URI moduleUri = clientModule.getModuleUri();
             for (final MessageDestinationRef ref : clientModule.getApplicationClient().getMessageDestinationRef()) {
-                final String destinationId = resolveDestinationId(ref, moduleUri, destinationResolver, destinationTypes);
+                final String destinationId = resolveDestinationId(ref, appModule, moduleUri, destinationResolver, destinationTypes);
                 if (destinationId != null) {
                     // for client modules we put the destinationId in the mapped name
                     ref.setMappedName(destinationId);
@@ -612,7 +612,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
         for (final WebModule webModule : appModule.getWebModules()) {
             final URI moduleUri = URLs.uri(webModule.getModuleId());
             for (final MessageDestinationRef ref : webModule.getWebApp().getMessageDestinationRef()) {
-                final String destinationId = resolveDestinationId(ref, moduleUri, destinationResolver, destinationTypes);
+                final String destinationId = resolveDestinationId(ref, appModule, moduleUri, destinationResolver, destinationTypes);
                 if (destinationId != null) {
                     // for web modules we put the destinationId in the mapped name
                     ref.setMappedName(destinationId);
@@ -689,7 +689,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                         mdb.setMessageDestinationType(destinationType);
 
                         // topics need a clientId and subscriptionName
-                        if ("javax.jms.Topic".equals(destinationType)) {
+                        if ("jakarta.jms.Topic".equals(destinationType)) {
                             final Properties properties = mdb.getActivationConfig().toProperties();
                             if (!properties.containsKey("clientId")) {
                                 mdb.getActivationConfig().addProperty("clientId", ejbDeployment.getDeploymentId());
@@ -706,7 +706,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
     }
 
     private String resolveDestinationId(final MessageDestinationRef ref,
-                                        final URI moduleUri,
+                                        AppModule appModule, final URI moduleUri,
                                         final LinkResolver<MessageDestination> destinationResolver,
                                         final Map<MessageDestination, String> destinationTypes) throws OpenEJBException {
         // skip destination refs without a destination link
@@ -716,7 +716,25 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
         }
 
         // resolve the destination... if we don't find one it is a configuration bug
-        final MessageDestination destination = destinationResolver.resolveLink(link, moduleUri);
+        MessageDestination destination = destinationResolver.resolveLink(link, moduleUri);
+
+        if (destination == null && link.contains("#")) {
+            // try the app module URI + "/" + link instead
+
+            final List<EjbModule> ejbModules = appModule.getEjbModules();
+            for (final EjbModule ejbModule : ejbModules) {
+                final String shortModuleName = link.substring(0, link.indexOf("#"));
+                if (ejbModule.getModuleUri().toString().endsWith(shortModuleName)) {
+                    final String appModuleLink = ejbModule.getModuleUri() + "#" + link.substring(link.indexOf("#") + 1);
+                    destination = destinationResolver.resolveLink(appModuleLink, moduleUri);
+
+                    if (destination != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
         if (destination == null) {
             throw new OpenEJBException("Message destination " + link + " for message-destination-ref " + ref.getMessageDestinationRefName() + " not found");
         }
@@ -1113,7 +1131,8 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
             return String.format("jdbc:mysql://%s:%s/%s", serverName, port, databaseName);
         }
 
-        if (driver.equals("com.postgresql.jdbc.Driver")) {
+        if (driver.startsWith("com.postgresql")
+                || driver.startsWith("org.postgresql")) {
             return String.format("jdbc:postgresql://%s:%s/%s", serverName, port, databaseName);
         }
 
@@ -1819,7 +1838,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
 
     private boolean isDataSourcePropertiesConfigured(final Properties properties) {
         return "true".equals(SystemInstance.get().getProperty("openejb.guess.resource-local-datasource-properties-configured", "true")) &&
-                (properties.containsKey("javax.persistence.jdbc.driver") || properties.containsKey("javax.persistence.jdbc.url"));
+                (properties.containsKey("jakarta.persistence.jdbc.driver") || properties.containsKey("jakarta.persistence.jdbc.url"));
     }
 
     private static void suffixAliases(final ResourceInfo ri, final String suffix) {
@@ -2069,7 +2088,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
     }
 
     private void logAutoCreateResource(final ResourceInfo resourceInfo, final String type, final String beanName) {
-        logger.info("Auto-creating a Resource with id '" + resourceInfo.id + "' of type '" + type + " for '" + beanName + "'.");
+        logger.info("Auto-creating a Resource with id '" + resourceInfo.id + "' of type '" + type + "' for '" + beanName + "'.");
     }
 
     private String firstMatching(final String prefix, final String type, final Properties required, final AppResources appResources) {
@@ -2187,6 +2206,14 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
             final String newResourceId = getResourceId(beanName, dataSourceId, null, null);
             if (!dataSourceId.equals(newResourceId)) {
                 resourceInfo.properties.setProperty("DataSource", newResourceId);
+            }
+        }
+
+        final String contextId = resourceInfo.properties.getProperty("Context");
+        if (contextId != null && contextId.length() > 0) {
+            final String newResourceId = getResourceId(beanName, contextId, null, null);
+            if (!contextId.equals(newResourceId)) {
+                resourceInfo.properties.setProperty("Context", newResourceId);
             }
         }
 
@@ -2429,11 +2456,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                 final MdbContainerInfo mdbContainerInfo = MdbContainerInfo.class.cast(containerInfo);
                 final String messageListenerInterface = mdbContainerInfo.properties.getProperty("MessageListenerInterface");
                 if (messageListenerInterface != null) {
-                    List<String> containerIds = containerIdsByType.get(messageListenerInterface);
-                    if (containerIds == null) {
-                        containerIds = new ArrayList<>();
-                        containerIdsByType.put(messageListenerInterface, containerIds);
-                    }
+                    List<String> containerIds = containerIdsByType.computeIfAbsent(messageListenerInterface, k -> new ArrayList<>());
                     containerIds.add(containerInfo.id);
                 }
             }
@@ -2466,11 +2489,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                             resourceId = connectorModule.getModuleId() + "-" + type;
                         }
 
-                        List<String> resourceIds = resourceIdsByType.get(type);
-                        if (resourceIds == null) {
-                            resourceIds = new ArrayList<>();
-                            resourceIdsByType.put(type, resourceIds);
-                        }
+                        List<String> resourceIds = resourceIdsByType.computeIfAbsent(type, k -> new ArrayList<>());
                         resourceIds.add(resourceId);
                     }
                 }
@@ -2489,11 +2508,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                             containerId = connectorModule.getModuleId() + "-" + type;
                         }
 
-                        List<String> containerIds = containerIdsByType.get(type);
-                        if (containerIds == null) {
-                            containerIds = new ArrayList<>();
-                            containerIdsByType.put(type, containerIds);
-                        }
+                        List<String> containerIds = containerIdsByType.computeIfAbsent(type, k -> new ArrayList<>());
                         containerIds.add(containerId);
                     }
                 }
@@ -2510,11 +2525,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                         resourceEnvId = connectorModule.getModuleId() + "-" + type;
                     }
 
-                    List<String> resourceEnvIds = resourceEnvIdsByType.get(type);
-                    if (resourceEnvIds == null) {
-                        resourceEnvIds = new ArrayList<>();
-                        resourceEnvIdsByType.put(type, resourceEnvIds);
-                    }
+                    List<String> resourceEnvIds = resourceEnvIdsByType.computeIfAbsent(type, k -> new ArrayList<>());
                     resourceEnvIds.add(resourceEnvId);
                 }
             }
@@ -2524,11 +2535,7 @@ public class AutoConfig implements DynamicDeployer, JndiConstants {
                 if (type != null) {
                     final String[] types = type.trim().split(",");
                     for (final String t : types) {
-                        List<String> ids = resourceIdsByType.get(t);
-                        if (ids == null) {
-                            ids = new ArrayList<>();
-                            resourceIdsByType.put(t, ids);
-                        }
+                        List<String> ids = resourceIdsByType.computeIfAbsent(t, k -> new ArrayList<>());
                         ids.add(r.getId());
                         if (r.getJndi() != null) {
                             ids.add(r.getJndi());

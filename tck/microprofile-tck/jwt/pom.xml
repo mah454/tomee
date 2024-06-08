@@ -15,21 +15,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.apache.tomee</groupId>
     <artifactId>microprofile-tck</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-M2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>microprofile-jwt-tck</artifactId>
-  <name>OpenEJB :: TCK :: MicroProfile JWT TCK</name>
+  <name>TomEE :: TCK :: MicroProfile JWT TCK</name>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.tomee</groupId>
-      <artifactId>javaee-api</artifactId>
+      <artifactId>jakartaee-api</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -48,16 +47,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-rs-client</artifactId>
-      <version>${cxf.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.johnzon</groupId>
       <artifactId>johnzon-core</artifactId>
-      <version>${johnzon.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -75,15 +66,19 @@
     <dependency>
       <groupId>org.eclipse.microprofile.jwt</groupId>
       <artifactId>microprofile-jwt-auth-tck</artifactId>
-      <version>${microprofile.jwt.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject</artifactId>
+        </exclusion>
+      </exclusions>      
     </dependency>
 
     <!-- This is the actual MP-JWT TCK test classes -->
     <dependency>
       <groupId>org.eclipse.microprofile.jwt</groupId>
       <artifactId>microprofile-jwt-auth-tck</artifactId>
-      <version>${microprofile.jwt.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -109,9 +104,26 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.geronimo.config</groupId>
-      <artifactId>geronimo-config-impl</artifactId>
-      <version>1.2</version>
+      <groupId>io.smallrye.config</groupId>
+      <artifactId>smallrye-config-core</artifactId>
+      <version>${version.microprofile.impl.config}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>9.39.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-catalina</artifactId>
+      <version>${tomcat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-rs-client</artifactId>
+      <version>${version.cxf}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -145,13 +157,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
         <configuration>
           <suiteXmlFiles>
-            <!-- TCK does not deliver the xml file for the moment -->
-            <suiteXmlFile>${project.build.directory}/test-classes/dev.xml</suiteXmlFile>
+            <suiteXmlFile>${project.build.directory}/dependency/suites/tck-base-suite.xml</suiteXmlFile>
           </suiteXmlFiles>
-          <parallel>methods</parallel>
-          <threadCount>4</threadCount>
+          <reuseForks>true</reuseForks>
+          <forkCount>1C</forkCount>
+          <systemPropertyVariables>
+            <java.io.tmpdir>./target</java.io.tmpdir>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -189,8 +204,11 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
+                  <reuseForks>true</reuseForks>
+                  <forkCount>1C</forkCount>
                   <systemPropertyVariables>
                     <arquillian.launch>tomee-plus</arquillian.launch>
+                    <java.io.tmpdir>./target</java.io.tmpdir>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -200,8 +218,11 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
+                  <reuseForks>true</reuseForks>
+                  <forkCount>1C</forkCount>
                   <systemPropertyVariables>
                     <arquillian.launch>tomee-plume</arquillian.launch>
+                    <java.io.tmpdir>./target</java.io.tmpdir>
                   </systemPropertyVariables>
                 </configuration>
               </execution>

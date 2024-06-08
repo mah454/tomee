@@ -19,13 +19,13 @@ package org.apache.openejb.config.sys;
 
 import org.apache.openejb.util.SuperProperties;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -33,23 +33,23 @@ import java.util.Properties;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="class-name" type="{http://www.openejb.org/Service/Configuration}ClassName" />
- *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="display-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="provider-type" use="required" type="{http://www.openejb.org/Service/Configuration}ProviderTypes" />
- *       &lt;attribute name="constructor" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="factory-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;simpleContent&gt;
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string"&gt;
+ *       &lt;attribute name="class-name" type="{http://www.openejb.org/Service/Configuration}ClassName" /&gt;
+ *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="display-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="provider-type" use="required" type="{http://www.openejb.org/Service/Configuration}ProviderTypes" /&gt;
+ *       &lt;attribute name="constructor" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="factory-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/simpleContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -97,21 +97,21 @@ public class ServiceProvider {
 
     /**
      * Gets the value of the properties property.
-     * <p/>
-     * <p/>
+     *
+     *
      * This accessor method returns a reference to the live Properties Object,
      * not a snapshot. Therefore any modification you make to the
      * returned Properties will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the properties property.
-     * <p/>
-     * <p/>
+     *
+     *
      * For example, to add a new value, do as follows:
      * <pre>
      *    getProperties().setProperty(key, value);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
+     *
+     *
      */
     public Properties getProperties() {
         if (properties == null) {

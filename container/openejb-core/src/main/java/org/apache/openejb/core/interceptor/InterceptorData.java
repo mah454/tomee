@@ -17,21 +17,22 @@
 
 package org.apache.openejb.core.interceptor;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.ejb.AfterBegin;
+import jakarta.ejb.AfterCompletion;
+import jakarta.ejb.BeforeCompletion;
+import jakarta.ejb.PostActivate;
+import jakarta.ejb.PrePassivate;
+import jakarta.enterprise.inject.spi.InterceptionType;
+import jakarta.interceptor.AroundConstruct;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.AroundTimeout;
 import org.apache.openejb.core.Operation;
 import org.apache.openejb.util.SetAccessible;
 import org.apache.webbeans.component.CdiInterceptorBean;
 import org.apache.xbean.finder.ClassFinder;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.AfterBegin;
-import javax.ejb.AfterCompletion;
-import javax.ejb.BeforeCompletion;
-import javax.ejb.PostActivate;
-import javax.ejb.PrePassivate;
-import javax.enterprise.inject.spi.InterceptionType;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.AroundTimeout;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,6 +57,7 @@ public class InterceptorData {
 
     private final Set<Method> aroundInvoke = new LinkedHashSet<>();
 
+    private final Set<Method> aroundConstruct = new LinkedHashSet<>();
     private final Set<Method> postConstruct = new LinkedHashSet<>();
     private final Set<Method> preDestroy = new LinkedHashSet<>();
 
@@ -112,6 +115,11 @@ public class InterceptorData {
         return postConstruct;
     }
 
+    // TODO should it return a set of Constructor instead
+    public Set<Method> getAroundConstruct() {
+        return aroundConstruct;
+    }
+
     public Set<Method> getPreDestroy() {
         return preDestroy;
     }
@@ -148,6 +156,8 @@ public class InterceptorData {
                 return getAroundInvoke();
             case REMOVE:
                 return getAroundInvoke();
+            case AROUND_CONSTRUCT:
+                return getAroundConstruct();
             case POST_CONSTRUCT:
                 return getPostConstruct();
             case PRE_DESTROY:
@@ -178,7 +188,7 @@ public class InterceptorData {
 
         final InterceptorData that = (InterceptorData) o;
 
-        if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null) {
+        if (!Objects.equals(clazz, that.clazz)) {
             return false;
         }
 
@@ -198,6 +208,7 @@ public class InterceptorData {
         if (model != null) {
             final InterceptorData data = new InterceptorData(clazz);
             data.aroundInvoke.addAll(model.getAroundInvoke());
+            data.aroundConstruct.addAll(model.getAroundConstruct());
             data.postConstruct.addAll(model.getPostConstruct());
             data.preDestroy.addAll(model.getPreDestroy());
             data.postActivate.addAll(model.getPostActivate());
@@ -213,6 +224,7 @@ public class InterceptorData {
         final InterceptorData data = new InterceptorData(clazz);
 
         add(finder, data.aroundInvoke, AroundInvoke.class);
+        add(finder, data.aroundConstruct, AroundConstruct.class);
         add(finder, data.postConstruct, PostConstruct.class);
         add(finder, data.preDestroy, PreDestroy.class);
         add(finder, data.postActivate, PostActivate.class);

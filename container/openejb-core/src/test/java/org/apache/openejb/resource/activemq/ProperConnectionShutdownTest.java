@@ -26,22 +26,21 @@ import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.Join;
 import org.apache.openejb.util.NetworkUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.DeliveryMode;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,7 +51,6 @@ import static org.junit.Assert.assertTrue;
 // inspired from MessagingBeanTest in examples
 public class ProperConnectionShutdownTest {
     @Test
-    @Ignore("https://issues.apache.org/jira/browse/AMQ-6051")
     public void run() throws Throwable {
         final Thread[] threadsBefore = listThreads();
         final AtomicReference<Thread[]> threadWhile = new AtomicReference<>();
@@ -72,16 +70,10 @@ public class ProperConnectionShutdownTest {
                 assertEquals(messages.receiveMessage(), "How are you?");
                 assertEquals(messages.receiveMessage(), "Still spinning?");
 
-                /* TODO: activate it when AMQ-6051 is fixed
-
                 // all worked, now hold a connection
-                new Thread(new Runnable() { // not daemon!
-                    @Override
-                    public void run() {
-                        messages.blockConnection(); // oops, I forgot to close it
-                    }
-                }).start();
-                 */
+                // not daemon!
+                // oops, I forgot to close it
+                new Thread(messages::blockConnection).start();
             }
         };
         new DeployApplication(this, testInContainer, new ApplicationComposers(this)).evaluate();
@@ -91,6 +83,21 @@ public class ProperConnectionShutdownTest {
             Thread.sleep(1000);
         }
 
+        int retry = 0;
+        boolean threadsCompleted = false;
+        while (retry < 30) {
+
+            threadsCompleted = checkThreads(threadsBefore);
+            if (threadsCompleted) break;
+            retry++;
+
+            Thread.sleep(1000);
+        }
+
+        assertTrue(threadsCompleted);
+    }
+
+    private boolean checkThreads(Thread[] threadsBefore) {
         // ensure no connection are leaking
         final Thread[] threadsAfter = listThreads();
 
@@ -107,12 +114,12 @@ public class ProperConnectionShutdownTest {
             }
         }
 
-        final String debugMessage = Join.join(", ", threadsAfter);
+        if (countAMQ > 0) {
+            return false;
+        }
 
-        assertEquals(debugMessage, 0, countAMQ);
-
-        // geronimo libs spawn 2 threads we know: PoolIdleReleaseTimer and CurrentTime so we can get initial + 2 threads there
-        assertTrue(debugMessage, countOthers <= threadsBefore.length + 2);
+        // we expect PoolIdleReleaseTimer, CurrentTime and LogAsyncStream
+        return countOthers <= threadsBefore.length + 3;
     }
 
     private Thread[] listThreads() {

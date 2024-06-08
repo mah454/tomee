@@ -18,11 +18,14 @@ package org.apache.tomee.microprofile.tck.opentracing;
 
 import io.opentracing.mock.MockTracer;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Singleton;
 
-@ApplicationScoped
+@Singleton
+@Default
 @Alternative
 public class MicroProfileOpenTracingTCKTracer extends MockTracer {
 }

@@ -29,6 +29,7 @@ import org.apache.cxf.transport.DestinationFactory;
 import org.apache.openejb.Injection;
 import org.apache.openejb.InjectionProcessor;
 import org.apache.openejb.assembler.classic.util.ServiceConfiguration;
+import org.apache.openejb.cdi.CdiEjbBean;
 import org.apache.openejb.core.webservices.JaxWsUtils;
 import org.apache.openejb.core.webservices.PortData;
 import org.apache.openejb.loader.SystemInstance;
@@ -45,13 +46,13 @@ import org.apache.webbeans.context.creational.CreationalContextImpl;
 import org.apache.webbeans.inject.OWBInjector;
 import org.apache.webbeans.util.WebBeansUtil;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.Producer;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.Producer;
 import javax.naming.Context;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.WebServiceException;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.WebServiceException;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
@@ -137,13 +138,29 @@ public class PojoEndpoint extends CxfEndpoint {
                             } finally {
                                 creationalContext.putBean(oldBean);
                             }
+
+                            // not a plain Pojo or CDI bean so it will fail on invocation because we use a JAXWSMethodInvoker
+                            // instead of an EjbMethodInvoker - let's fallback to old style pojo bellow
+                            // this should not happen anymore because the createPojoWsContainer in the CxfService will
+                            // retrieve a previously deployed EJB and reuse it.
+                            if (bean instanceof CdiEjbBean) {
+                                implementor = null;
+                            }
+
+                            if (implementor != null && WebBeansUtil.isDependent(bean)) { // should be isPseudoScope but should be ok for jaxws
+                                toClean = creationalContext;
+                            }
+
+
+
+                        /* This will never work because if bean == null, OWB will throw an exception on getReference
                         } else {
                             implementor = bm.getReference(bean, instance, creationalContext);
                             injector = injectCxfResources(implementor);
+                         */
                         }
-                        if (WebBeansUtil.isDependent(bean)) { // should be isPseudoScope but should be ok for jaxws
-                            toClean = creationalContext;
-                        }
+
+
                     } catch (final Exception ie) {
                         LOGGER.info("Can't use cdi to create " + instance + " webservice: " + ie.getMessage());
                     }

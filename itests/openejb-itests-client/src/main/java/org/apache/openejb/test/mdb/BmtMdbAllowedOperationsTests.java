@@ -19,17 +19,17 @@ package org.apache.openejb.test.mdb;
 
 import org.apache.openejb.test.object.OperationsPolicy;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 /**
  * [9] Should be run as the nineth test suite of the BasicStatelessTestClients
- * <p/>
+ *
  * <PRE>
  * =========================================================================
  * Operations allowed in the methods of a stateless SessionBean with
  * container-managed transaction demarcation
  * =========================================================================
- * <p/>
+ *
  * Bean method           | Bean method can perform the following operations
  * ______________________|__________________________________________________
  * |

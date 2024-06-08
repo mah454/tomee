@@ -32,7 +32,7 @@ import org.apache.openejb.util.OpenEjbVersion;
 import org.apache.openejb.util.OptionsLog;
 import org.apache.openejb.util.SafeToolkit;
 
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -172,9 +172,9 @@ public final class OpenEJB {
                 if (containerSystem.containers().length > 0) {
                     final Container[] c = containerSystem.containers();
                     logger.debug("startup.debugContainersType");
-                    for (int i = 0; i < c.length; i++) {
+                    for (Container container : c) {
                         String entry = "   ";
-                        switch (c[i].getContainerType()) {
+                        switch (container.getContainerType()) {
                             case BMP_ENTITY:
                                 entry += "BMP ENTITY  ";
                                 break;
@@ -191,7 +191,7 @@ public final class OpenEJB {
                                 entry += "MESSAGE     ";
                                 break;
                         }
-                        entry += c[i].getContainerID();
+                        entry += container.getContainerID();
                         logger.debug("startup.debugEntry", entry);
                     }
                 }
@@ -200,9 +200,9 @@ public final class OpenEJB {
                 if (containerSystem.deployments().length > 0) {
                     logger.debug("startup.debugDeploymentsType");
                     final BeanContext[] d = containerSystem.deployments();
-                    for (int i = 0; i < d.length; i++) {
+                    for (BeanContext beanContext : d) {
                         String entry = "   ";
-                        switch (d[i].getComponentType()) {
+                        switch (beanContext.getComponentType()) {
                             case BMP_ENTITY:
                                 entry += "BMP_ENTITY  ";
                                 break;
@@ -225,7 +225,7 @@ public final class OpenEJB {
                                 entry += "MESSAGE     ";
                                 break;
                         }
-                        entry += d[i].getDeploymentID();
+                        entry += beanContext.getDeploymentID();
                         logger.debug("startup.debugEntry", entry);
                     }
                 }

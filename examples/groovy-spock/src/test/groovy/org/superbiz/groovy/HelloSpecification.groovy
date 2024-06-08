@@ -24,17 +24,18 @@ import org.jboss.shrinkwrap.api.ShrinkWrap
 import org.jboss.shrinkwrap.api.asset.EmptyAsset
 import org.jboss.shrinkwrap.api.spec.WebArchive
 import org.junit.runner.RunWith
+import spock.lang.Specification
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 @RunWith(ArquillianSputnik.class)
-class HelloSpecification extends spock.lang.Specification {
+class HelloSpecification extends Specification {
 
     @Inject
-    private org.superbiz.groovy.Hello hello
+    private Hello hello
 
     @Deployment
     def static WebArchive "create archive"() {

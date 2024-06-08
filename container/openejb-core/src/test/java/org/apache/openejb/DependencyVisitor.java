@@ -45,16 +45,16 @@
  */
 package org.apache.openejb;
 
-import org.apache.xbean.asm7.AnnotationVisitor;
-import org.apache.xbean.asm7.Attribute;
-import org.apache.xbean.asm7.FieldVisitor;
-import org.apache.xbean.asm7.Label;
-import org.apache.xbean.asm7.MethodVisitor;
-import org.apache.xbean.asm7.Opcodes;
-import org.apache.xbean.asm7.Type;
-import org.apache.xbean.asm7.shade.commons.EmptyVisitor;
-import org.apache.xbean.asm7.signature.SignatureReader;
-import org.apache.xbean.asm7.signature.SignatureVisitor;
+import org.apache.xbean.asm9.AnnotationVisitor;
+import org.apache.xbean.asm9.Attribute;
+import org.apache.xbean.asm9.FieldVisitor;
+import org.apache.xbean.asm9.Label;
+import org.apache.xbean.asm9.MethodVisitor;
+import org.apache.xbean.asm9.Opcodes;
+import org.apache.xbean.asm9.Type;
+import org.apache.xbean.asm9.shade.commons.EmptyVisitor;
+import org.apache.xbean.asm9.signature.SignatureReader;
+import org.apache.xbean.asm9.signature.SignatureVisitor;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,11 +93,7 @@ public class DependencyVisitor extends EmptyVisitor {
             current = new HashMap<>();
         } else {
             final String p = getGroupKey(name);
-            current = groups.get(p);
-            if (current == null) {
-                current = new HashMap<>();
-                groups.put(p, current);
-            }
+            current = groups.computeIfAbsent(p, k -> new HashMap<>());
 
             if (signature == null) {
                 addName(superName);
@@ -369,8 +365,8 @@ public class DependencyVisitor extends EmptyVisitor {
     private void addMethodDesc(final String desc) {
         addType(Type.getReturnType(desc));
         final Type[] types = Type.getArgumentTypes(desc);
-        for (int i = 0; i < types.length; i++) {
-            addType(types[i]);
+        for (Type type : types) {
+            addType(type);
         }
     }
 
@@ -401,7 +397,7 @@ public class DependencyVisitor extends EmptyVisitor {
         private final DependencyVisitor delegate;
 
         public SignatureAdapter(final DependencyVisitor dependencyVisitor) {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
             delegate = dependencyVisitor;
         }
 

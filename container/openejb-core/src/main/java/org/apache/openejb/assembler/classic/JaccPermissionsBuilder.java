@@ -25,14 +25,15 @@ import org.apache.openejb.util.JavaSecurityManagers;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 
-import javax.security.jacc.EJBMethodPermission;
-import javax.security.jacc.EJBRoleRefPermission;
-import javax.security.jacc.PolicyConfiguration;
-import javax.security.jacc.PolicyConfigurationFactory;
-import javax.security.jacc.PolicyContextException;
+import jakarta.security.jacc.EJBMethodPermission;
+import jakarta.security.jacc.EJBRoleRefPermission;
+import jakarta.security.jacc.PolicyConfiguration;
+import jakarta.security.jacc.PolicyConfigurationFactory;
+import jakarta.security.jacc.PolicyContextException;
 import java.lang.reflect.Method;
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,10 +56,12 @@ public class JaccPermissionsBuilder {
             return;
         }
 
+        final String contextID = policyContext.getContextID();
         try {
             final PolicyConfigurationFactory factory = PolicyConfigurationFactory.getPolicyConfigurationFactory();
 
-            final PolicyConfiguration policy = factory.getPolicyConfiguration(policyContext.getContextID(), false);
+            // final boolean needsCommit = factory.inService(contextID);
+            final PolicyConfiguration policy = factory.getPolicyConfiguration(contextID, false);
 
             policy.addToExcludedPolicy(policyContext.getExcludedPermissions());
 
@@ -68,11 +71,15 @@ public class JaccPermissionsBuilder {
                 policy.addToRole(entry.getKey(), entry.getValue());
             }
 
-            policy.commit();
+            // not sure if this is required or not
+            // if (needsCommit) {
+                policy.commit();
+            // }
         } catch (final ClassNotFoundException e) {
             throw new OpenEJBException("PolicyConfigurationFactory class not found", e);
+
         } catch (final PolicyContextException e) {
-            throw new OpenEJBException("JACC PolicyConfiguration failed: ContextId=" + policyContext.getContextID(), e);
+            throw new OpenEJBException("JACC PolicyConfiguration failed: ContextId=" + contextID, e);
         }
     }
 
@@ -258,7 +265,7 @@ public class JaccPermissionsBuilder {
 
         /**
          * EJB v2.1 section 21.3.2
-         * <p/>
+         *
          * It is possible that some methods are not assigned to any security
          * roles nor contained in the <code>exclude-list</code> element. In
          * this case, it is the responsibility of the Deployer to assign method
@@ -286,7 +293,7 @@ public class JaccPermissionsBuilder {
 
     /**
      * Generate all the possible permissions for a bean's interface.
-     * <p/>
+     *
      * Method permissions are defined in the deployment descriptor as a binary
      * relation from the set of security roles to the set of methods of the
      * home, component, and/or web service endpoint interfaces of session and

@@ -16,25 +16,25 @@
  */
 package org.apache.openejb.jee.was.v6.ejb;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 
 /**
- * <p/>
+ *
  * Java class for SessionType.
- * <p/>
- * <p/>
+ *
+ *
  * The following schema fragment specifies the expected content contained within
  * this class.
- * <p/>
- * <p/>
+ *
+ *
  * <pre>
- * &lt;simpleType name="SessionType">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}NCName">
- *     &lt;enumeration value="Stateful"/>
- *     &lt;enumeration value="Stateless"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="SessionType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}NCName"&gt;
+ *     &lt;enumeration value="Stateful"/&gt;
+ *     &lt;enumeration value="Stateless"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  */
 @XmlEnum
